@@ -97,8 +97,6 @@ The source secret to be used if the remote Git repository requires authenticatio
 
 The default image tag to associate with Build's and DeploymentConfig's
 
-The source secret to be used if the remote Git repository requires authentication
-
 ## Definition properties
 
 Properties defined on the stream/task definition

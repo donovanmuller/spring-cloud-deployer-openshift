@@ -52,8 +52,6 @@ public class GitWithDockerBuildConfigFactoryTest extends OpenShiftMockServerTest
 				.isEqualTo("v1.0.1.RELEASE");
 		assertThat(buildConfig.getSpec().getSource().getContextDir())
 				.isEqualTo("src/main/docker");
-		assertThat(buildConfig.getSpec().getSource().getSourceSecret().getName())
-				.isEmpty();
 		assertThat(buildConfig.getSpec().getOutput().getTo().getName())
 				.isEqualTo("testapp-source:latest");
 	}

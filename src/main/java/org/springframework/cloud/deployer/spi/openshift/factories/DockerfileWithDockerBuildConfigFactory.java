@@ -46,7 +46,7 @@ public class DockerfileWithDockerBuildConfigFactory extends BuildConfigFactory {
                 .withNewStrategy()
                     .withType("Docker")
                     .withNewDockerStrategy()
-                    .endDockerStrategy()
+					.endDockerStrategy()
                 .endStrategy()
                 .withNewOutput()
                     .withNewTo()

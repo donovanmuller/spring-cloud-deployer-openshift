@@ -177,7 +177,7 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 
 	/**
 	 * Get the source context directory, the path where the Dockerfile is expected.
-	 * Defaults to src/main/docker
+	 * Defaults to the root directory.
 	 *
 	 * @param request
 	 * @return the context directory/path where the Dockerfile is expected
@@ -185,6 +185,6 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 	protected String dockerfileLocation(AppDeploymentRequest request) {
 		return request.getDeploymentProperties().getOrDefault(
 				OpenShiftDeploymentPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH,
-				"src/main/docker") + "/Dockerfile";
+				"Dockerfile");
 	}
 }

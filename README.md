@@ -166,3 +166,11 @@ $ ./mvnw -Dopenshift.url=https://172.28.128.4:8443 \
   -Dkubernetes.auth.basic.password=admin \
   test
 ```
+
+## Further Reading
+
+Please see the following posts for more information:
+
+* [Spring Cloud Deployer OpenShift](http://blog.switchbit.io/spring-cloud-deployer-openshift)
+* [SCDF OpenShift: Deploying Maven artifacts with custom Dockerfile](http://blog.switchbit.io/scdf-openshift-deploying-maven-artifacts-with-custom-dockerfile)
+

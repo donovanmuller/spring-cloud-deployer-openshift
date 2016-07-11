@@ -30,6 +30,9 @@ public abstract class BuildConfigFactory
 
 	public static String SPRING_BUILD_ID_ENV_VAR = "spring_build_id";
 	public static String SPRING_BUILD_APP_NAME_ENV_VAR = "app_name";
+	public static String SPRING_BUILD_APP_GROUPID_ENV_VAR = "app_groupId";
+	public static String SPRING_BUILD_APP_ARTIFACTID_ENV_VAR = "app_artifactId";
+	public static String SPRING_BUILD_APP_VERSION_ENV_VAR = "app_version";
 	public static String SPRING_BUILD_RESOURCE_URL_ENV_VAR = "app_resource_url";
 	public static String SPRING_BUILD_AUTH_USERNAME_ENV_VAR = "repo_auth_username";
 	public static String SPRING_BUILD_AUTH_PASSWORD_ENV_VAR = "repo_auth_password";
@@ -58,7 +61,16 @@ public abstract class BuildConfigFactory
 				resourceHash.hashResource(request.getResource()));
 
 		if (getExisting(appId).isPresent()) {
-			buildConfig = client.buildConfigs().patch(buildConfig);
+			/**
+			 * patching an existing BuildConfig does not seem to work on OpenShift 1.3. An
+			 * error around trying to remove a non existent key, "items", is thrown. As a
+			 * workaround, we delete the BuildConfig and all associated Builds (otherwise
+			 * the Build names don't increment automatically when applied)
+			 */
+			// buildConfig = client.buildConfigs().patch(buildConfig);
+			client.buildConfigs().withName(appId).delete();
+			client.builds().withLabelIn("spring-app-id", appId).delete();
+			buildConfig = client.buildConfigs().create(buildConfig);
 		}
 		else {
 			buildConfig = client.buildConfigs().create(buildConfig);
@@ -105,6 +117,7 @@ public abstract class BuildConfigFactory
 	}
 
 	protected BuildRequest buildBuildRequest(AppDeploymentRequest request, String appId) {
+		MavenResource mavenResource = (MavenResource) request.getResource();
 		MavenProperties.Authentication authentication = Optional.ofNullable(
 				getFirstRemoteRepository(mavenProperties.getRemoteRepositories())
 						.getAuth())
@@ -118,6 +131,9 @@ public abstract class BuildConfigFactory
             .withEnv(toEnvVars(properties.getEnvironmentVariables()))
                 .addToEnv(new EnvVar(SPRING_BUILD_ID_ENV_VAR, resourceHash.hashResource(request.getResource()), null))
                 .addToEnv(new EnvVar(SPRING_BUILD_APP_NAME_ENV_VAR , appId, null))
+                .addToEnv(new EnvVar(SPRING_BUILD_APP_GROUPID_ENV_VAR , mavenResource.getGroupId(), null))
+                .addToEnv(new EnvVar(SPRING_BUILD_APP_ARTIFACTID_ENV_VAR, mavenResource.getArtifactId(), null))
+                .addToEnv(new EnvVar(SPRING_BUILD_APP_VERSION_ENV_VAR , mavenResource.getVersion(), null))
                 .addToEnv(new EnvVar(SPRING_BUILD_AUTH_USERNAME_ENV_VAR , authentication.getUsername(), null))
                 .addToEnv(new EnvVar(SPRING_BUILD_AUTH_PASSWORD_ENV_VAR , authentication.getPassword(), null))
                 .addToEnv(new EnvVar(SPRING_BUILD_RESOURCE_URL_ENV_VAR,

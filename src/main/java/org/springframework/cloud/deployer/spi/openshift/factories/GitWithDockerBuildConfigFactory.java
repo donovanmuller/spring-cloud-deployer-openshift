@@ -10,6 +10,7 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.maven.GitReference;
+import org.springframework.util.StringUtils;
 
 import io.fabric8.openshift.api.model.BuildConfig;
 import io.fabric8.openshift.api.model.BuildConfigBuilder;
@@ -31,23 +32,43 @@ public class GitWithDockerBuildConfigFactory extends BuildConfigFactory {
 			GitReference gitReference, Map<String, String> labels, String hash) {
 		BuildConfig buildConfig = super.buildBuildConfig(appId, request, gitReference,
 				labels, hash);
+
+		//@formatter:off
+		buildConfig = new BuildConfigBuilder(buildConfig)
+			.editSpec()
+				.withNewSource()
+					.withType("Git")
+					.withNewGit()
+						.withUri(gitReference.getParsedUri())
+						.withRef(gitReference.getBranch())
+					.endGit()
+					.withContextDir(getContextDirectory(request))
+				.endSource()
+			.endSpec()
+			.build();
+		//@formatter:on
+
+		String sourceSecret = getGitSourceSecret(request);
+		if (StringUtils.hasText(sourceSecret)) {
+			//@formatter:off
+			buildConfig = new BuildConfigBuilder(buildConfig)
+				.editSpec()
+					.editSource()
+						.withNewSourceSecret(getGitSourceSecret(request))
+					.endSource()
+				.endSpec()
+			.build();
+			//@formatter:on
+		}
+
 		//@formatter:off
         return new BuildConfigBuilder(buildConfig)
             .editSpec()
-                .withNewSource()
-                    .withType("Git")
-                    .withNewGit()
-                        .withUri(gitReference.getParsedUri())
-                        .withRef(gitReference.getBranch())
-                    .endGit()
-                    .withContextDir(getContextDirectory(request))
-                    .withNewSourceSecret(getGitSourceSecret(request))
-                .endSource()
                 .withNewStrategy()
                     .withType("Docker")
                     .withNewDockerStrategy()
-                        .endDockerStrategy()
-                    .endStrategy()
+					.endDockerStrategy()
+				.endStrategy()
                 .withNewOutput()
                     .withNewTo()
                         .withKind("ImageStreamTag")

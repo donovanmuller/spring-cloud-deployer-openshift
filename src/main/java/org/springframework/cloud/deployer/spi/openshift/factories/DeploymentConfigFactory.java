@@ -42,7 +42,8 @@ public class DeploymentConfigFactory
 				resourceRequirements);
 
 		if (getExisting(appId).isPresent()) {
-			deploymentConfig = client.deploymentConfigs().patch(deploymentConfig);
+			client.deploymentConfigs().withName(appId).delete();
+			deploymentConfig = client.deploymentConfigs().create(deploymentConfig);
 		}
 		else {
 			deploymentConfig = client.deploymentConfigs().create(deploymentConfig);

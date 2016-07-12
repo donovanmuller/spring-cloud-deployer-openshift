@@ -34,7 +34,9 @@ public class RouteFactory implements ObjectFactory<Route> {
 		Route route = build(request, appId, port, labels);
 
 		if (getExisting(appId).isPresent()) {
-			route = client.routes().patch(route);
+			client.routes().withName(appId).delete();
+			route = client.routes().create(route);
+			// route = client.routes().patch(route);
 		}
 		else {
 			route = client.routes().create(route);

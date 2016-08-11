@@ -16,6 +16,7 @@ import org.springframework.cloud.deployer.spi.openshift.OpenShiftAppDeployer;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftMavenDeploymentRequest;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftRequestDefinitionPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.factories.BuildConfigFactory;
 import org.springframework.cloud.deployer.spi.openshift.factories.DeploymentConfigFactory;
@@ -89,11 +90,11 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 
 		Map<String, String> parameters = request.getDefinition().getProperties();
 		if (parameters.containsKey(
-				OpenShiftDeploymentPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
+					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
 			String gitUri = parameters.get(
-					OpenShiftDeploymentPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
+					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
 			String gitReference = parameters.getOrDefault(
-					OpenShiftDeploymentPropertyKeys.OPENSHIFT_BUILD_GIT_REF_PROPERTY,
+					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_REF_PROPERTY,
 					"master");
 			buildConfig = new GitWithDockerBuildConfigFactory(getClient(), labels,
 					new GitReference(gitUri, gitReference), getProperties(),
@@ -183,8 +184,8 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 	 * @return the context directory/path where the Dockerfile is expected
 	 */
 	protected String dockerfileLocation(AppDeploymentRequest request) {
-		return request.getDeploymentProperties().getOrDefault(
-				OpenShiftDeploymentPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH,
+		return request.getDefinition().getProperties().getOrDefault(
+				OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH,
 				"Dockerfile");
 	}
 }

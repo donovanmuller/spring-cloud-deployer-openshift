@@ -8,6 +8,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftRequestDefinitionPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.maven.GitReference;
 import org.springframework.util.StringUtils;
@@ -88,8 +89,8 @@ public class GitWithDockerBuildConfigFactory extends BuildConfigFactory {
 	 * @return the context directory/path where the Dockerfile is expected
 	 */
 	protected String getContextDirectory(AppDeploymentRequest request) {
-		return request.getDeploymentProperties().getOrDefault(
-				OpenShiftDeploymentPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH,
+		return request.getDefinition().getProperties().getOrDefault(
+				OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH,
 				"src/main/docker");
 	}
 
@@ -102,9 +103,9 @@ public class GitWithDockerBuildConfigFactory extends BuildConfigFactory {
 	 * @return a Secret if there is one available
 	 */
 	protected String getGitSourceSecret(AppDeploymentRequest request) {
-		return request.getDeploymentProperties().getOrDefault(
-				OpenShiftDeploymentPropertyKeys.OPENSHIFT_BUILD_GIT_SOURCE_SECRET,
+		return request.getDefinition().getProperties().getOrDefault(
+				OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_SOURCE_SECRET,
 				getEnvironmentVariable(properties.getEnvironmentVariables(),
-						OpenShiftDeploymentPropertyKeys.OPENSHIFT_BUILD_GIT_SOURCE_SECRET));
+						OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_SOURCE_SECRET));
 	}
 }

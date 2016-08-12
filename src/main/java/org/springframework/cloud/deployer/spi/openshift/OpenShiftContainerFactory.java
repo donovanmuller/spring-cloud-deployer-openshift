@@ -10,6 +10,10 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+
 public class OpenShiftContainerFactory extends DefaultContainerFactory
 		implements OpenShiftSupport {
 
@@ -55,7 +59,12 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
                     .withName(appId)
                     .withImage(appId)
                     .withEnv(toEnvVars(properties.getEnvironmentVariables()))
-                    .withArgs(createCommandArgs(request));
+                    .withArgs(createCommandArgs(request))
+					.withVolumeMounts(getHostPathVolumes(request.getDeploymentProperties())
+						.keySet()
+						.stream()
+						.collect(toList()));
+
             if (port != null) {
                 containerBuilder.addNewPort()
 						.withContainerPort(port)

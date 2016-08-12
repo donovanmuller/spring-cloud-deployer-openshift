@@ -18,6 +18,8 @@ import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.fabric8.openshift.api.model.DeploymentTriggerPolicyBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 
+import static java.util.stream.Collectors.toList;
+
 public class DeploymentConfigFactory
 		implements ObjectFactory<DeploymentConfig>, OpenShiftSupport {
 
@@ -109,6 +111,10 @@ public class DeploymentConfigFactory
                                 .getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_ACCOUNT,
                                         StringUtils.EMPTY))
 						.withNodeSelector(getNodeSelectors(request.getDeploymentProperties()))
+						.withVolumes(getHostPathVolumes(request.getDeploymentProperties())
+							.values()
+							.stream()
+							.collect(toList()))
                     .endSpec()
                 .endTemplate()
             .endSpec()

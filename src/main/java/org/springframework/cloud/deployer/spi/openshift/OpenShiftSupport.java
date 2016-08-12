@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.VolumeMount;
+import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.util.Assert;
@@ -65,5 +69,34 @@ public interface OpenShiftSupport {
 		}
 
 		return nodeSelectors;
+	}
+
+	default Map<VolumeMount, Volume> getHostPathVolumes(Map<String, String> properties) {
+		Map<VolumeMount, Volume> volumes = new HashMap<>();
+
+		String volumesProperty = properties.getOrDefault(
+			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_HOSTPATH_VOLUME,
+			StringUtils.EMPTY);
+
+		if (StringUtils.isNotBlank(volumesProperty)) {
+			String[] volumePairs = volumesProperty.split(",");
+			for (String volumePair : volumePairs) {
+				String[] volume = volumePair.split(":");
+				Assert.isTrue(volume.length == 3,
+					format("Invalid volume value: {}", volumePair));
+
+				volumes.put(new VolumeMountBuilder()
+						.withName(volume[0])
+						.withMountPath(volume[1])
+						.withReadOnly(false)
+						.build(),
+					new VolumeBuilder()
+						.withName(volume[0])
+						.withNewHostPath(volume[2])
+						.build());
+			}
+		}
+
+		return volumes;
 	}
 }

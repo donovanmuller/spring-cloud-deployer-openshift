@@ -46,4 +46,6 @@ public class OpenShiftDeployerProperties {
 	public void setDefaultImageTag(final String defaultImageTag) {
 		this.defaultImageTag = defaultImageTag;
 	}
+
+
 }

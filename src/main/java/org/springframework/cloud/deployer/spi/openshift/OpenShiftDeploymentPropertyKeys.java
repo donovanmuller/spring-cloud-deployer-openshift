@@ -49,6 +49,14 @@ public interface OpenShiftDeploymentPropertyKeys {
 	String OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME = "spring.cloud.deployer.openshift.deployment.route.host";
 
 	/**
+	 * An optional volumeMount/volume mapping for the hostPath volume plugin.
+	 * See https://docs.openshift.org/latest/admin_guide/manage_scc.html#use-the-hostpath-volume-plugin
+	 * Mappings are specified as follows:
+	 * <code>spring.cloud.deployer.openshift.deployment.hostpath.volume=volumeName:mountPath:hostPath</code>
+	 */
+	String OPENSHIFT_DEPLOYMENT_HOSTPATH_VOLUME = "spring.cloud.deployer.openshift.deployment.hostpath.volume";
+
+	/**
 	 * The below two properties are equal (a Kubernetes "LoadBalancer" is equivalent to a
 	 * Route in OpenShift - see
 	 * {@link org.springframework.cloud.deployer.spi.kubernetes.KubernetesAppDeployer}) in

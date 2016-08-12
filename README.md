@@ -109,10 +109,6 @@ A remote Git URI containing the `Dockerfile` to use as the input source.
 
 The Git branch/tag to use with the remote Git repository.
 
-## Deployment properties
-
-Properties defined on deployment of a defined stream/task
-
 `spring.cloud.deployer.openshift.build.git.dockerfile`
 
 The path where the Dockerfile is expected in the Git repository.
@@ -120,6 +116,10 @@ The path where the Dockerfile is expected in the Git repository.
 `spring.cloud.deployer.openshift.build.git.secret`
 
 The source secret to be used if the remote Git repository requires authentication.
+
+## Deployment properties
+
+Properties defined on deployment of a defined stream/task
 
 `spring.cloud.deployer.openshift.forceBuild`
 

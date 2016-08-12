@@ -151,6 +151,20 @@ The `host` value to use for the Route resource.
 
 Boolean flag indicating whether a Route resource should be created for an application.
 
+`spring.cloud.deployer.openshift.deployment.hostpath.volume`
+
+A comma separated list of volume mounts/volumes to asssociate with an app deployment.
+Mappings are in the following format:
+
+`spring.cloud.deployer.openshift.deployment.hostpath.volume=volumeName:mountPath:hostPath`
+
+where `volumeName` is the name of the volume (both volumeMount and volume), `mountPath` is the path mounted
+inside the container and `hostPath` is the path mounted from the node.
+
+*There is currently only support for the `hostPath` volume plugin.*
+Please see [here](https://docs.openshift.org/latest/admin_guide/manage_scc.html#use-the-hostpath-volume-plugin) for
+more information.
+
 ## Running the integration tests
 
 The integration tests require a running OpenShift 3 instance.

@@ -7,21 +7,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import io.fabric8.kubernetes.api.model.VolumeMount;
-import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.util.Assert;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.VolumeMount;
+import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 
-public interface OpenShiftSupport {
+public interface OpenShiftSupport extends DataflowSupport {
+
+	default String getImage(AppDeploymentRequest request, String appId) {
+		return isIndexed(request) ? StringUtils.substringBeforeLast(appId, "-") : appId;
+	}
 
 	default String getImageTag(AppDeploymentRequest request,
 			OpenShiftDeployerProperties properties, String appId) {
 		return format("%s:%s", appId,
+				request.getDeploymentProperties().getOrDefault(
+						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG,
+						properties.getDefaultImageTag()));
+	}
+
+	default String getIndexedImageTag(AppDeploymentRequest request,
+			OpenShiftDeployerProperties properties, String appId) {
+		return format("%s:%s", getImage(request, appId),
 				request.getDeploymentProperties().getOrDefault(
 						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG,
 						properties.getDefaultImageTag()));
@@ -71,29 +83,26 @@ public interface OpenShiftSupport {
 		return nodeSelectors;
 	}
 
+	// TODO remove
 	default Map<VolumeMount, Volume> getHostPathVolumes(Map<String, String> properties) {
 		Map<VolumeMount, Volume> volumes = new HashMap<>();
 
 		String volumesProperty = properties.getOrDefault(
-			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_HOSTPATH_VOLUME,
-			StringUtils.EMPTY);
+				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_HOSTPATH_VOLUME,
+				StringUtils.EMPTY);
 
 		if (StringUtils.isNotBlank(volumesProperty)) {
 			String[] volumePairs = volumesProperty.split(",");
 			for (String volumePair : volumePairs) {
 				String[] volume = volumePair.split(":");
 				Assert.isTrue(volume.length == 3,
-					format("Invalid volume value: {}", volumePair));
+						format("Invalid volume value: {}", volumePair));
 
-				volumes.put(new VolumeMountBuilder()
-						.withName(volume[0])
-						.withMountPath(volume[1])
-						.withReadOnly(false)
-						.build(),
-					new VolumeBuilder()
-						.withName(volume[0])
-						.withNewHostPath(volume[2])
-						.build());
+				volumes.put(
+						new VolumeMountBuilder().withName(volume[0])
+								.withMountPath(volume[1]).withReadOnly(false).build(),
+						new VolumeBuilder().withName(volume[0]).withNewHostPath(volume[2])
+								.build());
 			}
 		}
 

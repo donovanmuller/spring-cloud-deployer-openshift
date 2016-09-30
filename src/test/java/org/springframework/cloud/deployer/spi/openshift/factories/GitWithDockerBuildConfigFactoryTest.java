@@ -33,7 +33,7 @@ public class GitWithDockerBuildConfigFactoryTest extends OpenShiftMockServerTest
 	@Test
 	public void buildBuildConfig() {
 		buildConfigFactory = new GitWithDockerBuildConfigFactory(getOpenshiftClient(),
-				null, null, new KubernetesDeployerProperties(), null, resourceHash) {
+				null, null, new KubernetesDeployerProperties(), null, null, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -60,7 +60,7 @@ public class GitWithDockerBuildConfigFactoryTest extends OpenShiftMockServerTest
 	@Test
 	public void buildBuildConfigWithContextDirectory() {
 		buildConfigFactory = new GitWithDockerBuildConfigFactory(getOpenshiftClient(),
-				null, null, new KubernetesDeployerProperties(), null, resourceHash) {
+				null, null, new KubernetesDeployerProperties(), null, null, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -85,7 +85,7 @@ public class GitWithDockerBuildConfigFactoryTest extends OpenShiftMockServerTest
 	@Test
 	public void buildBuildConfigWithSourceSecretFromDeploymentProperty() {
 		buildConfigFactory = new GitWithDockerBuildConfigFactory(getOpenshiftClient(),
-				null, null, new KubernetesDeployerProperties(), null, resourceHash) {
+				null, null, new KubernetesDeployerProperties(), null, null, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -115,7 +115,7 @@ public class GitWithDockerBuildConfigFactoryTest extends OpenShiftMockServerTest
 		properties.setEnvironmentVariables(new String[] {
 				"spring.cloud.deployer.openshift.build.git.secret=shh, its a secret" });
 		buildConfigFactory = new GitWithDockerBuildConfigFactory(getOpenshiftClient(),
-				null, null, properties, null, resourceHash) {
+				null, null, properties, null, null, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(

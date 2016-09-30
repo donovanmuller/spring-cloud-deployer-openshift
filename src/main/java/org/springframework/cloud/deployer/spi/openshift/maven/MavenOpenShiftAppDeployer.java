@@ -20,7 +20,7 @@ import org.springframework.cloud.deployer.spi.openshift.OpenShiftRequestDefiniti
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.factories.BuildConfigFactory;
 import org.springframework.cloud.deployer.spi.openshift.factories.DeploymentConfigFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.DeploymentConfigWithImageChangeTriggerFactory;
+import org.springframework.cloud.deployer.spi.openshift.factories.DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory;
 import org.springframework.cloud.deployer.spi.openshift.factories.DockerfileWithDockerBuildConfigFactory;
 import org.springframework.cloud.deployer.spi.openshift.factories.GitWithDockerBuildConfigFactory;
 import org.springframework.cloud.deployer.spi.openshift.factories.ImageStreamFactory;
@@ -53,8 +53,8 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 	}
 
 	@Override
-	protected List<ObjectFactory> populateOpenShiftObjects(AppDeploymentRequest request,
-			String appId) {
+	protected List<ObjectFactory> populateOpenShiftObjectsForDeployment(
+			AppDeploymentRequest request, String appId) {
 		List<ObjectFactory> factories = new ArrayList<>();
 
 		MavenResource mavenResource = (MavenResource) request.getResource();
@@ -67,7 +67,7 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 					mavenResource));
 		}
 
-		factories.addAll(super.populateOpenShiftObjects(request, appId));
+		factories.addAll(super.populateOpenShiftObjectsForDeployment(request, appId));
 
 		return factories;
 	}
@@ -76,8 +76,8 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 	protected DeploymentConfigFactory getDeploymentConfigFactory(
 			AppDeploymentRequest request, Map<String, String> labels,
 			Container container) {
-		return new DeploymentConfigWithImageChangeTriggerFactory(getClient(),
-				openShiftDeployerProperties, container, labels,
+		return new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
+				getClient(), openShiftDeployerProperties, container, labels,
 				getResourceRequirements(request));
 	}
 
@@ -90,7 +90,7 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 
 		Map<String, String> parameters = request.getDefinition().getProperties();
 		if (parameters.containsKey(
-					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
+				OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
 			String gitUri = parameters.get(
 					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
 			String gitReference = parameters.getOrDefault(
@@ -98,7 +98,7 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 					"master");
 			buildConfig = new GitWithDockerBuildConfigFactory(getClient(), labels,
 					new GitReference(gitUri, gitReference), getProperties(),
-					mavenProperties, resourceHash);
+					openShiftDeployerProperties, mavenProperties, resourceHash);
 		}
 		else {
 			OpenShiftMavenDeploymentRequest openShiftRequest = new OpenShiftMavenDeploymentRequest(
@@ -125,7 +125,7 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 					 */
 					buildConfig = new GitWithDockerBuildConfigFactory(getClient(), labels,
 							openShiftRequest.getGitReference(), getProperties(),
-							mavenProperties, resourceHash);
+							openShiftDeployerProperties, mavenProperties, resourceHash);
 				}
 				else {
 					/**
@@ -135,7 +135,7 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 					 */
 					buildConfig = new DockerfileWithDockerBuildConfigFactory(getClient(),
 							labels, openShiftRequest.getGitReference(), getProperties(),
-							mavenProperties, resourceHash);
+							openShiftDeployerProperties, mavenProperties, resourceHash);
 				}
 			}
 			catch (IOException e) {
@@ -167,9 +167,8 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 					.flatMap(build -> build.getSpec().getStrategy().getDockerStrategy()
 							.getEnv().stream().filter(envVar -> envVar.getName()
 									.equals(BuildConfigFactory.SPRING_BUILD_ID_ENV_VAR)
-									&& envVar.getValue()
-											.equals(resourceHash
-													.hashResource(mavenResource))))
+									&& envVar.getValue().equals(
+											resourceHash.hashResource(mavenResource))))
 					.count() > 0;
 		}
 

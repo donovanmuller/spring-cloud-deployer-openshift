@@ -27,7 +27,7 @@ public class DeploymentConfigFactoryTest extends OpenShiftMockServerTestBase {
 
 	@Test
 	public void buildDeploymentConfig() {
-		deploymentConfigFactory = new DeploymentConfigFactory(getOpenshiftClient(), null,
+		deploymentConfigFactory = new DeploymentConfigFactory(getOpenshiftClient(), null, null,
 				null, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -46,7 +46,7 @@ public class DeploymentConfigFactoryTest extends OpenShiftMockServerTestBase {
 
 	@Test
 	public void buildDeploymentConfigWithServiceAccountAndNodeSelector() {
-		deploymentConfigFactory = new DeploymentConfigFactory(getOpenshiftClient(), null,
+		deploymentConfigFactory = new DeploymentConfigFactory(getOpenshiftClient(), null, null,
 				null, null);
 
 		Map<String, String> deploymentProperties = ImmutableMap.of(
@@ -83,7 +83,7 @@ public class DeploymentConfigFactoryTest extends OpenShiftMockServerTestBase {
 						.endMetadata().build())
 				.times(3);
 
-		deploymentConfigFactory = new DeploymentConfigFactory(getOpenshiftClient(), null,
+		deploymentConfigFactory = new DeploymentConfigFactory(getOpenshiftClient(), null, null,
 				Collections.EMPTY_MAP, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -102,7 +102,7 @@ public class DeploymentConfigFactoryTest extends OpenShiftMockServerTestBase {
 								.build())
 				.once();
 
-		deploymentConfigFactory = new DeploymentConfigFactory(getOpenshiftClient(), null,
+		deploymentConfigFactory = new DeploymentConfigFactory(getOpenshiftClient(), null, null,
 				Collections.EMPTY_MAP, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(

@@ -4,8 +4,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.openshift.DataflowSupport;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftSupport;
 
@@ -18,21 +19,22 @@ import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.fabric8.openshift.api.model.DeploymentTriggerPolicyBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-import static java.util.stream.Collectors.toList;
-
 public class DeploymentConfigFactory
-		implements ObjectFactory<DeploymentConfig>, OpenShiftSupport {
+		implements ObjectFactory<DeploymentConfig>, OpenShiftSupport, DataflowSupport {
 
 	public static final String SPRING_DEPLOYMENT_TIMESTAMP = "spring-cloud-deployer/redeploy-timestamp";
 
 	private OpenShiftClient client;
+	private final OpenShiftDeployerProperties openShiftDeployerProperties;
 	private Container container;
 	private Map<String, String> labels;
 	private ResourceRequirements resourceRequirements;
 
-	public DeploymentConfigFactory(OpenShiftClient client, Container container,
-			Map<String, String> labels, final ResourceRequirements resourceRequirements) {
+	public DeploymentConfigFactory(OpenShiftClient client,
+			OpenShiftDeployerProperties openShiftDeployerProperties, Container container,
+			Map<String, String> labels, ResourceRequirements resourceRequirements) {
 		this.client = client;
+		this.openShiftDeployerProperties = openShiftDeployerProperties;
 		this.container = container;
 		this.labels = labels;
 		this.resourceRequirements = resourceRequirements;
@@ -46,6 +48,7 @@ public class DeploymentConfigFactory
 		if (getExisting(appId).isPresent()) {
 			client.deploymentConfigs().withName(appId).delete();
 			deploymentConfig = client.deploymentConfigs().create(deploymentConfig);
+//			deploymentConfig = client.deploymentConfigs().cascading(true).replace(deploymentConfig);
 		}
 		else {
 			deploymentConfig = client.deploymentConfigs().create(deploymentConfig);
@@ -91,7 +94,8 @@ public class DeploymentConfigFactory
                 .withLabels(labels)
             .endMetadata()
             .withNewSpec()
-                .withTriggers(ImmutableList.of(new DeploymentTriggerPolicyBuilder()
+                .withTriggers(ImmutableList.of(
+                	new DeploymentTriggerPolicyBuilder()
                         .withType("ConfigChange")
                         .build()))
                 .withNewStrategy()
@@ -111,10 +115,7 @@ public class DeploymentConfigFactory
                                 .getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_ACCOUNT,
                                         StringUtils.EMPTY))
 						.withNodeSelector(getNodeSelectors(request.getDeploymentProperties()))
-						.withVolumes(getHostPathVolumes(request.getDeploymentProperties())
-							.values()
-							.stream()
-							.collect(toList()))
+						.withVolumes(openShiftDeployerProperties.getVolumes())
                     .endSpec()
                 .endTemplate()
             .endSpec()
@@ -123,7 +124,6 @@ public class DeploymentConfigFactory
 	}
 
 	protected Integer getReplicas(AppDeploymentRequest request) {
-		return Integer.valueOf(request.getDeploymentProperties()
-				.getOrDefault(AppDeployer.COUNT_PROPERTY_KEY, "1"));
+		return getAppInstanceCount(request);
 	}
 }

@@ -27,7 +27,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest
 
 	@Test
 	public void buildDeploymentConfig() {
-		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerFactory(
+		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
 				getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null,
 				null);
 
@@ -55,7 +55,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest
 
 	@Test
 	public void buildDeploymentConfigWithImageTag() {
-		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerFactory(
+		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
 				getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null,
 				null);
 

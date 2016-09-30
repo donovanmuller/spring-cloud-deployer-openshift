@@ -35,6 +35,7 @@ import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.test.AbstractAppDeployerIntegrationTests;
+import org.springframework.cloud.deployer.spi.test.Timeout;
 import org.springframework.core.io.Resource;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -78,7 +79,7 @@ public class KubernetesAppDeployerIntegrationTest
 		kubernetesDeployerProperties.setMinutesToWaitForLoadBalancer(1);
 
 		AppDefinition definition = new AppDefinition(randomName(), null);
-		Resource resource = integrationTestProcessor();
+		Resource resource = testApplication();
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource);
 
 		log.info("Deploying {}...", request.getDefinition().getName());
@@ -127,12 +128,6 @@ public class KubernetesAppDeployerIntegrationTest
 	}
 
 	@Override
-	public void testParameterPassing() {
-		log.info("Testing {}...", "ParameterPassing");
-		super.testParameterPassing();
-	}
-
-	@Override
 	protected String randomName() {
 		// Kubernetes app names must start with a letter and can only be 24 characters
 		// long
@@ -145,7 +140,7 @@ public class KubernetesAppDeployerIntegrationTest
 	}
 
 	@Override
-	protected Resource integrationTestProcessor() {
+	protected Resource testApplication() {
 		return new DockerResource(
 				"springcloud/spring-cloud-deployer-spi-test-app:latest");
 	}

@@ -7,7 +7,7 @@ import java.util.Map;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
-import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftRequestDefinitionPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.maven.GitReference;
@@ -23,9 +23,11 @@ public class GitWithDockerBuildConfigFactory extends BuildConfigFactory {
 
 	public GitWithDockerBuildConfigFactory(OpenShiftClient client,
 			Map<String, String> labels, GitReference gitReference,
-			KubernetesDeployerProperties properties, MavenProperties mavenProperties,
-			ResourceHash resourceHash) {
-		super(client, labels, gitReference, properties, mavenProperties, resourceHash);
+			KubernetesDeployerProperties properties,
+			OpenShiftDeployerProperties openShiftDeployerProperties,
+			MavenProperties mavenProperties, ResourceHash resourceHash) {
+		super(client, labels, gitReference, properties, openShiftDeployerProperties,
+				mavenProperties, resourceHash);
 		this.properties = properties;
 	}
 

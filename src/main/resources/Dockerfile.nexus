@@ -1,0 +1,15 @@
+# Based on: https://spring.io/guides/gs/spring-boot-docker/
+FROM java:8
+#FROM anapsix/alpine-java:8_jdk
+
+VOLUME /tmp
+
+RUN wget --quiet --user ${repo_auth_username} \
+  --password ${repo_auth_password} \
+  --content-disposition \
+  -O /app.jar \
+  "http://nexus.vagrant.f8/service/local/artifact/maven/redirect?r=public&g=${app_groupId}&a=${app_artifactId}&v=${app_version}"
+
+RUN bash -c 'chmod a+rx /app.jar'
+
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]

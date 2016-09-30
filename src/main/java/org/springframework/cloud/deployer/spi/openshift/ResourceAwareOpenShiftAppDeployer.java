@@ -6,6 +6,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.core.AppRedeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftAppDeployer;
 
 public class ResourceAwareOpenShiftAppDeployer implements AppDeployer {
@@ -37,6 +38,27 @@ public class ResourceAwareOpenShiftAppDeployer implements AppDeployer {
 		catch (Exception e) {
 			logger.error(String.format(
 					"Error deploying application deployment request: %s", request), e);
+			throw e;
+		}
+
+		return appId;
+	}
+
+	@Override
+	public String redeploy(final AppRedeploymentRequest request) {
+		String appId;
+
+		try {
+			if (request.getResource() instanceof MavenResource) {
+				appId = mavenOpenShiftAppDeployer.redeploy(request);
+			}
+			else {
+				appId = openShiftAppDeployer.redeploy(request);
+			}
+		}
+		catch (Exception e) {
+			logger.error(String.format(
+				"Error redeploying application redeployment request: %s", request), e);
 			throw e;
 		}
 

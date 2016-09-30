@@ -35,7 +35,7 @@ public class BuildConfigFactoryTest extends OpenShiftMockServerTestBase {
 	@Test
 	public void buildBuildConfig() {
 		buildConfigFactory = new BuildConfigFactory(getOpenshiftClient(), null, null,
-				null, null, resourceHash) {
+				null, null, null, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -60,7 +60,7 @@ public class BuildConfigFactoryTest extends OpenShiftMockServerTestBase {
 		KubernetesDeployerProperties properties = new KubernetesDeployerProperties();
 
 		buildConfigFactory = new BuildConfigFactory(getOpenshiftClient(), null, null,
-				properties, mavenProperties, resourceHash) {
+				properties, null, mavenProperties, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -96,7 +96,7 @@ public class BuildConfigFactoryTest extends OpenShiftMockServerTestBase {
 		KubernetesDeployerProperties properties = new KubernetesDeployerProperties();
 
 		buildConfigFactory = new BuildConfigFactory(getOpenshiftClient(), null, null,
-				properties, mavenProperties, resourceHash) {
+				properties, null, mavenProperties, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(

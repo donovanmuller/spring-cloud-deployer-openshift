@@ -10,6 +10,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftSupport;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.maven.GitReference;
@@ -41,16 +42,19 @@ public abstract class BuildConfigFactory
 	private Map<String, String> labels;
 	private GitReference gitReference;
 	private KubernetesDeployerProperties properties;
+	private OpenShiftDeployerProperties openShiftDeployerProperties;
 	private MavenProperties mavenProperties;
 	private ResourceHash resourceHash;
 
 	public BuildConfigFactory(OpenShiftClient client, Map<String, String> labels,
 			GitReference gitReference, KubernetesDeployerProperties properties,
+			OpenShiftDeployerProperties openShiftDeployerProperties,
 			MavenProperties mavenProperties, ResourceHash resourceHash) {
 		this.client = client;
 		this.labels = labels;
 		this.gitReference = gitReference;
 		this.properties = properties;
+		this.openShiftDeployerProperties = openShiftDeployerProperties;
 		this.mavenProperties = mavenProperties;
 		this.resourceHash = resourceHash;
 	}

@@ -1,6 +1,10 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
+import io.fabric8.kubernetes.api.model.Volume;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @ConfigurationProperties(prefix = "spring.cloud.deployer.openshift")
 public class OpenShiftDeployerProperties {
@@ -22,6 +26,13 @@ public class OpenShiftDeployerProperties {
 	 * {@link io.fabric8.openshift.api.model.DeploymentConfig}'s
 	 */
 	private String defaultImageTag = "latest";
+
+	/**
+	 * The {@link io.fabric8.kubernetes.api.model.Volume}s that this deployer server supports.
+	 * The {@link io.fabric8.kubernetes.api.model.VolumeMount}s will
+	 * be defined via application specific properties.
+	 */
+	private List<Volume> volumes = new ArrayList<>();
 
 	public boolean isForceBuild() {
 		return forceBuild;
@@ -47,5 +58,11 @@ public class OpenShiftDeployerProperties {
 		this.defaultImageTag = defaultImageTag;
 	}
 
+	public List<Volume> getVolumes() {
+		return volumes;
+	}
 
+	public void setVolumes(final List<Volume> volumes) {
+		this.volumes = volumes;
+	}
 }

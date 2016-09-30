@@ -90,7 +90,7 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 
 		Map<String, String> parameters = request.getDefinition().getProperties();
 		if (parameters.containsKey(
-					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
+				OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
 			String gitUri = parameters.get(
 					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
 			String gitReference = parameters.getOrDefault(
@@ -99,7 +99,7 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 			buildConfig = new WatchingBuildConfigFactory(getClient(),
 					new GitWithDockerBuildConfigFactory(getClient(), labels,
 							new GitReference(gitUri, gitReference), getProperties(),
-							mavenProperties, resourceHash),
+							openShiftDeployerProperties, mavenProperties, resourceHash),
 					(build, watch) -> launchTask(build, watch, request));
 		}
 		else {
@@ -112,14 +112,16 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 					buildConfig = new WatchingBuildConfigFactory(getClient(),
 							new GitWithDockerBuildConfigFactory(getClient(), labels,
 									openShiftRequest.getGitReference(), getProperties(),
-									mavenProperties, resourceHash),
+									openShiftDeployerProperties, mavenProperties,
+									resourceHash),
 							(build, watch) -> launchTask(build, watch, request));
 				}
 				else {
 					buildConfig = new WatchingBuildConfigFactory(getClient(),
 							new DockerfileWithDockerBuildConfigFactory(getClient(),
 									labels, openShiftRequest.getGitReference(),
-									getProperties(), mavenProperties, resourceHash),
+									getProperties(), openShiftDeployerProperties,
+									mavenProperties, resourceHash),
 							(build, watch) -> launchTask(build, watch, request));
 				}
 			}
@@ -152,9 +154,8 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 					.flatMap(build -> build.getSpec().getStrategy().getDockerStrategy()
 							.getEnv().stream().filter(envVar -> envVar.getName()
 									.equals(BuildConfigFactory.SPRING_BUILD_ID_ENV_VAR)
-									&& envVar.getValue()
-											.equals(resourceHash
-													.hashResource(mavenResource))))
+									&& envVar.getValue().equals(
+											resourceHash.hashResource(mavenResource))))
 					.count() > 0;
 		}
 

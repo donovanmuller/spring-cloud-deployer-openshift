@@ -31,7 +31,7 @@ public class DockerfileWithDockerBuildConfigFactoryTest
 	@Test
 	public void buildBuildConfig() {
 		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(
-				getOpenshiftClient(), null, null, null, null, resourceHash) {
+				getOpenshiftClient(), null, null, null, null, null, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -50,7 +50,7 @@ public class DockerfileWithDockerBuildConfigFactoryTest
 	@Test
 	public void buildBuildConfigWithDockerfileFromFileSystem() {
 		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(
-				getOpenshiftClient(), null, null, null, null, resourceHash) {
+				getOpenshiftClient(), null, null, null, null, null, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -69,7 +69,7 @@ public class DockerfileWithDockerBuildConfigFactoryTest
 	@Test
 	public void buildBuildConfigWithInlineDockerfile() {
 		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(
-				getOpenshiftClient(), null, null, null, null, resourceHash) {
+				getOpenshiftClient(), null, null, null, null, null, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
@@ -88,7 +88,7 @@ public class DockerfileWithDockerBuildConfigFactoryTest
 	@Test
 	public void buildBuildConfigWithImageTag() {
 		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(
-				getOpenshiftClient(), null, null, null, null, resourceHash) {
+				getOpenshiftClient(), null, null, null, null, null, resourceHash) {
 		};
 
 		AppDeploymentRequest request = new AppDeploymentRequest(

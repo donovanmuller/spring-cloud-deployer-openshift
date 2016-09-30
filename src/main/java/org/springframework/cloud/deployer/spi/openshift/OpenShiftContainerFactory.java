@@ -1,18 +1,27 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.bind.PropertiesConfigurationFactory;
+import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.DefaultContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
+import org.springframework.cloud.deployer.spi.openshift.maven.VolumeMountProperties;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
-
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
+import io.fabric8.kubernetes.api.model.VolumeMount;
 
 public class OpenShiftContainerFactory extends DefaultContainerFactory
 		implements OpenShiftSupport {
@@ -24,10 +33,13 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
 	private static String READINESS_ENDPOINT = "/info";
 
 	private KubernetesDeployerProperties properties;
+	private ConfigServicePropertySourceLocator configServicePropertySourceLocator;
 
-	public OpenShiftContainerFactory(KubernetesDeployerProperties properties) {
+	public OpenShiftContainerFactory(KubernetesDeployerProperties properties,
+			ConfigServicePropertySourceLocator configServicePropertySourceLocator) {
 		super(properties);
 		this.properties = properties;
+		this.configServicePropertySourceLocator = configServicePropertySourceLocator;
 	}
 
 	/**
@@ -60,10 +72,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
                     .withImage(appId)
                     .withEnv(toEnvVars(properties.getEnvironmentVariables()))
                     .withArgs(createCommandArgs(request))
-					.withVolumeMounts(getHostPathVolumes(request.getDeploymentProperties())
-						.keySet()
-						.stream()
-						.collect(toList()));
+					.withVolumeMounts(getVolumeMounts(appId));
 
             if (port != null) {
                 containerBuilder.addNewPort()
@@ -88,5 +97,36 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
 		}
 
 		return container;
+	}
+
+	// TODO support getting volumes from deployment properties
+	protected List<VolumeMount> getVolumeMounts(String appId) {
+		List<VolumeMount> volumeMounts = new ArrayList<>();
+
+		ConfigurableEnvironment appEnvironment = new StandardEnvironment();
+		appEnvironment.getPropertySources()
+				.addFirst(new MapPropertySource("deployer-override",
+						Collections.singletonMap("spring.application.name", appId)));
+
+		PropertySource<?> propertySource = configServicePropertySourceLocator
+				.locate(appEnvironment);
+		MutablePropertySources propertySources = new MutablePropertySources();
+		propertySources.addFirst(propertySource);
+
+		VolumeMountProperties volumeMountProperties = new VolumeMountProperties();
+		PropertiesConfigurationFactory<VolumeMountProperties> factory = new PropertiesConfigurationFactory<>(
+				volumeMountProperties);
+		factory.setPropertySources(propertySources);
+
+		try {
+			factory.afterPropertiesSet();
+			volumeMounts = factory.getObject().getVolumeMounts();
+		}
+		catch (Exception e) {
+			logger.warn("Could not get app '{}' configuration from config server: '{}'",
+					appId, e.getMessage());
+		}
+
+		return volumeMounts;
 	}
 }

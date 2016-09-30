@@ -12,15 +12,16 @@ import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.fabric8.openshift.api.model.DeploymentTriggerPolicyBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class DeploymentConfigWithImageChangeTriggerFactory
-		extends DeploymentConfigFactory {
+public class DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory
+		extends DeploymentConfigWithIndexSuppportFactory {
 
 	private final OpenShiftDeployerProperties openShiftDeployerProperties;
 
-	public DeploymentConfigWithImageChangeTriggerFactory(OpenShiftClient client,
-			OpenShiftDeployerProperties openShiftDeployerProperties, Container container,
-			Map<String, String> labels, ResourceRequirements resourceRequirements) {
-		super(client, container, labels, resourceRequirements);
+	public DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(OpenShiftClient client,
+																		  OpenShiftDeployerProperties openShiftDeployerProperties, Container container,
+																		  Map<String, String> labels, ResourceRequirements resourceRequirements) {
+		super(client, openShiftDeployerProperties, container, labels,
+				resourceRequirements);
 		this.openShiftDeployerProperties = openShiftDeployerProperties;
 	}
 
@@ -45,7 +46,7 @@ public class DeploymentConfigWithImageChangeTriggerFactory
                     .withContainerNames(appId)
                     .withNewFrom()
                         .withKind("ImageStreamTag")
-                        .withName(getImageTag(request, openShiftDeployerProperties, appId))
+                        .withName(getIndexedImageTag(request, openShiftDeployerProperties, appId))
                     .endFrom()
                 .endImageChangeParams()
                 .build())

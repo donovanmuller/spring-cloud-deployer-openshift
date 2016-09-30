@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
@@ -72,8 +73,8 @@ public class OpenShiftAutoConfiguration {
 	}
 
 	@Bean
-	public ContainerFactory containerFactory() {
-		return new OpenShiftContainerFactory(kubernetesDeployerProperties);
+	public ContainerFactory containerFactory(ConfigServicePropertySourceLocator configServicePropertySourceLocator) {
+		return new OpenShiftContainerFactory(kubernetesDeployerProperties, configServicePropertySourceLocator);
 	}
 
 	@Bean

@@ -1,7 +1,5 @@
 package org.springframework.cloud.deployer.spi.openshift.factories;
 
-import static java.lang.String.format;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -10,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.maven.GitReference;
@@ -24,11 +23,16 @@ import io.fabric8.openshift.client.OpenShiftClient;
 
 public class DockerfileWithDockerBuildConfigFactory extends BuildConfigFactory {
 
+	private OpenShiftDeployerProperties openShiftDeployerProperties;
+
 	public DockerfileWithDockerBuildConfigFactory(OpenShiftClient client,
 			Map<String, String> labels, GitReference gitReference,
-			KubernetesDeployerProperties properties, MavenProperties mavenProperties,
-			ResourceHash resourceHash) {
-		super(client, labels, gitReference, properties, mavenProperties, resourceHash);
+			KubernetesDeployerProperties properties,
+			OpenShiftDeployerProperties openShiftDeployerProperties,
+			MavenProperties mavenProperties, ResourceHash resourceHash) {
+		super(client, labels, gitReference, properties, openShiftDeployerProperties,
+				mavenProperties, resourceHash);
+		this.openShiftDeployerProperties = openShiftDeployerProperties;
 	}
 
 	@Override
@@ -51,9 +55,7 @@ public class DockerfileWithDockerBuildConfigFactory extends BuildConfigFactory {
                 .withNewOutput()
                     .withNewTo()
                         .withKind("ImageStreamTag")
-                        .withName(format("%s:%s", appId, request.getDeploymentProperties()
-							.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG,
-								"latest")))
+                        .withName(getImageTag(request, openShiftDeployerProperties, appId))
                     .endTo()
                 .endOutput()
             .endSpec()

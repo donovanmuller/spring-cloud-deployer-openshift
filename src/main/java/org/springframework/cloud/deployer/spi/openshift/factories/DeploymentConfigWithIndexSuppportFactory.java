@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.cloud.deployer.resource.docker.DockerResource;
+import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.DataflowSupport;
@@ -28,8 +30,8 @@ public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFa
 
 	@Override
 	public DeploymentConfig addObject(AppDeploymentRequest request, String appId) {
-		Integer count = getAppInstanceCount(request);
 		if (isIndexed(request)) {
+			Integer count = getAppInstanceCount(request);
 			for (int index = 0; index < count; index++) {
 				String indexedId = appId + "-" + index;
 				super.addObject(request, indexedId);
@@ -43,13 +45,29 @@ public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFa
 	}
 
 	@Override
+	public void applyObject(AppDeploymentRequest request, String appId) {
+		if (isIndexed(request)) {
+			Integer count = getAppInstanceCount(request);
+			for (int index = 0; index < count; index++) {
+				String indexedId = appId + "-" + index;
+				super.applyObject(request, indexedId);
+			}
+		}
+		else {
+			super.applyObject(request, appId);
+		}
+	}
+
+	@Override
 	protected DeploymentConfig build(AppDeploymentRequest request, String appId,
 			Container container, Map<String, String> labels,
 			ResourceRequirements resourceRequirements) {
-		// TODO don't add '-0' to un-indexed streams
 		labels.replace("spring-deployment-id", appId);
 		container.setName(appId);
-		container.setImage(getImage(request, appId));
+
+		if (request.getResource() instanceof MavenResource) {
+			container.setImage(getImage(request, appId));
+		}
 
 		Optional<EnvVar> instanceIndexEnvVar = container.getEnv().stream()
 			.filter(envVar -> envVar.getName()

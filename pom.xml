@@ -14,35 +14,51 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-deployer-parent</artifactId>
-		<version>1.0.4.BUILD-SNAPSHOT</version>
+		<version>1.1.0.M1</version>
 	</parent>
 
 	<properties>
-		<!-- for Java 8 support -->
 		<java.version>1.8</java.version>
 		<animal.sniffer.skip>true</animal.sniffer.skip>
+		<kubernetes-client.version>1.4.14</kubernetes-client.version>
+		<okhttp.version>3.4.1</okhttp.version>
 
-		<kubernetes-client.version>1.4.1</kubernetes-client.version>
-		<spring-cloud-deployer-kubernetes.version>1.0.3.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
-		<spring-cloud-deployer-spi.version>1.0.4.BUILD-SNAPSHOT</spring-cloud-deployer-spi.version>
+		<spring-cloud-deployer-kubernetes.version>1.0.4.RELEASE</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-spi.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-spi.version>
+		<spring-cloud-dataflow.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-dataflow.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-deployer</artifactId>
+				<version>${spring-cloud-deployer-spi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
+				<version>${spring-cloud-dataflow.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-deployer-kubernetes</artifactId>
 			<version>${spring-cloud-deployer-kubernetes.version}</version>
-			<!--<exclusions>-->
-				<!--<exclusion>-->
-					<!--<groupId>org.springframework.cloud</groupId>-->
-					<!--<artifactId>spring-cloud-deployer-resource-maven</artifactId>-->
-				<!--</exclusion>-->
-			<!--</exclusions>-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-deployer-spi</artifactId>
+			<version>${spring-cloud-deployer-spi.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-deployer-resource-maven</artifactId>
-			<version>1.0.4.BUILD-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -88,11 +104,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-stream-test-support-internal</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-deployer-spi-test</artifactId>
 			<version>${spring-cloud-deployer-spi.version}</version>
 			<scope>test</scope>
@@ -112,20 +123,77 @@
 		<dependency>
 			<groupId>io.fabric8</groupId>
 			<artifactId>mockwebserver</artifactId>
-			<version>0.0.3</version>
+			<version>0.0.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.squareup.okhttp</groupId>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>${okhttp.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>logging-interceptor</artifactId>
-			<version>2.7.5</version>
+			<version>${okhttp.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.5.1</version>
+			<version>3.5.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>spring</id>
+			<activation><activeByDefault>true</activeByDefault></activation>
+			<repositories>
+				<repository>
+					<id>spring-snapshots</id>
+					<name>Spring Snapshots</name>
+					<url>http://repo.spring.io/libs-snapshot-local</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>spring-milestones</id>
+					<name>Spring Milestones</name>
+					<url>http://repo.spring.io/libs-milestone-local</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>spring-releases</id>
+					<name>Spring Releases</name>
+					<url>http://repo.spring.io/release</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>spring-snapshots</id>
+					<name>Spring Snapshots</name>
+					<url>http://repo.spring.io/libs-snapshot-local</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</pluginRepository>
+				<pluginRepository>
+					<id>spring-milestones</id>
+					<name>Spring Milestones</name>
+					<url>http://repo.spring.io/libs-milestone-local</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
+	</profiles>
 </project>

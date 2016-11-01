@@ -57,8 +57,7 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 
 		MavenResource mavenResource = (MavenResource) request.getResource();
 		if (!buildExists(request, appId, mavenResource)) {
-			logger.info("Building application [{}] with resource: {}", appId,
-					mavenResource);
+			logger.info(String.format("Building application '%s' with resource: '%s'", appId,	mavenResource));
 
 			factories.add(new ImageStreamFactory(getClient()));
 			factories.add(chooseBuildStrategy(request, createIdMap(appId, request, null),
@@ -164,7 +163,7 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 
 	protected void launchTask(Build build, Watch watch, AppDeploymentRequest request) {
 		if (build.getStatus().getPhase().equals("Complete")) {
-			logger.info("Build complete: {}", build.getMetadata().getName());
+			logger.info(String.format("Build complete: '%s'", build.getMetadata().getName()));
 
 			DockerResource dockerResource = new DockerResource(
 					build.getStatus().getOutputDockerImageReference());

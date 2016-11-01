@@ -25,7 +25,7 @@ public class DeploymentConfigFactory
 	public static final String SPRING_DEPLOYMENT_TIMESTAMP = "spring-cloud-deployer/redeploy-timestamp";
 
 	private OpenShiftClient client;
-	private final OpenShiftDeployerProperties openShiftDeployerProperties;
+	private OpenShiftDeployerProperties openShiftDeployerProperties;
 	private Container container;
 	private Map<String, String> labels;
 	private ResourceRequirements resourceRequirements;
@@ -46,9 +46,7 @@ public class DeploymentConfigFactory
 				resourceRequirements);
 
 		if (getExisting(appId).isPresent()) {
-			client.deploymentConfigs().withName(appId).delete();
-			deploymentConfig = client.deploymentConfigs().create(deploymentConfig);
-//			deploymentConfig = client.deploymentConfigs().cascading(true).replace(deploymentConfig);
+			deploymentConfig = client.deploymentConfigs().cascading(true).replace(deploymentConfig);
 		}
 		else {
 			deploymentConfig = client.deploymentConfigs().create(deploymentConfig);
@@ -68,13 +66,13 @@ public class DeploymentConfigFactory
 				})) {
 			//@formatter:off
             client.deploymentConfigs()
-                    .withName(appId)
-                    .edit()
-                        .editMetadata()
-                            .addToAnnotations(SPRING_DEPLOYMENT_TIMESTAMP,
-								String.valueOf(System.currentTimeMillis()))
-                        .endMetadata()
-                    .done();
+				.withName(appId)
+				.edit()
+					.editMetadata()
+						.addToAnnotations(SPRING_DEPLOYMENT_TIMESTAMP,
+							String.valueOf(System.currentTimeMillis()))
+					.endMetadata()
+				.done();
             //@formatter:on
 		}
 	}

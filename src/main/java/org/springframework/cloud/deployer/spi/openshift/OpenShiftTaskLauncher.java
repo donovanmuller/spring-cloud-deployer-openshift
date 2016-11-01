@@ -28,7 +28,7 @@ public class OpenShiftTaskLauncher extends KubernetesTaskLauncher
 
 	@Override
 	public String launch(AppDeploymentRequest request) {
-		logger.info("Launching task: {}", request.getDefinition());
+		logger.info(String.format("Launching task: '%s'", request.getDefinition()));
 
 		String taskId = createDeploymentId(request);
 

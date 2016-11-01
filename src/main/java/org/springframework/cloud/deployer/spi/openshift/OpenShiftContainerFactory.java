@@ -3,6 +3,7 @@ package org.springframework.cloud.deployer.spi.openshift;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +24,9 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 
-public class OpenShiftContainerFactory extends DefaultContainerFactory
-		implements OpenShiftSupport {
+public class OpenShiftContainerFactory extends DefaultContainerFactory implements OpenShiftSupport {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(OpenShiftContainerFactory.class);
+	private static final Logger logger = LoggerFactory.getLogger(OpenShiftContainerFactory.class);
 
 	private static String LIVENESS_ENDPOINT = "/health";
 	private static String READINESS_ENDPOINT = "/info";
@@ -43,11 +42,11 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
 	}
 
 	/**
-	 * Containers for {@link DockerResource}'s are delegated to the
-	 * {@link DefaultContainerFactory}, any other container, like a
-	 * {@link org.springframework.cloud.deployer.resource.maven.MavenResource} for
-	 * example, are created with the image as the application Id because the Docker image
-	 * would have been built and pushed to the OpenShift internal registry. See
+	 * Containers for {@link DockerResource}'s are delegated to the {@link DefaultContainerFactory},
+	 * any other container, like a
+	 * {@link org.springframework.cloud.deployer.resource.maven.MavenResource} for example, are
+	 * created with the image as the application Id because the Docker image would have been built
+	 * and pushed to the OpenShift internal registry. See
 	 * https://docs.openshift.org/latest/architecture/infrastructure_components/
 	 * image_registry.html#integrated-openshift-registry
 	 *
@@ -57,12 +56,12 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
 	 * @return a {@link Container}
 	 */
 	@Override
-	public Container create(String appId, AppDeploymentRequest request, Integer port,
-			Integer instanceIndex) {
+	public Container create(String appId, AppDeploymentRequest request, Integer port, Integer instanceIndex) {
 		Container container;
 
 		if (request.getResource() instanceof DockerResource) {
 			container = super.create(appId, request, port, instanceIndex);
+			container.setVolumeMounts(getVolumeMounts(appId, request.getDeploymentProperties()));
 		}
 		else {
 			//@formatter:off
@@ -72,7 +71,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
                     .withImage(appId)
                     .withEnv(toEnvVars(properties.getEnvironmentVariables()))
                     .withArgs(createCommandArgs(request))
-					.withVolumeMounts(getVolumeMounts(appId));
+					.withVolumeMounts(getVolumeMounts(appId, request.getDeploymentProperties()));
 
             if (port != null) {
                 containerBuilder.addNewPort()
@@ -99,32 +98,32 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
 		return container;
 	}
 
-	// TODO support getting volumes from deployment properties
-	protected List<VolumeMount> getVolumeMounts(String appId) {
+	// TODO extract the configServicePropertySourceLocator stuff into it's own class
+	protected List<VolumeMount> getVolumeMounts(String appId, Map<String, String> deploymentProperties) {
 		List<VolumeMount> volumeMounts = new ArrayList<>();
 
 		ConfigurableEnvironment appEnvironment = new StandardEnvironment();
-		appEnvironment.getPropertySources()
-				.addFirst(new MapPropertySource("deployer-override",
-						Collections.singletonMap("spring.application.name", appId)));
+		appEnvironment.getPropertySources().addFirst(
+				new MapPropertySource("deployer-override", Collections.singletonMap("spring.application.name", appId)));
 
-		PropertySource<?> propertySource = configServicePropertySourceLocator
-				.locate(appEnvironment);
+		PropertySource<?> propertySource = configServicePropertySourceLocator.locate(appEnvironment);
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(propertySource);
 
-		VolumeMountProperties volumeMountProperties = new VolumeMountProperties();
+		// TODO check of properties are merged/overridden
+		VolumeMountProperties volumeMountProperties = getVolumeMountProperties(deploymentProperties);
+		volumeMounts.addAll(volumeMountProperties.getVolumeMounts());
 		PropertiesConfigurationFactory<VolumeMountProperties> factory = new PropertiesConfigurationFactory<>(
 				volumeMountProperties);
 		factory.setPropertySources(propertySources);
 
 		try {
 			factory.afterPropertiesSet();
-			volumeMounts = factory.getObject().getVolumeMounts();
+			VolumeMountProperties configVolumeProperties = factory.getObject();
+			volumeMounts.addAll(configVolumeProperties.getVolumeMounts());
 		}
 		catch (Exception e) {
-			logger.warn("Could not get app '{}' configuration from config server: '{}'",
-					appId, e.getMessage());
+			logger.warn("Could not get app '{}' configuration from config server: '{}'", appId, e.getMessage());
 		}
 
 		return volumeMounts;

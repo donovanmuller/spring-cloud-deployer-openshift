@@ -18,10 +18,9 @@ public class DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory
 	private final OpenShiftDeployerProperties openShiftDeployerProperties;
 
 	public DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(OpenShiftClient client,
-																		  OpenShiftDeployerProperties openShiftDeployerProperties, Container container,
-																		  Map<String, String> labels, ResourceRequirements resourceRequirements) {
-		super(client, openShiftDeployerProperties, container, labels,
-				resourceRequirements);
+			OpenShiftDeployerProperties openShiftDeployerProperties, Container container, Map<String, String> labels,
+			ResourceRequirements resourceRequirements) {
+		super(client, openShiftDeployerProperties, container, labels, resourceRequirements);
 		this.openShiftDeployerProperties = openShiftDeployerProperties;
 	}
 
@@ -31,11 +30,9 @@ public class DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory
 	}
 
 	@Override
-	protected DeploymentConfig build(AppDeploymentRequest request, String appId,
-			Container container, Map<String, String> labels,
-			ResourceRequirements resourceRequirements) {
-		DeploymentConfig deploymentConfig = super.build(request, appId, container, labels,
-				resourceRequirements);
+	protected DeploymentConfig build(AppDeploymentRequest request, String appId, Container container,
+			Map<String, String> labels, ResourceRequirements resourceRequirements) {
+		DeploymentConfig deploymentConfig = super.build(request, appId, container, labels, resourceRequirements);
 		//@formatter:off
         return new DeploymentConfigBuilder(deploymentConfig)
             .editSpec()

@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.core.io.Resource;
@@ -14,10 +16,12 @@ import org.springframework.core.io.Resource;
 import com.google.common.collect.ImmutableMap;
 
 import io.fabric8.openshift.api.model.BuildConfig;
-import io.fabric8.openshift.client.mock.OpenShiftMockServerTestBase;
+import io.fabric8.openshift.client.mock.OpenShiftServer;
 
-public class DockerfileWithDockerBuildConfigFactoryTest
-		extends OpenShiftMockServerTestBase {
+public class DockerfileWithDockerBuildConfigFactoryTest {
+
+	@Rule
+	public OpenShiftServer server = new OpenShiftServer();
 
 	private ResourceHash resourceHash;
 
@@ -30,78 +34,63 @@ public class DockerfileWithDockerBuildConfigFactoryTest
 
 	@Test
 	public void buildBuildConfig() {
-		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(
-				getOpenshiftClient(), null, null, null, null, null, resourceHash) {
+		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(server.getOpenshiftClient(), null, null, null,
+				new OpenShiftDeployerProperties(), null, resourceHash) {
 		};
 
-		AppDeploymentRequest request = new AppDeploymentRequest(
-				new AppDefinition("testapp-source", null), mock(Resource.class));
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
+				mock(Resource.class));
 
-		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source",
-				request, null, null, "1");
+		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source", request, null, null, "1");
 
 		assertThat(buildConfig.getSpec().getSource().getType()).isEqualTo("Dockerfile");
-		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim())
-				.startsWith("FROM java:8");
-		assertThat(buildConfig.getSpec().getOutput().getTo().getName())
-				.isEqualTo("testapp-source:latest");
+		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim()).startsWith("FROM java:8");
+		assertThat(buildConfig.getSpec().getOutput().getTo().getName()).isEqualTo("testapp-source:latest");
 	}
 
 	@Test
 	public void buildBuildConfigWithDockerfileFromFileSystem() {
-		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(
-				getOpenshiftClient(), null, null, null, null, null, resourceHash) {
+		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(server.getOpenshiftClient(), null, null, null,
+				new OpenShiftDeployerProperties(), null, resourceHash) {
 		};
 
-		AppDeploymentRequest request = new AppDeploymentRequest(
-				new AppDefinition("testapp-source", null), mock(Resource.class),
-				ImmutableMap.of(
-						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DOCKERFILE,
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
+				mock(Resource.class), ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DOCKERFILE,
 						"src/test/resources/TestDockerfile"));
 
-		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source",
-				request, null, null, "1");
+		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source", request, null, null, "1");
 
-		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim())
-				.isEqualTo("FROM test from file system");
+		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim()).isEqualTo("FROM test from file system");
 	}
 
 	@Test
 	public void buildBuildConfigWithInlineDockerfile() {
-		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(
-				getOpenshiftClient(), null, null, null, null, null, resourceHash) {
+		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(server.getOpenshiftClient(), null, null, null,
+				new OpenShiftDeployerProperties(), null, resourceHash) {
 		};
 
-		AppDeploymentRequest request = new AppDeploymentRequest(
-				new AppDefinition("testapp-source", null), mock(Resource.class),
-				ImmutableMap.of(
-						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DOCKERFILE,
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
+				mock(Resource.class), ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DOCKERFILE,
 						"FROM an inline Dockerfile"));
 
-		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source",
-				request, null, null, "1");
+		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source", request, null, null, "1");
 
-		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim())
-				.isEqualTo("FROM an inline Dockerfile");
+		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim()).isEqualTo("FROM an inline Dockerfile");
 	}
 
 	@Test
 	public void buildBuildConfigWithImageTag() {
-		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(
-				getOpenshiftClient(), null, null, null, null, null, resourceHash) {
+		buildConfigFactory = new DockerfileWithDockerBuildConfigFactory(server.getOpenshiftClient(), null, null, null,
+				new OpenShiftDeployerProperties(), null, resourceHash) {
 		};
 
-		AppDeploymentRequest request = new AppDeploymentRequest(
-				new AppDefinition("testapp-source", null), mock(Resource.class),
-				ImmutableMap.of(
-						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG,
-						"dev"));
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
+				mock(Resource.class),
+				ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev"));
 
-		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source",
-				request, null, null, "1");
+		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source", request, null, null, "1");
 
-		assertThat(buildConfig.getSpec().getOutput().getTo().getName())
-				.isEqualTo("testapp-source:dev");
+		assertThat(buildConfig.getSpec().getOutput().getTo().getName()).isEqualTo("testapp-source:dev");
 	}
 
 }

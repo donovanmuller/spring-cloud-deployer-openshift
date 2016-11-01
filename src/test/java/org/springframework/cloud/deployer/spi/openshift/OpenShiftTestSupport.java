@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
-import org.springframework.cloud.stream.test.junit.AbstractExternalResourceTestSupport;
+import org.springframework.cloud.deployer.spi.test.junit.AbstractExternalResourceTestSupport;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +18,9 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 
 /**
- * JUnit {@link org.junit.Rule} that detects the fact that a OpenShift installation is
- * available.
+ * JUnit {@link org.junit.Rule} that detects the fact that a OpenShift installation is available.
  */
-public class OpenShiftTestSupport
-		extends AbstractExternalResourceTestSupport<KubernetesClient> {
+public class OpenShiftTestSupport extends AbstractExternalResourceTestSupport<KubernetesClient> {
 
 	private ConfigurableApplicationContext context;
 
@@ -45,8 +43,7 @@ public class OpenShiftTestSupport
 	@Configuration
 	@EnableAutoConfiguration
 	@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
-	@EnableConfigurationProperties({ KubernetesDeployerProperties.class,
-			OpenShiftDeployerProperties.class })
+	@EnableConfigurationProperties({ KubernetesDeployerProperties.class, OpenShiftDeployerProperties.class })
 	public static class Config {
 
 		@Autowired

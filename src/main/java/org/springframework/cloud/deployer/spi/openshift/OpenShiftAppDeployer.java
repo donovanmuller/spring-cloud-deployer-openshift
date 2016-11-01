@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.fabric8.openshift.api.model.DeploymentConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -31,7 +32,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.openshift.api.model.Build;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDeployer {
+public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDeployer, OpenShiftSupport {
 
 	private static Logger logger = LoggerFactory.getLogger(OpenShiftAppDeployer.class);
 
@@ -41,8 +42,8 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	private OpenShiftClient client;
 
 	public OpenShiftAppDeployer(KubernetesDeployerProperties properties,
-			OpenShiftDeployerProperties openShiftDeployerProperties,
-			KubernetesClient client, ContainerFactory containerFactory) {
+			OpenShiftDeployerProperties openShiftDeployerProperties, KubernetesClient client,
+			ContainerFactory containerFactory) {
 		super(properties, client);
 
 		this.properties = properties;
@@ -59,12 +60,10 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		String appId = createDeploymentId(request);
 
 		if (!status(appId).getState().equals(DeploymentState.unknown)) {
-			throw new IllegalStateException(
-					String.format("App '%s' is already deployed", appId));
+			throw new IllegalStateException(String.format("App '%s' is already deployed", appId));
 		}
 
-		List<ObjectFactory> factories = populateOpenShiftObjectsForDeployment(request,
-				appId);
+		List<ObjectFactory> factories = populateOpenShiftObjectsForDeployment(request, appId);
 		factories.forEach(factory -> factory.addObject(request, appId));
 		factories.forEach(factory -> factory.applyObject(request, appId));
 
@@ -79,12 +78,10 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		String appId = createDeploymentId(request);
 
 		if (!status(appId).getState().equals(DeploymentState.deployed)) {
-			throw new IllegalStateException(
-					String.format("App '%s' is not deployed", appId));
+			throw new IllegalStateException(String.format("App '%s' is not deployed", appId));
 		}
 
-		List<ObjectFactory> factories = populateOpenShiftObjectsForRedeployment(request,
-				appId);
+		List<ObjectFactory> factories = populateOpenShiftObjectsForRedeployment(request, appId);
 		factories.forEach(factory -> factory.addObject(request, appId));
 		factories.forEach(factory -> factory.applyObject(request, appId));
 
@@ -98,9 +95,17 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		// don't delete BuildConfig/Builds
 		client.services().withLabelIn(SPRING_APP_KEY, appId).delete();
 		client.routes().withLabelIn(SPRING_APP_KEY, appId).delete();
-		client.deploymentConfigs().withLabelIn(SPRING_APP_KEY, appId).delete();
+		for (DeploymentConfig deploymentConfig : client.deploymentConfigs().withLabelIn(SPRING_APP_KEY, appId).list().getItems()) {
+			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).scale(0, true);
+			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).cascading(true).delete();
+		}
 		client.replicationControllers().withLabelIn(SPRING_APP_KEY, appId).delete();
-		client.pods().withLabelIn(SPRING_APP_KEY, appId).delete();
+		for (Pod pod : client.pods().withLabel("openshift.io/deployer-pod-for.name").list().getItems()) {
+			if (pod.getMetadata().getName().startsWith(appId))  {
+				client.pods().withName(pod.getMetadata().getName()).cascading(true).delete();
+			}
+		}
+
 	}
 
 	/**
@@ -109,22 +114,18 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	 * {@link org.springframework.cloud.deployer.spi.kubernetes.AbstractKubernetesDeployer#buildAppStatus}
 	 */
 	@Override
-	protected AppStatus buildAppStatus(KubernetesDeployerProperties properties,
-			String appId, PodList list) {
+	protected AppStatus buildAppStatus(KubernetesDeployerProperties properties, String appId, PodList list) {
 		AppStatus.Builder statusBuilder = AppStatus.of(appId);
 
-		List<Build> builds = client.builds().withLabelIn(SPRING_APP_KEY, appId).list()
-				.getItems();
+		List<Build> builds = client.builds().withLabelIn(SPRING_APP_KEY, appId).list().getItems();
 		Build build = (builds.isEmpty()) ? null : Iterables.getLast(builds);
 
 		if (list == null) {
-			statusBuilder
-					.with(new OpenShiftAppInstanceStatus(appId, null, properties, build));
+			statusBuilder.with(new OpenShiftAppInstanceStatus(appId, null, properties, build));
 		}
 		else {
 			for (Pod pod : list.getItems()) {
-				statusBuilder.with(
-						new OpenShiftAppInstanceStatus(appId, pod, properties, build));
+				statusBuilder.with(new OpenShiftAppInstanceStatus(appId, pod, properties, build));
 			}
 		}
 
@@ -132,60 +133,55 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	}
 
 	/**
-	 * Populate the OpenShift objects that will be created/updated and applied when
-	 * deploying an app.
+	 * Populate the OpenShift objects that will be created/updated and applied when deploying an
+	 * app.
 	 *
 	 * @param request
 	 * @param appId
 	 * @return list of {@link ObjectFactory}'s
 	 */
-	protected List<ObjectFactory> populateOpenShiftObjectsForDeployment(
-			AppDeploymentRequest request, String appId) {
+	protected List<ObjectFactory> populateOpenShiftObjectsForDeployment(AppDeploymentRequest request, String appId) {
 		List<ObjectFactory> factories = new ArrayList<>();
 
 		Map<String, String> labels = createIdMap(appId, request, null);
+		labels.putAll(toLabels(request.getDeploymentProperties()));
 		int externalPort = configureExternalPort(request);
 
-		Container container = getContainerFactory().create(createDeploymentId(request),
-				request, externalPort, null);
+		Container container = getContainerFactory().create(createDeploymentId(request), request, externalPort, null);
 
 		factories.add(getDeploymentConfigFactory(request, labels, container));
 		factories.add(new ServiceWithIndexSuppportFactory(getClient(), externalPort, labels));
 
 		if (createRoute(request)) {
-			factories.add(new RouteFactory(getClient(), getOpenShiftDeployerProperties(),
-					externalPort, labels));
+			factories.add(new RouteFactory(getClient(), getOpenShiftDeployerProperties(), externalPort, labels));
 		}
 
 		return factories;
 	}
 
 	/**
-	 * Populate the OpenShift objects that will be created/updated and applied when
-	 * redeploying an app.
+	 * Populate the OpenShift objects that will be created/updated and applied when redeploying an
+	 * app.
 	 *
 	 * @param request
 	 * @param appId
 	 * @return list of {@link ObjectFactory}'s
 	 */
-	protected List<ObjectFactory> populateOpenShiftObjectsForRedeployment(
-			AppRedeploymentRequest request, String appId) {
+	protected List<ObjectFactory> populateOpenShiftObjectsForRedeployment(AppRedeploymentRequest request,
+			String appId) {
 		// When https://github.com/fabric8io/kubernetes-client/issues/507
 		// has been merged, we can look at rolling updates etc.
 		return populateOpenShiftObjectsForDeployment(request, appId);
 	}
 
-	protected DeploymentConfigFactory getDeploymentConfigFactory(
-			AppDeploymentRequest request, Map<String, String> labels,
-			Container container) {
-		return new DeploymentConfigWithIndexSuppportFactory(getClient(),
-				openShiftDeployerProperties, container, labels,
+	protected DeploymentConfigFactory getDeploymentConfigFactory(AppDeploymentRequest request,
+			Map<String, String> labels, Container container) {
+		return new DeploymentConfigWithIndexSuppportFactory(getClient(), openShiftDeployerProperties, container, labels,
 				getResourceRequirements(request));
 	}
 
 	/**
-	 * Create an OpenShift Route if either of these two deployment properties are
-	 * specified:
+	 * Create an OpenShift Route if either of these two deployment properties are specified:
 	 *
 	 * <ul>
 	 * <li>spring.cloud.deployer.kubernetes.createLoadBalancer</li>
@@ -199,8 +195,7 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		boolean createRoute = false;
 		String createRouteProperty = request.getDeploymentProperties().getOrDefault(
 				OpenShiftDeploymentPropertyKeys.KUBERNETES_CREATE_LOAD_BALANCER,
-				request.getDeploymentProperties()
-						.get(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_ROUTE));
+				request.getDeploymentProperties().get(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_ROUTE));
 		if (StringUtils.isEmpty(createRouteProperty)) {
 			createRoute = properties.isCreateLoadBalancer();
 		}
@@ -233,10 +228,10 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		return containerFactory;
 	}
 
-	private void validate(AppDeploymentRequest appDeploymentRequest) {
+	private void
+	validate(AppDeploymentRequest appDeploymentRequest) {
 		if (appDeploymentRequest.getDefinition().getName().length() > 24) {
-			throw new IllegalArgumentException(
-					"Application name cannot be more than 24 characters");
+			throw new IllegalArgumentException("Application name cannot be more than 24 characters");
 		}
 	}
 }

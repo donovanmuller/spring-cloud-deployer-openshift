@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.fabric8.openshift.api.model.DeploymentConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.deployer.spi.core.AppRedeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAppDeployer;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
@@ -30,6 +28,7 @@ import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.openshift.api.model.Build;
+import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
 
 public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDeployer, OpenShiftSupport {
@@ -71,24 +70,6 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	}
 
 	@Override
-	public String redeploy(final AppRedeploymentRequest request) {
-		logger.info("Redeploying application: {}", request.getDefinition());
-
-		validate(request);
-		String appId = createDeploymentId(request);
-
-		if (!status(appId).getState().equals(DeploymentState.deployed)) {
-			throw new IllegalStateException(String.format("App '%s' is not deployed", appId));
-		}
-
-		List<ObjectFactory> factories = populateOpenShiftObjectsForRedeployment(request, appId);
-		factories.forEach(factory -> factory.addObject(request, appId));
-		factories.forEach(factory -> factory.applyObject(request, appId));
-
-		return appId;
-	}
-
-	@Override
 	public void undeploy(String appId) {
 		logger.info("Undeploying application: {}", appId);
 
@@ -100,12 +81,9 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).cascading(true).delete();
 		}
 		client.replicationControllers().withLabelIn(SPRING_APP_KEY, appId).delete();
-		for (Pod pod : client.pods().withLabel("openshift.io/deployer-pod-for.name").list().getItems()) {
-			if (pod.getMetadata().getName().startsWith(appId))  {
-				client.pods().withName(pod.getMetadata().getName()).cascading(true).delete();
-			}
-		}
-
+		client.pods().withLabel("openshift.io/deployer-pod-for.name").list().getItems().stream()
+			.filter(pod -> pod.getMetadata().getName().startsWith(appId))
+			.forEach(pod -> client.pods().withName(pod.getMetadata().getName()).cascading(true).delete());
 	}
 
 	/**
@@ -157,21 +135,6 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		}
 
 		return factories;
-	}
-
-	/**
-	 * Populate the OpenShift objects that will be created/updated and applied when redeploying an
-	 * app.
-	 *
-	 * @param request
-	 * @param appId
-	 * @return list of {@link ObjectFactory}'s
-	 */
-	protected List<ObjectFactory> populateOpenShiftObjectsForRedeployment(AppRedeploymentRequest request,
-			String appId) {
-		// When https://github.com/fabric8io/kubernetes-client/issues/507
-		// has been merged, we can look at rolling updates etc.
-		return populateOpenShiftObjectsForDeployment(request, appId);
 	}
 
 	protected DeploymentConfigFactory getDeploymentConfigFactory(AppDeploymentRequest request,

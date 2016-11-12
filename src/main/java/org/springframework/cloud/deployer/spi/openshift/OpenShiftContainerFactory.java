@@ -1,44 +1,26 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.bind.PropertiesConfigurationFactory;
-import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.DefaultContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
-import org.springframework.cloud.deployer.spi.openshift.maven.VolumeMountProperties;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
-import org.springframework.core.env.MutablePropertySources;
-import org.springframework.core.env.PropertySource;
-import org.springframework.core.env.StandardEnvironment;
+import org.springframework.cloud.deployer.spi.openshift.volumes.VolumeMountFactory;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.VolumeMount;
 
 public class OpenShiftContainerFactory extends DefaultContainerFactory implements OpenShiftSupport {
-
-	private static final Logger logger = LoggerFactory.getLogger(OpenShiftContainerFactory.class);
 
 	private static String LIVENESS_ENDPOINT = "/health";
 	private static String READINESS_ENDPOINT = "/info";
 
 	private KubernetesDeployerProperties properties;
-	private ConfigServicePropertySourceLocator configServicePropertySourceLocator;
+	private VolumeMountFactory volumeMountFactory;
 
-	public OpenShiftContainerFactory(KubernetesDeployerProperties properties,
-			ConfigServicePropertySourceLocator configServicePropertySourceLocator) {
+	public OpenShiftContainerFactory(KubernetesDeployerProperties properties, VolumeMountFactory volumeMountFactory) {
 		super(properties);
 		this.properties = properties;
-		this.configServicePropertySourceLocator = configServicePropertySourceLocator;
+		this.volumeMountFactory = volumeMountFactory;
 	}
 
 	/**
@@ -61,7 +43,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory implement
 
 		if (request.getResource() instanceof DockerResource) {
 			container = super.create(appId, request, port, instanceIndex);
-			container.setVolumeMounts(getVolumeMounts(appId, request.getDeploymentProperties()));
+			container.setVolumeMounts(volumeMountFactory.create(appId, request.getDeploymentProperties()));
 		}
 		else {
 			//@formatter:off
@@ -71,7 +53,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory implement
                     .withImage(appId)
                     .withEnv(toEnvVars(properties.getEnvironmentVariables()))
                     .withArgs(createCommandArgs(request))
-					.withVolumeMounts(getVolumeMounts(appId, request.getDeploymentProperties()));
+					.withVolumeMounts(volumeMountFactory.create(appId, request.getDeploymentProperties()));
 
             if (port != null) {
                 containerBuilder.addNewPort()
@@ -96,36 +78,5 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory implement
 		}
 
 		return container;
-	}
-
-	// TODO extract the configServicePropertySourceLocator stuff into it's own class
-	protected List<VolumeMount> getVolumeMounts(String appId, Map<String, String> deploymentProperties) {
-		List<VolumeMount> volumeMounts = new ArrayList<>();
-
-		ConfigurableEnvironment appEnvironment = new StandardEnvironment();
-		appEnvironment.getPropertySources().addFirst(
-				new MapPropertySource("deployer-override", Collections.singletonMap("spring.application.name", appId)));
-
-		PropertySource<?> propertySource = configServicePropertySourceLocator.locate(appEnvironment);
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(propertySource);
-
-		// TODO check of properties are merged/overridden
-		VolumeMountProperties volumeMountProperties = getVolumeMountProperties(deploymentProperties);
-		volumeMounts.addAll(volumeMountProperties.getVolumeMounts());
-		PropertiesConfigurationFactory<VolumeMountProperties> factory = new PropertiesConfigurationFactory<>(
-				volumeMountProperties);
-		factory.setPropertySources(propertySources);
-
-		try {
-			factory.afterPropertiesSet();
-			VolumeMountProperties configVolumeProperties = factory.getObject();
-			volumeMounts.addAll(configVolumeProperties.getVolumeMounts());
-		}
-		catch (Exception e) {
-			logger.warn("Could not get app '{}' configuration from config server: '{}'", appId, e.getMessage());
-		}
-
-		return volumeMounts;
 	}
 }

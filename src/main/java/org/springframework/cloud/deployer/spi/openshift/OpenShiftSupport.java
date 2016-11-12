@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.deployer.spi.openshift.maven.VolumeMountProperties;
+import org.springframework.cloud.deployer.spi.openshift.volumes.VolumeMountProperties;
 import org.springframework.util.Assert;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
@@ -88,28 +88,5 @@ public interface OpenShiftSupport extends DataflowSupport {
 		}
 
 		return nodeSelectors;
-	}
-
-	default VolumeMountProperties getVolumeMountProperties(Map<String, String> properties) {
-		VolumeMountProperties volumeMountProperties = new VolumeMountProperties();
-
-		String volumeMounts = properties
-				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_VOLUME_MOUNTS, StringUtils.EMPTY);
-
-		if (StringUtils.isNotBlank(volumeMounts)) {
-			String[] volumePairs = volumeMounts.split(",");
-			for (String volumePair : volumePairs) {
-				String[] volume = volumePair.split(":");
-				Assert.isTrue(volume.length <= 3, format("Invalid volume mount: '{}'", volumePair));
-
-				volumeMountProperties
-						.addVolumeMount(new VolumeMount(volume[1], volume[0],
-								Boolean.valueOf(StringUtils.defaultIfBlank(
-										volume.length == 3 ? volume[2] : StringUtils.EMPTY, Boolean.FALSE.toString())),
-								null));
-			}
-		}
-
-		return volumeMountProperties;
 	}
 }

@@ -11,3 +11,5 @@ RUN wget --user ${repo_auth_username} \
 RUN bash -c 'chmod a+rx /app.jar'
 
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]
+
+# TODO Maybe use wrapper script for best operability?

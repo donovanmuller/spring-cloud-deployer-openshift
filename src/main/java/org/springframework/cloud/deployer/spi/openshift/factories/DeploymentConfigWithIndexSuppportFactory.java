@@ -18,8 +18,7 @@ import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFactory
-		implements DataflowSupport {
+public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFactory implements DataflowSupport {
 
 	public DeploymentConfigWithIndexSuppportFactory(OpenShiftClient client,
 			OpenShiftDeployerProperties openShiftDeployerProperties, Container container,

@@ -32,8 +32,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 
-	private static Logger logger = LoggerFactory
-			.getLogger(MavenOpenShiftAppDeployer.class);
+	private static Logger logger = LoggerFactory.getLogger(MavenOpenShiftAppDeployer.class);
 
 	private OpenShiftDeployerProperties openShiftDeployerProperties;
 	private MavenResourceJarExtractor mavenResourceJarExtractor;
@@ -59,7 +58,7 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 
 		MavenResource mavenResource = (MavenResource) request.getResource();
 		if (!buildExists(request, appId, mavenResource)) {
-			logger.info("Building application [{}] with resource: {}", appId,
+			logger.info("Building application '{}' with resource: {}", appId,
 					mavenResource);
 
 			factories.add(new ImageStreamFactory(getClient()));

@@ -64,6 +64,8 @@ public class DeploymentConfigFactory
 					return phase.equals("New") || phase.equals("Pending")
 							|| phase.equals("Running") || phase.equals("Failed");
 				})) {
+			// TODO when https://github.com/fabric8io/kubernetes-client/issues/507#issuecomment-246272404
+			// is implemented, rather kick off another deployment
 			//@formatter:off
             client.deploymentConfigs()
 				.withName(appId)

@@ -13,7 +13,9 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftAppDeployer;
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftTaskLauncher;
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenResourceJarExtractor;
-import org.springframework.cloud.deployer.spi.openshift.volumes.VolumeMountFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.pod.OpenShiftContainerFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeMountConfigServerFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeMountFactory;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,6 +86,6 @@ public class OpenShiftAutoConfiguration {
 	@Bean
 	public VolumeMountFactory volumeMountFactory(
 			ConfigServicePropertySourceLocator configServicePropertySourceLocator) {
-		return new VolumeMountFactory(configServicePropertySourceLocator);
+		return new VolumeMountConfigServerFactory(configServicePropertySourceLocator);
 	}
 }

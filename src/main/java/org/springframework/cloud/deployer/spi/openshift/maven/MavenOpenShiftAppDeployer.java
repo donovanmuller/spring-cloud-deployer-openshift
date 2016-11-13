@@ -16,7 +16,7 @@ import org.springframework.cloud.deployer.spi.openshift.OpenShiftAppDeployer;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftMavenDeploymentRequest;
-import org.springframework.cloud.deployer.spi.openshift.OpenShiftRequestDefinitionPropertyKeys;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftApplicationPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.factories.BuildConfigFactory;
 import org.springframework.cloud.deployer.spi.openshift.factories.DeploymentConfigFactory;
@@ -87,13 +87,13 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 			Map<String, String> labels, MavenResource mavenResource) {
 		BuildConfigFactory buildConfig;
 
-		Map<String, String> parameters = request.getDefinition().getProperties();
-		if (parameters.containsKey(
-				OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
-			String gitUri = parameters.get(
-					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
-			String gitReference = parameters.getOrDefault(
-					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_REF_PROPERTY,
+		Map<String, String> applicationProperties = request.getDefinition().getProperties();
+		if (applicationProperties.containsKey(
+				OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
+			String gitUri = applicationProperties.get(
+					OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
+			String gitReference = applicationProperties.getOrDefault(
+					OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_REF_PROPERTY,
 					"master");
 			buildConfig = new GitWithDockerBuildConfigFactory(getClient(), labels,
 					new GitReference(gitUri, gitReference), getProperties(),
@@ -183,7 +183,7 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 	 */
 	protected String dockerfileLocation(AppDeploymentRequest request) {
 		return request.getDefinition().getProperties().getOrDefault(
-				OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH,
+				OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH,
 				"Dockerfile");
 	}
 }

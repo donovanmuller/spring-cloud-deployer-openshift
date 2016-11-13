@@ -1,4 +1,4 @@
-package org.springframework.cloud.deployer.spi.openshift.volumes;
+package org.springframework.cloud.deployer.spi.openshift.resources.volumes;
 
 import java.util.ArrayList;
 import java.util.Arrays;

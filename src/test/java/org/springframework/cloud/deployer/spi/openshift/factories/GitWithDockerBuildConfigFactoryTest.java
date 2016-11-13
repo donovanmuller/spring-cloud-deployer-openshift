@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
-import org.springframework.cloud.deployer.spi.openshift.OpenShiftRequestDefinitionPropertyKeys;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftApplicationPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.maven.GitReference;
 import org.springframework.core.io.Resource;
@@ -62,7 +62,7 @@ public class GitWithDockerBuildConfigFactoryTest {
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
 				new AppDefinition("testapp-source", ImmutableMap
-						.of(OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH, "docker")),
+						.of(OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH, "docker")),
 				mock(Resource.class), null);
 
 		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source", request,
@@ -80,7 +80,7 @@ public class GitWithDockerBuildConfigFactoryTest {
 
 		AppDeploymentRequest request = new AppDeploymentRequest(
 				new AppDefinition("testapp-source", ImmutableMap.of(
-						OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_SOURCE_SECRET, "shh, its a secret")),
+						OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_SOURCE_SECRET, "shh, its a secret")),
 				mock(Resource.class), null);
 
 		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig("testapp-source", request,

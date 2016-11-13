@@ -1,10 +1,13 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
-import io.fabric8.kubernetes.api.model.Volume;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.fabric8.kubernetes.api.model.Volume;
 
 @ConfigurationProperties(prefix = "spring.cloud.deployer.openshift")
 public class OpenShiftDeployerProperties {
@@ -15,22 +18,20 @@ public class OpenShiftDeployerProperties {
 	private boolean forceBuild;
 
 	/**
-	 * See https://docs.openshift.org/latest/architecture/core_concepts/routes.html#route-
-	 * hostnames
+	 * See https://docs.openshift.org/latest/architecture/core_concepts/routes.html#route- hostnames
 	 */
 	private String defaultRoutingSubdomain = "router.default.svc.cluster.local";
 
 	/**
-	 * The default image tag to associate with
-	 * {@link io.fabric8.openshift.api.model.Build} targets and
-	 * {@link io.fabric8.openshift.api.model.DeploymentConfig}'s
+	 * The default image tag to associate with {@link io.fabric8.openshift.api.model.Build} targets
+	 * and {@link io.fabric8.openshift.api.model.DeploymentConfig}'s
 	 */
 	private String defaultImageTag = "latest";
 
 	/**
-	 * The {@link io.fabric8.kubernetes.api.model.Volume}s that this deployer server supports.
-	 * The {@link io.fabric8.kubernetes.api.model.VolumeMount}s will
-	 * be defined via application specific properties.
+	 * The {@link io.fabric8.kubernetes.api.model.Volume}s that this deployer server supports. The
+	 * {@link io.fabric8.kubernetes.api.model.VolumeMount}s will be defined as deployment properties
+	 * ({@link org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeMountFactory}).
 	 */
 	private List<Volume> volumes = new ArrayList<>();
 

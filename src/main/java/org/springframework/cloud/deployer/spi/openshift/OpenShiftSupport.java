@@ -9,11 +9,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.deployer.spi.openshift.volumes.VolumeMountProperties;
 import org.springframework.util.Assert;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.VolumeMount;
 
 public interface OpenShiftSupport extends DataflowSupport {
 
@@ -55,11 +53,11 @@ public interface OpenShiftSupport extends DataflowSupport {
 	default Map<String, String> toLabels(Map<String, String> properties) {
 		Map<String, String> labels = new HashMap<>();
 
-		String nodeSelectorsProperty = properties
+		String labelsProperty = properties
 				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_LABELS, StringUtils.EMPTY);
 
-		if (StringUtils.isNotBlank(nodeSelectorsProperty)) {
-			String[] labelPairs = nodeSelectorsProperty.split(",");
+		if (StringUtils.isNotBlank(labelsProperty)) {
+			String[] labelPairs = labelsProperty.split(",");
 			for (String labelPair : labelPairs) {
 				String[] label = labelPair.split("=");
 				Assert.isTrue(label.length == 2, format("Invalid label value: '{}'", labelPair));

@@ -45,13 +45,13 @@ public interface OpenShiftDeploymentPropertyKeys {
 	String OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME = "spring.cloud.deployer.openshift.deployment.route.host";
 
 	/**
-	 * An optional list of {@link io.fabric8.kubernetes.api.model.VolumeMount}s. TODO reference
+	 * An optional list of {@link io.fabric8.kubernetes.api.model.VolumeMount}s.
 	 * <code>spring.cloud.deployer.openshift.deployment.volumeMounts=volumeName:mountPath[:readOnly],...</code>
 	 */
 	String OPENSHIFT_DEPLOYMENT_VOLUME_MOUNTS = "spring.cloud.deployer.openshift.deployment.volumeMounts";
 
 	/**
-	 * An optional comma separate list of labels to add to the DeploymentConfig. This could be
+	 * An optional comma separated list of labels to add to the DeploymentConfig. This could be
 	 * useful for grouping different standalone/stream/tasks into common view/application group etc.
 	 * <code>spring.cloud.deployer.openshift.deployment.labels=groupName=test,someLabel=value</code>
 	 */

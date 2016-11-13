@@ -14,7 +14,7 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftMavenDeploymentRequest;
-import org.springframework.cloud.deployer.spi.openshift.OpenShiftRequestDefinitionPropertyKeys;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftApplicationPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftTaskLauncher;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.factories.BuildConfigFactory;
@@ -89,11 +89,11 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 
 		Map<String, String> parameters = request.getDefinition().getProperties();
 		if (parameters.containsKey(
-				OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
+				OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
 			String gitUri = parameters.get(
-					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
+					OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
 			String gitReference = parameters.getOrDefault(
-					OpenShiftRequestDefinitionPropertyKeys.OPENSHIFT_BUILD_GIT_REF_PROPERTY,
+					OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_REF_PROPERTY,
 					"master");
 			buildConfig = new WatchingBuildConfigFactory(getClient(),
 					new GitWithDockerBuildConfigFactory(getClient(), labels,

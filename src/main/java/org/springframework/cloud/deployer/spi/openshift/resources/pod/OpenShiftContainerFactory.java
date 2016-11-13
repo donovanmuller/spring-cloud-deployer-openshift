@@ -1,10 +1,11 @@
-package org.springframework.cloud.deployer.spi.openshift;
+package org.springframework.cloud.deployer.spi.openshift.resources.pod;
 
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.DefaultContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
-import org.springframework.cloud.deployer.spi.openshift.volumes.VolumeMountFactory;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftSupport;
+import org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeMountFactory;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
@@ -43,7 +44,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory implement
 
 		if (request.getResource() instanceof DockerResource) {
 			container = super.create(appId, request, port, instanceIndex);
-			container.setVolumeMounts(volumeMountFactory.create(appId, request.getDeploymentProperties()));
+			container.setVolumeMounts(volumeMountFactory.addObject(request, appId));
 		}
 		else {
 			//@formatter:off
@@ -53,7 +54,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory implement
                     .withImage(appId)
                     .withEnv(toEnvVars(properties.getEnvironmentVariables()))
                     .withArgs(createCommandArgs(request))
-					.withVolumeMounts(volumeMountFactory.create(appId, request.getDeploymentProperties()));
+					.withVolumeMounts(volumeMountFactory.addObject(request, appId));
 
             if (port != null) {
                 containerBuilder.addNewPort()

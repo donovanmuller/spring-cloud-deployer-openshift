@@ -1,6 +1,6 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
-public interface OpenShiftRequestDefinitionPropertyKeys {
+public interface OpenShiftApplicationPropertyKeys {
 
 	/**
 	 * The Git remote repository URI that will contain a Dockerfile in src/main/docker.
@@ -10,7 +10,7 @@ public interface OpenShiftRequestDefinitionPropertyKeys {
 
 	/**
 	 * The Git branch/reference for
-	 * {@link OpenShiftRequestDefinitionPropertyKeys#OPENSHIFT_BUILD_GIT_URI_PROPERTY}. See
+	 * {@link OpenShiftApplicationPropertyKeys#OPENSHIFT_BUILD_GIT_URI_PROPERTY}. See
 	 * https://docs.openshift.org/latest/dev_guide/builds.html#source-code
 	 */
 	String OPENSHIFT_BUILD_GIT_REF_PROPERTY = "spring.cloud.deployer.openshift.build.git.ref";

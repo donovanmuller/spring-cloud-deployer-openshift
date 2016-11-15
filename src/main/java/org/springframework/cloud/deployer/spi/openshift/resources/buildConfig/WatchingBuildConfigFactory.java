@@ -1,4 +1,4 @@
-package org.springframework.cloud.deployer.spi.openshift.factories;
+package org.springframework.cloud.deployer.spi.openshift.resources.buildConfig;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +10,7 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.openshift.api.model.Build;
 import io.fabric8.openshift.api.model.BuildConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 
 /**
  * Provides the ability to watch an object. Whilst watching this object, the events for

@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
-import org.springframework.cloud.deployer.spi.openshift.factories.ObjectFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 
 import io.fabric8.kubernetes.client.KubernetesClient;

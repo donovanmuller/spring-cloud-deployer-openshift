@@ -1,4 +1,4 @@
-package org.springframework.cloud.deployer.spi.openshift.factories;
+package org.springframework.cloud.deployer.spi.openshift.resources.buildConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -11,6 +11,8 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.BuildConfigFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.DockerfileWithDockerBuildConfigFactory;
 import org.springframework.core.io.Resource;
 
 import com.google.common.collect.ImmutableMap;

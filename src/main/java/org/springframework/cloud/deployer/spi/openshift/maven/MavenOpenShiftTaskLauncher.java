@@ -17,12 +17,12 @@ import org.springframework.cloud.deployer.spi.openshift.OpenShiftMavenDeployment
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftApplicationPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftTaskLauncher;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
-import org.springframework.cloud.deployer.spi.openshift.factories.BuildConfigFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.DockerfileWithDockerBuildConfigFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.GitWithDockerBuildConfigFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.ImageStreamFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.ObjectFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.WatchingBuildConfigFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.BuildConfigFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.DockerfileWithDockerBuildConfigFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.GitWithDockerBuildConfigFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.imageStream.ImageStreamFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.WatchingBuildConfigFactory;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Iterables;

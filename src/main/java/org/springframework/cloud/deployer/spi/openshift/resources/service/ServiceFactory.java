@@ -1,12 +1,16 @@
-package org.springframework.cloud.deployer.spi.openshift.factories;
+package org.springframework.cloud.deployer.spi.openshift.resources.service;
 
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 
@@ -16,8 +20,7 @@ public class ServiceFactory implements ObjectFactory<Service> {
 	private Integer port;
 	private Map<String, String> labels;
 
-	public ServiceFactory(OpenShiftClient client, Integer port,
-			Map<String, String> labels) {
+	public ServiceFactory(OpenShiftClient client, Integer port, Map<String, String> labels) {
 		this.client = client;
 		this.port = port;
 		this.labels = labels;
@@ -53,8 +56,10 @@ public class ServiceFactory implements ObjectFactory<Service> {
 		//@formatter:on
 	}
 
-	protected Service build(AppDeploymentRequest request, String appId, Integer port,
-			Map<String, String> labels) {
+	protected Service build(AppDeploymentRequest request, String appId, Integer port, Map<String, String> labels) {
+		boolean createNodePort = StringUtils.isNotBlank(
+				request.getDeploymentProperties().get(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT));
+
 		return new ServiceBuilder()
 			//@formatter:off
             .withNewMetadata()
@@ -62,13 +67,26 @@ public class ServiceFactory implements ObjectFactory<Service> {
                 .withLabels(labels)
             .endMetadata()
             .withNewSpec()
-                .withPorts(new ServicePortBuilder()
-                        .withPort(port)
-                        .withNewTargetPort(port)
-                        .build())
+                .withPorts(createNodePort ? buildServiceNodePort(request) : buildServicePort())
                 .withSelector(labels)
             .endSpec()
             .build();
             //@formatter:on
+	}
+
+	private ServicePort buildServicePort() {
+		return new ServicePortBuilder()
+			.withPort(port)
+			.withNewTargetPort(port)
+			.build();
+	}
+
+	private ServicePort buildServiceNodePort(AppDeploymentRequest request) {
+		String createNodePort = request.getDeploymentProperties()
+				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT, StringUtils.EMPTY);
+		return new ServicePortBuilder()
+			.withPort(port)
+			.withNodePort(StringUtils.isNumeric(createNodePort) ? Integer.parseInt(createNodePort) : null)
+			.build();
 	}
 }

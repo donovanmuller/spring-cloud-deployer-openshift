@@ -1,4 +1,4 @@
-package org.springframework.cloud.deployer.spi.openshift.factories;
+package org.springframework.cloud.deployer.spi.openshift.resources.service;
 
 import java.util.Map;
 

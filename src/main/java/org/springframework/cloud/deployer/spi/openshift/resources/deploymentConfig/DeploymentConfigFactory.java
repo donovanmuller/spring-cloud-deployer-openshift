@@ -1,4 +1,4 @@
-package org.springframework.cloud.deployer.spi.openshift.factories;
+package org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +18,7 @@ import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.fabric8.openshift.api.model.DeploymentTriggerPolicyBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 
 public class DeploymentConfigFactory
 		implements ObjectFactory<DeploymentConfig>, OpenShiftSupport, DataflowSupport {

@@ -23,6 +23,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
@@ -34,7 +35,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.common.collect.ImmutableMap;
 
-@SpringApplicationConfiguration(classes = { KubernetesAutoConfiguration.class,
+@SpringBootTest(classes = { KubernetesAutoConfiguration.class,
 		OpenShiftAutoConfiguration.class,
 		OpenShiftTaskLauncherMavenIntegrationTest.Config.class })
 @RunWith(SpringJUnit4ClassRunner.class)

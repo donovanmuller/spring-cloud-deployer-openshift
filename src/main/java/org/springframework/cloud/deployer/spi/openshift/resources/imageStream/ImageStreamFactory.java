@@ -1,4 +1,4 @@
-package org.springframework.cloud.deployer.spi.openshift.factories;
+package org.springframework.cloud.deployer.spi.openshift.resources.imageStream;
 
 import java.util.Optional;
 
@@ -6,6 +6,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.springframework.cloud.deployer.spi.openshift.resources.AbstractObjectFactory;
 
 public class ImageStreamFactory extends AbstractObjectFactory<ImageStream> {
 

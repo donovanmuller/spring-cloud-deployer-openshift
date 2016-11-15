@@ -2,8 +2,10 @@ package org.springframework.cloud.deployer.spi.openshift;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Map;
 
+import io.fabric8.kubernetes.api.model.EnvVar;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -41,5 +43,21 @@ public class OpenShiftSupportTest implements OpenShiftSupport {
 
 		assertThat(nodeSelectors).containsAllEntriesOf(
 				ImmutableMap.of("region", "primary", "role", "node", "label", "test"));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void toEnvVarsWithoutOverrides() {
+		List<EnvVar> envVars = toEnvVars(new String[]{"test=ing"});
+
+		assertThat(envVars).first().isEqualTo(new EnvVar("test", "ing", null));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void toEnvVarsWithOverrides() {
+		List<EnvVar> envVars = toEnvVars(new String[]{"test=ing"}, ImmutableMap.of("test", "ing this thing"));
+
+		assertThat(envVars).first().isEqualTo(new EnvVar("test", "ing this thing", null));
 	}
 }

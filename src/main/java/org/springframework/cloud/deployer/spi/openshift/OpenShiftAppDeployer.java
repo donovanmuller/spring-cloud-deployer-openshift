@@ -13,11 +13,11 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAppDeployer;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
-import org.springframework.cloud.deployer.spi.openshift.factories.DeploymentConfigFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.DeploymentConfigWithIndexSuppportFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.ObjectFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.RouteFactory;
-import org.springframework.cloud.deployer.spi.openshift.factories.ServiceWithIndexSuppportFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig.DeploymentConfigFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig.DeploymentConfigWithIndexSuppportFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.route.RouteFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.service.ServiceWithIndexSuppportFactory;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Iterables;
@@ -76,14 +76,15 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		// don't delete BuildConfig/Builds
 		client.services().withLabelIn(SPRING_APP_KEY, appId).delete();
 		client.routes().withLabelIn(SPRING_APP_KEY, appId).delete();
-		for (DeploymentConfig deploymentConfig : client.deploymentConfigs().withLabelIn(SPRING_APP_KEY, appId).list().getItems()) {
+		for (DeploymentConfig deploymentConfig : client.deploymentConfigs().withLabelIn(SPRING_APP_KEY, appId).list()
+				.getItems()) {
 			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).scale(0, true);
 			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).cascading(true).delete();
 		}
 		client.replicationControllers().withLabelIn(SPRING_APP_KEY, appId).delete();
 		client.pods().withLabel("openshift.io/deployer-pod-for.name").list().getItems().stream()
-			.filter(pod -> pod.getMetadata().getName().startsWith(appId))
-			.forEach(pod -> client.pods().withName(pod.getMetadata().getName()).cascading(true).delete());
+				.filter(pod -> pod.getMetadata().getName().startsWith(appId))
+				.forEach(pod -> client.pods().withName(pod.getMetadata().getName()).cascading(true).delete());
 	}
 
 	/**
@@ -168,6 +169,12 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 			}
 		}
 
+		String createNodePort = request.getDeploymentProperties()
+				.get(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT);
+		if (createRoute && createNodePort != null) {
+			throw new IllegalArgumentException("Cannot create NodePort and LoadBalancer at the same time.");
+		}
+
 		return createRoute;
 	}
 
@@ -191,8 +198,7 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		return containerFactory;
 	}
 
-	private void
-	validate(AppDeploymentRequest appDeploymentRequest) {
+	private void validate(AppDeploymentRequest appDeploymentRequest) {
 		if (appDeploymentRequest.getDefinition().getName().length() > 24) {
 			throw new IllegalArgumentException("Application name cannot be more than 24 characters");
 		}

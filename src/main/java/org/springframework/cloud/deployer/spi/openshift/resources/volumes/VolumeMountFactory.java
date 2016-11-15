@@ -10,7 +10,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
-import org.springframework.cloud.deployer.spi.openshift.factories.ObjectFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 import org.springframework.util.Assert;
 
 import io.fabric8.kubernetes.api.model.VolumeMount;
@@ -40,9 +40,8 @@ public class VolumeMountFactory implements ObjectFactory<List<VolumeMount>> {
 
 	/**
 	 * Get the {@link OpenShiftDeploymentPropertyKeys#OPENSHIFT_DEPLOYMENT_VOLUME_MOUNTS} deployment
-	 * proeprty from the {@link AppDeploymentRequest}. This covers both common deployer properties
-	 * set a deployer server level as well as deployment properties specified (on stream etc.) on
-	 * deployment.
+	 * property from the {@link AppDeploymentRequest}. This covers both common deployer properties
+	 * set on a deployer server level as well as deployment properties.
 	 *
 	 * @param request
 	 * @return the configured volume mounts

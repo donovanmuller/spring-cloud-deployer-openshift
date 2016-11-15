@@ -4,8 +4,11 @@ import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -39,15 +42,23 @@ public interface OpenShiftSupport extends DataflowSupport {
 				.findFirst().orElse(defaultValue);
 	}
 
-	default List<EnvVar> toEnvVars(String[] properties) {
-		List<EnvVar> envVars = new ArrayList<>();
+	default List<EnvVar> toEnvVars(String[] properties, Map<String, String>... overrideProperties) {
+		Set<EnvVar> envVars = new HashSet<>();
+		if (overrideProperties != null) {
+			for (Map<String, String> overrideProperty : overrideProperties) {
+				envVars.addAll(overrideProperty.entrySet().stream()
+					.map(property -> new EnvVar(property.getKey(), property.getValue(), null))
+					.collect(Collectors.toList()));
+			}
+		}
+		// bit backwards but overridden deployment EnvVar's will not be replaced by deployer property
 		for (String envVar : properties) {
 			String[] strings = envVar.split("=", 2);
 			Assert.isTrue(strings.length == 2, "Invalid environment variable declared: " + envVar);
 			envVars.add(new EnvVar(strings[0], strings[1], null));
 		}
 
-		return envVars;
+		return new ArrayList<>(envVars);
 	}
 
 	default Map<String, String> toLabels(Map<String, String> properties) {

@@ -1,4 +1,4 @@
-package org.springframework.cloud.deployer.spi.openshift.factories;
+package org.springframework.cloud.deployer.spi.openshift.resources.route;
 
 import static java.lang.String.format;
 
@@ -12,6 +12,7 @@ import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPrope
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 
 public class RouteFactory implements ObjectFactory<Route> {
 

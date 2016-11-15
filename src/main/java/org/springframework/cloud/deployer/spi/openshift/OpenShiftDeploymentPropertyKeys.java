@@ -66,4 +66,33 @@ public interface OpenShiftDeploymentPropertyKeys {
 	 */
 	String KUBERNETES_CREATE_LOAD_BALANCER = "spring.cloud.deployer.kubernetes.createLoadBalancer";
 	String OPENSHIFT_CREATE_ROUTE = "spring.cloud.deployer.openshift.createRoute";
+
+	/**
+	 * Create a NodePort instead of a Route. Either "true" or a number at deployment time. The value
+	 * "true" will choose a random port. If a number is given it must be in the range that is
+	 * configured for the cluster (service-node-port-range, default is 30000-32767).
+	 */
+	String OPENSHIFT_CREATE_NODE_PORT = "spring.cloud.deployer.openshift.createNodePort";
+
+	/**
+	 * A comma separated list of environment variables. Primarily used
+	 */
+	String OPENSHIFT_DEPLOYMENT_ENVIRONMENT_VARIABLES = "spring.cloud.deployer.openshift.environmentVariables";
+
+	/**
+	 * Custom container command.
+	 */
+	String OPENSHIFT_DEPLOYMENT_CONTAINER_COMMAND = "spring.cloud.deployer.openshift.containerCommand";
+
+	/**
+	 * Additional (in addition to default Spring Boot port) container ports to that should exposed.
+	 */
+	String OPENSHIFT_DEPLOYMENT_CONTAINER_PORTS = "spring.cloud.deployer.openshift.containerPorts";
+
+	/**
+	 * The Docker ENTRYPOINT style used when running the container. This determines how command line
+	 * arguments are passed to the container. See
+	 * {@link org.springframework.cloud.deployer.spi.openshift.resources.pod.OpenShiftContainerFactory}
+	 */
+	String OPENSHIFT_DEPLOYMENT_CONTAINER_ENTRYPOINT_STYLE = "spring.cloud.deployer.openshift.entryPointStyle";
 }

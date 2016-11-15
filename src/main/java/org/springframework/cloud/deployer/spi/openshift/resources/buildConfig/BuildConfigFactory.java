@@ -1,4 +1,4 @@
-package org.springframework.cloud.deployer.spi.openshift.factories;
+package org.springframework.cloud.deployer.spi.openshift.resources.buildConfig;
 
 import static java.lang.String.format;
 
@@ -13,6 +13,7 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftSupport;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 import org.springframework.cloud.deployer.spi.openshift.maven.GitReference;
 import org.springframework.util.Assert;
 

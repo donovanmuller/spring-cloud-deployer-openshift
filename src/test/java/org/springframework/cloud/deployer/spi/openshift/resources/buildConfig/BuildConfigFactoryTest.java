@@ -1,4 +1,4 @@
-package org.springframework.cloud.deployer.spi.openshift.factories;
+package org.springframework.cloud.deployer.spi.openshift.resources.buildConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -14,6 +14,7 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.BuildConfigFactory;
 import org.springframework.core.io.Resource;
 
 import io.fabric8.kubernetes.api.model.EnvVar;

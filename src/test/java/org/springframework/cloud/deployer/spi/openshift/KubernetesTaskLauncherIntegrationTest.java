@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -56,17 +56,14 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 /**
  * Copied <a href="https://github.com/spring-cloud/spring-cloud-deployer-kubernetes">from
- * spring-cloud-deployer-kubernetes</a> to test the <code>docker:</code> resource
- * handling.
+ * spring-cloud-deployer-kubernetes</a> to test the <code>docker:</code> resource handling.
  */
-@SpringApplicationConfiguration(classes = { KubernetesAutoConfiguration.class,
-		OpenShiftAutoConfiguration.class,
+@SpringBootTest(classes = { KubernetesAutoConfiguration.class, OpenShiftAutoConfiguration.class,
 		KubernetesTaskLauncherIntegrationTest.Config.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class KubernetesTaskLauncherIntegrationTest {
 
-	protected static final Logger logger = LoggerFactory
-			.getLogger(KubernetesTaskLauncherIntegrationTest.class);
+	protected static final Logger logger = LoggerFactory.getLogger(KubernetesTaskLauncherIntegrationTest.class);
 
 	@ClassRule
 	public static OpenShiftTestSupport openShiftTestSupport = new OpenShiftTestSupport();
@@ -94,9 +91,8 @@ public class KubernetesTaskLauncherIntegrationTest {
 		logger.info("Launched {} ", deploymentId);
 
 		Timeout timeout = launchTimeout();
-		assertThat(deploymentId,
-				eventually(hasStatusThat(Matchers.hasProperty("state", is(complete))),
-						timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(complete))),
+				timeout.maxAttempts, timeout.pause));
 	}
 
 	@Test
@@ -112,15 +108,13 @@ public class KubernetesTaskLauncherIntegrationTest {
 		String deploymentId = taskLauncher.launch(request);
 		logger.info("Launched {} ", deploymentId);
 		Timeout timeout = launchTimeout();
-		assertThat(deploymentId,
-				eventually(hasStatusThat(Matchers.hasProperty("state", is(complete))),
-						timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(complete))),
+				timeout.maxAttempts, timeout.pause));
 
 		deploymentId = taskLauncher.launch(request);
 		logger.info("Re-launched {} ", deploymentId);
-		assertThat(deploymentId,
-				eventually(hasStatusThat(Matchers.hasProperty("state", is(complete))),
-						timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(complete))),
+				timeout.maxAttempts, timeout.pause));
 	}
 
 	@Test
@@ -130,16 +124,15 @@ public class KubernetesTaskLauncherIntegrationTest {
 		properties.put("killDelay", "1000");
 		AppDefinition definition = new AppDefinition(this.randomName(), properties);
 		Resource resource = integrationTestTask();
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource,
-				Collections.emptyMap(), Collections.singletonList("--exitCode=0"));
+		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, Collections.emptyMap(),
+				Collections.singletonList("--exitCode=0"));
 		logger.info("Launching {}...", request.getDefinition().getName());
 		String deploymentId = taskLauncher.launch(request);
 		logger.info("Launched {} ", deploymentId);
 
 		Timeout timeout = launchTimeout();
-		assertThat(deploymentId,
-				eventually(hasStatusThat(Matchers.hasProperty("state", is(complete))),
-						timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(complete))),
+				timeout.maxAttempts, timeout.pause));
 	}
 
 	protected String randomName() {
@@ -148,8 +141,7 @@ public class KubernetesTaskLauncherIntegrationTest {
 	}
 
 	protected Resource integrationTestTask() {
-		return new DockerResource(
-				"springcloud/spring-cloud-deployer-spi-test-app:latest");
+		return new DockerResource("springcloud/spring-cloud-deployer-spi-test-app:latest");
 	}
 
 	protected Timeout launchTimeout() {
@@ -161,14 +153,12 @@ public class KubernetesTaskLauncherIntegrationTest {
 			private TaskStatus status;
 
 			public boolean matches(Object item) {
-				this.status = KubernetesTaskLauncherIntegrationTest.this.taskLauncher
-						.status((String) item);
+				this.status = KubernetesTaskLauncherIntegrationTest.this.taskLauncher.status((String) item);
 				return statusMatcher.matches(this.status);
 			}
 
 			public void describeMismatch(Object item, Description mismatchDescription) {
-				mismatchDescription.appendText("status of ").appendValue(item)
-						.appendText(" ");
+				mismatchDescription.appendText("status of ").appendValue(item).appendText(" ");
 				statusMatcher.describeMismatch(this.status, mismatchDescription);
 			}
 
@@ -194,10 +184,8 @@ public class KubernetesTaskLauncherIntegrationTest {
 		@Bean
 		public MavenProperties mavenProperties() {
 			MavenProperties mavenProperties = new MavenProperties();
-			mavenProperties.setRemoteRepositories(
-					ImmutableMap.of("maven.remote-repositories.spring.url",
-							new MavenProperties.RemoteRepository(
-									"http://repo.spring.io/snapshots")));
+			mavenProperties.setRemoteRepositories(ImmutableMap.of("maven.remote-repositories.spring.url",
+					new MavenProperties.RemoteRepository("http://repo.spring.io/snapshots")));
 			return mavenProperties;
 		}
 	}

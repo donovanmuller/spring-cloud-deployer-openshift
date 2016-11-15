@@ -26,7 +26,7 @@ import org.hamcrest.Matchers;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -43,14 +43,11 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 /**
  * Copied and adapted
  * <a href="https://github.com/spring-cloud/spring-cloud-deployer-kubernetes">from
- * spring-cloud-deployer-kubernetes</a> to test the <code>docker:</code> resource
- * handling.
+ * spring-cloud-deployer-kubernetes</a> to test the <code>docker:</code> resource handling.
  */
-@SpringApplicationConfiguration(classes = { KubernetesAutoConfiguration.class,
-		OpenShiftAutoConfiguration.class,
+@SpringBootTest(classes = { KubernetesAutoConfiguration.class, OpenShiftAutoConfiguration.class,
 		OpenShiftAppDeployerMavenIntegrationTest.Config.class })
-public class KubernetesAppDeployerIntegrationTest
-		extends AbstractAppDeployerIntegrationTests {
+public class KubernetesAppDeployerIntegrationTest extends AbstractAppDeployerIntegrationTests {
 
 	@ClassRule
 	public static OpenShiftTestSupport openShiftAvailable = new OpenShiftTestSupport();
@@ -85,16 +82,14 @@ public class KubernetesAppDeployerIntegrationTest
 		log.info("Deploying {}...", request.getDefinition().getName());
 		String deploymentId = appDeployer().deploy(request);
 		Timeout timeout = deploymentTimeout();
-		assertThat(deploymentId,
-				eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
-						timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
+				timeout.maxAttempts, timeout.pause));
 
 		log.info("Undeploying {}...", deploymentId);
 		timeout = undeploymentTimeout();
 		appDeployer().undeploy(deploymentId);
-		assertThat(deploymentId,
-				eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-						timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+				timeout.maxAttempts, timeout.pause));
 	}
 
 	@Override
@@ -141,7 +136,6 @@ public class KubernetesAppDeployerIntegrationTest
 
 	@Override
 	protected Resource testApplication() {
-		return new DockerResource(
-				"springcloud/spring-cloud-deployer-spi-test-app:latest");
+		return new DockerResource("springcloud/spring-cloud-deployer-spi-test-app:latest");
 	}
 }

@@ -22,7 +22,6 @@ import java.util.Properties;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
@@ -35,12 +34,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.common.collect.ImmutableMap;
 
-@SpringBootTest(classes = { KubernetesAutoConfiguration.class,
-		OpenShiftAutoConfiguration.class,
+@SpringBootTest(classes = { KubernetesAutoConfiguration.class, OpenShiftAutoConfiguration.class,
 		OpenShiftTaskLauncherMavenIntegrationTest.Config.class })
 @RunWith(SpringJUnit4ClassRunner.class)
-public class OpenShiftTaskLauncherMavenIntegrationTest
-		extends KubernetesTaskLauncherIntegrationTest {
+public class OpenShiftTaskLauncherMavenIntegrationTest extends KubernetesTaskLauncherIntegrationTest {
 
 	@ClassRule
 	public static OpenShiftTestSupport openShiftTestSupport = new OpenShiftTestSupport();
@@ -64,13 +61,10 @@ public class OpenShiftTaskLauncherMavenIntegrationTest
 	protected Resource integrationTestTask() {
 		Properties properties = new Properties();
 		try {
-			properties.load(new ClassPathResource("integration-test-app.properties")
-					.getInputStream());
+			properties.load(new ClassPathResource("integration-test-app.properties").getInputStream());
 		}
 		catch (IOException e) {
-			throw new RuntimeException(
-					"Failed to determine which version of integration-test-app to use",
-					e);
+			throw new RuntimeException("Failed to determine which version of integration-test-app to use", e);
 		}
 		return new MavenResource.Builder().groupId("org.springframework.cloud")
 				.artifactId("spring-cloud-deployer-spi-test-app").classifier("exec")
@@ -88,10 +82,8 @@ public class OpenShiftTaskLauncherMavenIntegrationTest
 		@Bean
 		public MavenProperties mavenProperties() {
 			MavenProperties mavenProperties = new MavenProperties();
-			mavenProperties.setRemoteRepositories(
-					ImmutableMap.of("maven.remote-repositories.spring.url",
-							new MavenProperties.RemoteRepository(
-									"http://repo.spring.io/snapshots")));
+			mavenProperties.setRemoteRepositories(ImmutableMap.of("maven.remote-repositories.spring.url",
+					new MavenProperties.RemoteRepository("http://repo.spring.io/snapshots")));
 			return mavenProperties;
 		}
 	}

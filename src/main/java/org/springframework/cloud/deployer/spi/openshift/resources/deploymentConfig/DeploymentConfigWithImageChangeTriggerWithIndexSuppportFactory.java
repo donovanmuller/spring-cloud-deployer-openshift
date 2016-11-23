@@ -3,6 +3,7 @@ package org.springframework.cloud.deployer.spi.openshift.resources.deploymentCon
 import java.util.Map;
 
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -19,8 +20,8 @@ public class DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory
 
 	public DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(OpenShiftClient client,
 			OpenShiftDeployerProperties openShiftDeployerProperties, Container container, Map<String, String> labels,
-			ResourceRequirements resourceRequirements) {
-		super(client, openShiftDeployerProperties, container, labels, resourceRequirements);
+			ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy) {
+		super(client, openShiftDeployerProperties, container, labels, resourceRequirements, imagePullPolicy);
 		this.openShiftDeployerProperties = openShiftDeployerProperties;
 	}
 
@@ -31,8 +32,9 @@ public class DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory
 
 	@Override
 	protected DeploymentConfig build(AppDeploymentRequest request, String appId, Container container,
-			Map<String, String> labels, ResourceRequirements resourceRequirements) {
-		DeploymentConfig deploymentConfig = super.build(request, appId, container, labels, resourceRequirements);
+			Map<String, String> labels, ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy) {
+		DeploymentConfig deploymentConfig = super.build(request, appId, container, labels, resourceRequirements,
+				imagePullPolicy);
 		//@formatter:off
         return new DeploymentConfigBuilder(deploymentConfig)
             .editSpec()

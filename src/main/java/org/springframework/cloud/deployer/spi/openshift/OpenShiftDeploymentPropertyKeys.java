@@ -45,10 +45,16 @@ public interface OpenShiftDeploymentPropertyKeys {
 	String OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME = "spring.cloud.deployer.openshift.deployment.route.host";
 
 	/**
-	 * An optional list of {@link io.fabric8.kubernetes.api.model.VolumeMount}s.
-	 * <code>spring.cloud.deployer.openshift.deployment.volumeMounts=volumeName:mountPath[:readOnly],...</code>
+	 * An optional list of {@link io.fabric8.kubernetes.api.model.VolumeMount}s. See
+	 * {@link org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeMountFactory}
 	 */
 	String OPENSHIFT_DEPLOYMENT_VOLUME_MOUNTS = "spring.cloud.deployer.openshift.deployment.volumeMounts";
+
+	/**
+	 * An optional list of {@link io.fabric8.kubernetes.api.model.Volume}s. See
+	 * {@link org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeFactory}
+	 */
+	String OPENSHIFT_DEPLOYMENT_VOLUMES = "spring.cloud.deployer.openshift.deployment.volumes";
 
 	/**
 	 * An optional comma separated list of labels to add to the DeploymentConfig. This could be
@@ -74,25 +80,4 @@ public interface OpenShiftDeploymentPropertyKeys {
 	 */
 	String OPENSHIFT_CREATE_NODE_PORT = "spring.cloud.deployer.openshift.createNodePort";
 
-	/**
-	 * A comma separated list of environment variables. Primarily used
-	 */
-	String OPENSHIFT_DEPLOYMENT_ENVIRONMENT_VARIABLES = "spring.cloud.deployer.openshift.environmentVariables";
-
-	/**
-	 * Custom container command.
-	 */
-	String OPENSHIFT_DEPLOYMENT_CONTAINER_COMMAND = "spring.cloud.deployer.openshift.containerCommand";
-
-	/**
-	 * Additional (in addition to default Spring Boot port) container ports to that should exposed.
-	 */
-	String OPENSHIFT_DEPLOYMENT_CONTAINER_PORTS = "spring.cloud.deployer.openshift.containerPorts";
-
-	/**
-	 * The Docker ENTRYPOINT style used when running the container. This determines how command line
-	 * arguments are passed to the container. See
-	 * {@link org.springframework.cloud.deployer.spi.openshift.resources.pod.OpenShiftContainerFactory}
-	 */
-	String OPENSHIFT_DEPLOYMENT_CONTAINER_ENTRYPOINT_STYLE = "spring.cloud.deployer.openshift.entryPointStyle";
 }

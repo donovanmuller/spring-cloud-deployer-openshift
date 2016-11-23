@@ -1,16 +1,10 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import io.fabric8.kubernetes.api.model.Volume;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 
 @ConfigurationProperties(prefix = "spring.cloud.deployer.openshift")
-public class OpenShiftDeployerProperties {
+public class OpenShiftDeployerProperties extends KubernetesDeployerProperties {
 
 	/**
 	 * Global override for forcing OpenShift Build's of every application
@@ -29,11 +23,9 @@ public class OpenShiftDeployerProperties {
 	private String defaultImageTag = "latest";
 
 	/**
-	 * The {@link io.fabric8.kubernetes.api.model.Volume}s that this deployer server supports. The
-	 * {@link io.fabric8.kubernetes.api.model.VolumeMount}s will be defined as deployment properties
-	 * ({@link org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeMountFactory}).
+	 * Delay in milliseconds to wait for resources to be undeployed.
 	 */
-	private List<Volume> volumes = new ArrayList<>();
+	private long undeployDelay = 1000;
 
 	public boolean isForceBuild() {
 		return forceBuild;
@@ -59,11 +51,11 @@ public class OpenShiftDeployerProperties {
 		this.defaultImageTag = defaultImageTag;
 	}
 
-	public List<Volume> getVolumes() {
-		return volumes;
+	public long getUndeployDelay() {
+		return undeployDelay;
 	}
 
-	public void setVolumes(final List<Volume> volumes) {
-		this.volumes = volumes;
+	public void setUndeployDelay(final long undeployDelay) {
+		this.undeployDelay = undeployDelay;
 	}
 }

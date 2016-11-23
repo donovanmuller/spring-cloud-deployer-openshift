@@ -1,9 +1,11 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
@@ -32,11 +34,11 @@ public class ServiceFactory implements ObjectFactory<Service> {
 
 		if (getExisting(appId).isPresent()) {
 			// cannot patch a Service. Delete it, then recreate
-			client.services().delete(service);
-			service = client.services().create(service);
+			this.client.services().delete(service);
+			service = this.client.services().create(service);
 		}
 		else {
-			service = client.services().create(service);
+			service = this.client.services().create(service);
 		}
 
 		return service;
@@ -65,6 +67,7 @@ public class ServiceFactory implements ObjectFactory<Service> {
             .withNewMetadata()
                 .withName(appId)
                 .withLabels(labels)
+				.withAnnotations(determineDependencies(request))
             .endMetadata()
             .withNewSpec()
                 .withPorts(createNodePort ? buildServiceNodePort(request) : buildServicePort())
@@ -75,18 +78,29 @@ public class ServiceFactory implements ObjectFactory<Service> {
 	}
 
 	private ServicePort buildServicePort() {
-		return new ServicePortBuilder()
-			.withPort(port)
-			.withNewTargetPort(port)
-			.build();
+		return new ServicePortBuilder().withPort(port).withNewTargetPort(port).build();
 	}
 
 	private ServicePort buildServiceNodePort(AppDeploymentRequest request) {
 		String createNodePort = request.getDeploymentProperties()
 				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT, StringUtils.EMPTY);
-		return new ServicePortBuilder()
-			.withPort(port)
-			.withNodePort(StringUtils.isNumeric(createNodePort) ? Integer.parseInt(createNodePort) : null)
-			.build();
+		return new ServicePortBuilder().withPort(port)
+				.withNodePort(StringUtils.isNumeric(createNodePort) ? Integer.parseInt(createNodePort) : null).build();
+	}
+
+	private Map<String, String> determineDependencies(AppDeploymentRequest request) {
+		Map<String, String> dependencies = new HashMap<>();
+		client.services()
+				.withLabel(AppDeployer.GROUP_PROPERTY_KEY,
+						request.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY))
+				.list().getItems().stream()
+					.findFirst()
+					.ifPresent((Service service) ->
+						dependencies.put(
+							"service.alpha.openshift.io/dependencies",
+							String.format("[{'name': '%s','kind': 'Service'}]",
+								service.getMetadata().getName())));
+
+		return dependencies;
 	}
 }

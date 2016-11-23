@@ -5,31 +5,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftApplicationPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftMavenDeploymentRequest;
-import org.springframework.cloud.deployer.spi.openshift.OpenShiftApplicationPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftTaskLauncher;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
-import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.BuildConfigFactory;
-import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.DockerfileWithDockerBuildConfigFactory;
-import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.GitWithDockerBuildConfigFactory;
-import org.springframework.cloud.deployer.spi.openshift.resources.imageStream.ImageStreamFactory;
 import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
-import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.WatchingBuildConfigFactory;
-import org.springframework.util.StringUtils;
-
-import com.google.common.collect.Iterables;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.BuildConfigStrategy;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.GitWithDockerBuildConfigStrategy;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.MavenBuildConfigFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.MavenDockerfileWithDockerBuildConfigStrategy;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.WatchingBuildConfigStrategy;
+import org.springframework.cloud.deployer.spi.openshift.resources.imageStream.ImageStreamFactory;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.openshift.api.model.Build;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
 
 public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 
@@ -39,10 +39,8 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 	private ResourceHash resourceHash;
 
 	public MavenOpenShiftTaskLauncher(KubernetesDeployerProperties properties,
-			OpenShiftDeployerProperties openShiftDeployerProperties,
-			MavenProperties mavenProperties, KubernetesClient client,
-			MavenResourceJarExtractor mavenResourceJarExtractor,
-			ResourceHash resourceHash) {
+			OpenShiftDeployerProperties openShiftDeployerProperties, MavenProperties mavenProperties,
+			KubernetesClient client, MavenResourceJarExtractor mavenResourceJarExtractor, ResourceHash resourceHash) {
 		super(properties, client);
 		this.openShiftDeployerProperties = openShiftDeployerProperties;
 		this.mavenResourceJarExtractor = mavenResourceJarExtractor;
@@ -51,30 +49,17 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 	}
 
 	@Override
-	protected List<ObjectFactory> populateOpenShiftObjects(AppDeploymentRequest request,
-			String appId) {
+	protected List<ObjectFactory> populateOpenShiftObjects(AppDeploymentRequest request, String taskId) {
 		List<ObjectFactory> factories = new ArrayList<>();
 
 		MavenResource mavenResource = (MavenResource) request.getResource();
-		if (!buildExists(request, appId, mavenResource)) {
-			logger.info(String.format("Building application '%s' with resource: '%s'", appId,	mavenResource));
+		// because of random task names, there will never be an existing corresponding build
+		// so we should always kick off a new build
+		if (!buildExists(request, taskId, mavenResource)) {
+			logger.info(String.format("Building application '%s' with resource: '%s'", taskId, mavenResource));
 
 			factories.add(new ImageStreamFactory(getClient()));
-			factories.add(chooseBuildStrategy(request, createIdMap(appId, request, null),
-					mavenResource));
-		}
-		else {
-			Build build = Iterables.getLast(getClient().builds()
-					.withLabelIn(SPRING_APP_KEY, appId).list().getItems());
-			DockerResource dockerResource = new DockerResource(
-					build.getStatus().getOutputDockerImageReference());
-
-			AppDeploymentRequest taskDeploymentRequest = new AppDeploymentRequest(
-					request.getDefinition(), dockerResource,
-					request.getDeploymentProperties(), request.getCommandlineArguments());
-
-			factories
-					.addAll(super.populateOpenShiftObjects(taskDeploymentRequest, appId));
+			factories.add(chooseBuildStrategy(taskId, request, createIdMap(taskId, request, null), mavenResource));
 		}
 
 		return factories;
@@ -83,45 +68,44 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 	// TODO there is allot of duplication with
 	// org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftAppDeployer
 	// we should probably extract the common functionality
-	protected WatchingBuildConfigFactory chooseBuildStrategy(AppDeploymentRequest request,
+	protected WatchingBuildConfigStrategy chooseBuildStrategy(String taskId, AppDeploymentRequest request,
 			Map<String, String> labels, MavenResource mavenResource) {
-		WatchingBuildConfigFactory buildConfig;
+		BuildConfigStrategy buildConfigStrategy;
+		WatchingBuildConfigStrategy buildConfig;
 
 		Map<String, String> parameters = request.getDefinition().getProperties();
-		if (parameters.containsKey(
-				OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
-			String gitUri = parameters.get(
-					OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
-			String gitReference = parameters.getOrDefault(
-					OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_REF_PROPERTY,
-					"master");
-			buildConfig = new WatchingBuildConfigFactory(getClient(),
-					new GitWithDockerBuildConfigFactory(getClient(), labels,
-							new GitReference(gitUri, gitReference), getProperties(),
-							openShiftDeployerProperties, mavenProperties, resourceHash),
-					(build, watch) -> launchTask(build, watch, request));
+		if (parameters.containsKey(OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
+			String gitUri = parameters.get(OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
+			String gitReferenceProperty = parameters
+					.getOrDefault(OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_REF_PROPERTY, "master");
+			GitReference gitReference = new GitReference(gitUri, gitReferenceProperty);
+			MavenBuildConfigFactory mavenBuildConfigFactory = new MavenBuildConfigFactory(getProperties(), resourceHash,
+					mavenProperties);
+			buildConfigStrategy = new GitWithDockerBuildConfigStrategy(mavenBuildConfigFactory, gitReference,
+					getProperties(), getClient(), labels);
+			buildConfig = new WatchingBuildConfigStrategy(buildConfigStrategy, getClient(), labels,
+					(build, watch) -> launchTask(build, watch, taskId, request));
 		}
 		else {
-			OpenShiftMavenDeploymentRequest openShiftRequest = new OpenShiftMavenDeploymentRequest(
-					request, mavenProperties);
+			OpenShiftMavenDeploymentRequest openShiftRequest = new OpenShiftMavenDeploymentRequest(request,
+					mavenProperties);
 			try {
-				if (mavenResourceJarExtractor
-						.extractFile(mavenResource, "src/main/docker/Dockerfile")
-						.isPresent()) {
-					buildConfig = new WatchingBuildConfigFactory(getClient(),
-							new GitWithDockerBuildConfigFactory(getClient(), labels,
-									openShiftRequest.getGitReference(), getProperties(),
-									openShiftDeployerProperties, mavenProperties,
-									resourceHash),
-							(build, watch) -> launchTask(build, watch, request));
+				GitReference gitReference = openShiftRequest.getGitReference();
+				if (mavenResourceJarExtractor.extractFile(mavenResource, "src/main/docker/Dockerfile").isPresent()) {
+					MavenBuildConfigFactory mavenBuildConfigFactory = new MavenBuildConfigFactory(getProperties(),
+							resourceHash, mavenProperties);
+					buildConfigStrategy = new GitWithDockerBuildConfigStrategy(mavenBuildConfigFactory, gitReference,
+							getProperties(), getClient(), labels);
+					buildConfig = new WatchingBuildConfigStrategy(buildConfigStrategy, getClient(), labels,
+							(build, watch) -> launchTask(build, watch, taskId, request));
 				}
 				else {
-					buildConfig = new WatchingBuildConfigFactory(getClient(),
-							new DockerfileWithDockerBuildConfigFactory(getClient(),
-									labels, openShiftRequest.getGitReference(),
-									getProperties(), openShiftDeployerProperties,
-									mavenProperties, resourceHash),
-							(build, watch) -> launchTask(build, watch, request));
+					MavenBuildConfigFactory mavenBuildConfigFactory = new MavenBuildConfigFactory(getProperties(),
+							resourceHash, mavenProperties);
+					buildConfigStrategy = new MavenDockerfileWithDockerBuildConfigStrategy(mavenBuildConfigFactory,
+							openShiftDeployerProperties, getClient(), labels);
+					buildConfig = new WatchingBuildConfigStrategy(buildConfigStrategy, getClient(), labels,
+							(build, watch) -> launchTask(build, watch, taskId, request));
 				}
 			}
 			catch (IOException e) {
@@ -136,43 +120,48 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 	// TODO there is allot of duplication with
 	// org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftAppDeployer
 	// we should probably extract the common functionality
-	protected boolean buildExists(AppDeploymentRequest request, String appId,
-			MavenResource mavenResource) {
+	protected boolean buildExists(AppDeploymentRequest request, String appId, MavenResource mavenResource) {
 		boolean buildExists;
 
 		String forceBuild = request.getDeploymentProperties()
 				.get(OpenShiftDeploymentPropertyKeys.OPENSHIFT_BUILD_FORCE);
-		if (StringUtils.hasText(forceBuild)) {
+		if (StringUtils.isAlpha(forceBuild)) {
 			buildExists = !Boolean.parseBoolean(forceBuild.toLowerCase())
 					|| !openShiftDeployerProperties.isForceBuild();
 		}
 		else {
-			buildExists = getClient().builds().withLabelIn(SPRING_APP_KEY, appId).list()
-					.getItems().stream()
+			buildExists = getClient().builds().withLabelIn(SPRING_APP_KEY, appId).list().getItems().stream()
 					.filter(build -> !build.getStatus().getPhase().equals("Failed"))
-					.flatMap(build -> build.getSpec().getStrategy().getDockerStrategy()
-							.getEnv().stream().filter(envVar -> envVar.getName()
-									.equals(BuildConfigFactory.SPRING_BUILD_ID_ENV_VAR)
-									&& envVar.getValue().equals(
-											resourceHash.hashResource(mavenResource))))
+					.flatMap(build -> build.getSpec().getStrategy().getDockerStrategy().getEnv().stream()
+							.filter(envVar -> envVar.getName().equals(MavenBuildConfigFactory.SPRING_BUILD_ID_ENV_VAR)
+									&& envVar.getValue().equals(resourceHash.hashResource(mavenResource))))
 					.count() > 0;
 		}
 
 		return buildExists;
 	}
 
-	protected void launchTask(Build build, Watch watch, AppDeploymentRequest request) {
+	protected void launchTask(Build build, Watch watch, String taskId, AppDeploymentRequest request) {
 		if (build.getStatus().getPhase().equals("Complete")) {
 			logger.info(String.format("Build complete: '%s'", build.getMetadata().getName()));
 
-			DockerResource dockerResource = new DockerResource(
-					build.getStatus().getOutputDockerImageReference());
-			AppDeploymentRequest taskDeploymentRequest = new AppDeploymentRequest(
-					request.getDefinition(), dockerResource,
-					request.getDeploymentProperties(), request.getCommandlineArguments());
+			DockerResource dockerResource = new DockerResource(build.getStatus().getOutputDockerImageReference());
+			AppDeploymentRequest taskDeploymentRequest = new AppDeploymentRequest(request.getDefinition(),
+					dockerResource, request.getDeploymentProperties(), request.getCommandlineArguments());
 
-			new KubernetesTaskLauncher(getProperties(), getClient())
-					.launch(taskDeploymentRequest);
+			new KubernetesTaskLauncher(getProperties(),
+					new DefaultOpenShiftClient().inNamespace(getClient().getNamespace())) {
+
+				/**
+				 * Reuse the taskId created in the {@link OpenShiftTaskLauncher}, otherwise the
+				 * {@link KubernetesTaskLauncher} will generate a new taskId for the actual task Pod
+				 * which does not match the one returned from launch.
+				 */
+				@Override
+				protected String createDeploymentId(AppDeploymentRequest request) {
+					return taskId;
+				}
+			}.launch(taskDeploymentRequest);
 
 			watch.close();
 		}

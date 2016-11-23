@@ -8,11 +8,11 @@ import java.util.Optional;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
-import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 
 public class RouteFactory implements ObjectFactory<Route> {
 
@@ -21,8 +21,7 @@ public class RouteFactory implements ObjectFactory<Route> {
 	private Integer port;
 	private Map<String, String> labels;
 
-	public RouteFactory(OpenShiftClient client,
-			OpenShiftDeployerProperties openShiftDeployerProperties, Integer port,
+	public RouteFactory(OpenShiftClient client, OpenShiftDeployerProperties openShiftDeployerProperties, Integer port,
 			Map<String, String> labels) {
 		this.client = client;
 		this.openShiftDeployerProperties = openShiftDeployerProperties;
@@ -35,12 +34,10 @@ public class RouteFactory implements ObjectFactory<Route> {
 		Route route = build(request, appId, port, labels);
 
 		if (getExisting(appId).isPresent()) {
-			client.routes().withName(appId).delete();
-			route = client.routes().create(route);
-			// route = client.routes().patch(route);
+			route = this.client.routes().createOrReplace(route);
 		}
 		else {
-			route = client.routes().create(route);
+			route = this.client.routes().create(route);
 		}
 
 		return route;
@@ -55,8 +52,7 @@ public class RouteFactory implements ObjectFactory<Route> {
 		return Optional.ofNullable(client.routes().withName(name).fromServer().get());
 	}
 
-	protected Route build(AppDeploymentRequest request, String appId, Integer port,
-			Map<String, String> labels) {
+	protected Route build(AppDeploymentRequest request, String appId, Integer port, Map<String, String> labels) {
 		//@formatter:off
         return new RouteBuilder()
             .withNewMetadata()
@@ -79,11 +75,10 @@ public class RouteFactory implements ObjectFactory<Route> {
 
 	/**
 	 * Builds the <code>host</code> value for a Route. If there is a
-	 * <code>spring.cloud.deployer.openshift.deployment.route.hostname</code> deployment
-	 * variable with a value, this will be used as the <code>host</code> value for the
-	 * Route (see
-	 * https://docs.openshift.org/latest/architecture/core_concepts/routes.html#route-
-	 * hostnames) Alternatively, the <code>host</code> value is built up using:
+	 * <code>spring.cloud.deployer.openshift.deployment.route.hostname</code> deployment variable
+	 * with a value, this will be used as the <code>host</code> value for the Route (see
+	 * https://docs.openshift.org/latest/architecture/core_concepts/routes.html#route- hostnames)
+	 * Alternatively, the <code>host</code> value is built up using:
 	 *
 	 * <ul>
 	 * <li>application Id</li>
@@ -100,9 +95,8 @@ public class RouteFactory implements ObjectFactory<Route> {
 	 * @return host value for the Route
 	 */
 	protected String buildHost(AppDeploymentRequest request, String appId) {
-		return request.getDeploymentProperties().getOrDefault(
-				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME,
-				format("%s.%s.%s", appId, client.getNamespace(),
-						openShiftDeployerProperties.getDefaultRoutingSubdomain()));
+		return request.getDeploymentProperties()
+				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME, format("%s.%s.%s",
+						appId, client.getNamespace(), openShiftDeployerProperties.getDefaultRoutingSubdomain()));
 	}
 }

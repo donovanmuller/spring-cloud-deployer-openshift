@@ -5,11 +5,10 @@ VOLUME /tmp
 
 RUN wget --user ${repo_auth_username} \
   --password ${repo_auth_password} \
-  --content-disposition -O /app.jar \
+  --content-disposition \
+  -O /app.jar \
   "${app_resource_url}"
 
 RUN bash -c 'chmod a+rx /app.jar'
 
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]
-
-# TODO Maybe use wrapper script for best operability?
+ENTRYPOINT ["java", "$JAVA_OPTS", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]

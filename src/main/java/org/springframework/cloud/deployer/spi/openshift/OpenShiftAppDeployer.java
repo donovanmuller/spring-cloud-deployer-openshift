@@ -1,6 +1,7 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
+import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAppDeployer;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
@@ -35,18 +37,15 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 
 	private static Logger logger = LoggerFactory.getLogger(OpenShiftAppDeployer.class);
 
-	private ContainerFactory containerFactory;
-	private KubernetesDeployerProperties properties;
 	private OpenShiftDeployerProperties openShiftDeployerProperties;
+	private ContainerFactory containerFactory;
 	private OpenShiftClient client;
 
-	public OpenShiftAppDeployer(KubernetesDeployerProperties properties,
-			OpenShiftDeployerProperties openShiftDeployerProperties, KubernetesClient client,
+	public OpenShiftAppDeployer(OpenShiftDeployerProperties properties, KubernetesClient client,
 			ContainerFactory containerFactory) {
 		super(properties, client);
 
-		this.properties = properties;
-		this.openShiftDeployerProperties = openShiftDeployerProperties;
+		this.openShiftDeployerProperties = properties;
 		this.client = (OpenShiftClient) client;
 		this.containerFactory = containerFactory;
 	}
@@ -55,16 +54,18 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	public String deploy(AppDeploymentRequest request) {
 		logger.info("Deploying application: {}", request.getDefinition());
 
+		AppDeploymentRequest compatibleAppDeploymentRequest = enableKubernetedDeployerCompatibility(request);
 		validate(request);
-		String appId = createDeploymentId(request);
+
+		String appId = createDeploymentId(compatibleAppDeploymentRequest);
 
 		if (!status(appId).getState().equals(DeploymentState.unknown)) {
 			throw new IllegalStateException(String.format("App '%s' is already deployed", appId));
 		}
 
-		List<ObjectFactory> factories = populateOpenShiftObjectsForDeployment(request, appId);
-		factories.forEach(factory -> factory.addObject(request, appId));
-		factories.forEach(factory -> factory.applyObject(request, appId));
+		List<ObjectFactory> factories = populateOpenShiftObjectsForDeployment(compatibleAppDeploymentRequest, appId);
+		factories.forEach(factory -> factory.addObject(compatibleAppDeploymentRequest, appId));
+		factories.forEach(factory -> factory.applyObject(compatibleAppDeploymentRequest, appId));
 
 		return appId;
 	}
@@ -78,13 +79,33 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		client.routes().withLabelIn(SPRING_APP_KEY, appId).delete();
 		for (DeploymentConfig deploymentConfig : client.deploymentConfigs().withLabelIn(SPRING_APP_KEY, appId).list()
 				.getItems()) {
-			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).scale(0, true);
 			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).cascading(true).delete();
 		}
 		client.replicationControllers().withLabelIn(SPRING_APP_KEY, appId).delete();
-		client.pods().withLabel("openshift.io/deployer-pod-for.name").list().getItems().stream()
-				.filter(pod -> pod.getMetadata().getName().startsWith(appId))
-				.forEach(pod -> client.pods().withName(pod.getMetadata().getName()).cascading(true).delete());
+
+		/**
+		 * Remove the deployer pod before we attempt another deployment this used to be in
+		 * OpenShiftAppDeployer.undeploy() but if there were quick undeploy/deploy cycles of the
+		 * same app, the deployer pod of the new pod would be deleted before it ever had a chance to
+		 * deploy.
+		 *
+		 * Can be removed after https://github.com/fabric8io/kubernetes-client/issues/548 is
+		 * resolved
+		 */
+		//@formatter:off
+		this.client.pods().withLabel("openshift.io/deployer-pod-for.name").list().getItems().stream()
+			.filter(pod -> pod.getMetadata().getName().startsWith(appId))
+			.forEach(pod -> this.client.pods()
+				.withName(pod.getMetadata().getName())
+				.delete());
+		//@formatter:on
+		try {
+			// Give some time for resources to be deleted.
+			// This is nasty and probably should be investigated for a better solution
+			Thread.sleep(openShiftDeployerProperties.getUndeployDelay());
+		}
+		catch (InterruptedException e) {
+		}
 	}
 
 	/**
@@ -93,18 +114,18 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	 * {@link org.springframework.cloud.deployer.spi.kubernetes.AbstractKubernetesDeployer#buildAppStatus}
 	 */
 	@Override
-	protected AppStatus buildAppStatus(KubernetesDeployerProperties properties, String appId, PodList list) {
+	protected AppStatus buildAppStatus(String appId, PodList list) {
 		AppStatus.Builder statusBuilder = AppStatus.of(appId);
 
 		List<Build> builds = client.builds().withLabelIn(SPRING_APP_KEY, appId).list().getItems();
 		Build build = (builds.isEmpty()) ? null : Iterables.getLast(builds);
 
 		if (list == null) {
-			statusBuilder.with(new OpenShiftAppInstanceStatus(appId, null, properties, build));
+			statusBuilder.with(new OpenShiftAppInstanceStatus(appId, null, openShiftDeployerProperties, build));
 		}
 		else {
 			for (Pod pod : list.getItems()) {
-				statusBuilder.with(new OpenShiftAppInstanceStatus(appId, pod, properties, build));
+				statusBuilder.with(new OpenShiftAppInstanceStatus(appId, pod, openShiftDeployerProperties, build));
 			}
 		}
 
@@ -132,7 +153,7 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		factories.add(new ServiceWithIndexSuppportFactory(getClient(), externalPort, labels));
 
 		if (createRoute(request)) {
-			factories.add(new RouteFactory(getClient(), getOpenShiftDeployerProperties(), externalPort, labels));
+			factories.add(new RouteFactory(getClient(), openShiftDeployerProperties, externalPort, labels));
 		}
 
 		return factories;
@@ -141,7 +162,7 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	protected DeploymentConfigFactory getDeploymentConfigFactory(AppDeploymentRequest request,
 			Map<String, String> labels, Container container) {
 		return new DeploymentConfigWithIndexSuppportFactory(getClient(), openShiftDeployerProperties, container, labels,
-				getResourceRequirements(request));
+				getResourceRequirements(request), getImagePullPolicy(request));
 	}
 
 	/**
@@ -179,7 +200,11 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	}
 
 	protected ResourceRequirements getResourceRequirements(AppDeploymentRequest request) {
-		return new ResourceRequirements(deduceResourceLimits(properties, request), null);
+		return new ResourceRequirements(deduceResourceLimits(request), deduceResourceRequests(request));
+	}
+
+	protected ImagePullPolicy getImagePullPolicy(AppDeploymentRequest request) {
+		return deduceImagePullPolicy(request);
 	}
 
 	protected OpenShiftClient getClient() {
@@ -190,12 +215,20 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		return properties;
 	}
 
-	protected OpenShiftDeployerProperties getOpenShiftDeployerProperties() {
-		return openShiftDeployerProperties;
-	}
-
 	protected ContainerFactory getContainerFactory() {
 		return containerFactory;
+	}
+
+	protected AppDeploymentRequest enableKubernetedDeployerCompatibility(AppDeploymentRequest request) {
+		Map<String, String> kubernetesCompliantDeploymentProperties = new HashMap<>();
+		request.getDeploymentProperties().forEach((key, value) -> {
+			if (key.contains("spring.cloud.deployer.openshift")) {
+				kubernetesCompliantDeploymentProperties.put(key.replace("openshift", "kubernetes"), value);
+			}
+		});
+		kubernetesCompliantDeploymentProperties.putAll(request.getDeploymentProperties());
+		return new AppDeploymentRequest(request.getDefinition(), request.getResource(),
+				kubernetesCompliantDeploymentProperties, request.getCommandlineArguments());
 	}
 
 	private void validate(AppDeploymentRequest appDeploymentRequest) {

@@ -10,8 +10,7 @@ import org.springframework.cloud.deployer.spi.task.TaskStatus;
 
 public class ResourceAwareOpenShiftTaskLauncher implements TaskLauncher {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(ResourceAwareOpenShiftTaskLauncher.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResourceAwareOpenShiftTaskLauncher.class);
 
 	private OpenShiftTaskLauncher openShiftTaskLauncher;
 	private MavenOpenShiftTaskLauncher mavenOpenShiftTaskLauncher;
@@ -35,8 +34,7 @@ public class ResourceAwareOpenShiftTaskLauncher implements TaskLauncher {
 			}
 		}
 		catch (Exception e) {
-			logger.error(String.format(
-					"Error deploying application deployment request: %s", request), e);
+			logger.error(String.format("Error deploying application deployment request: %s", request), e);
 			throw e;
 		}
 

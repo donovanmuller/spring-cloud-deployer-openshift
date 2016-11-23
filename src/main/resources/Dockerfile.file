@@ -3,12 +3,11 @@ FROM java:8
 
 VOLUME /tmp
 
-RUN wget --quiet \
-  --user ${repo_auth_username} \
+RUN wget --user ${repo_auth_username} \
   --password ${repo_auth_password} \
   --content-disposition \
   -O /app.jar \
-  "http://${app_resource_host}/service/local/artifact/maven/redirect?r=public&g=${app_groupId}&a=${app_artifactId}&v=${app_version}"
+  "${app_resource_url}"
 
 RUN bash -c 'chmod a+rx /app.jar'
 

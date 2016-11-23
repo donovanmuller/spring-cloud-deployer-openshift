@@ -11,16 +11,14 @@ import org.springframework.cloud.deployer.spi.openshift.maven.MavenResourceProje
 
 public class OpenShiftMavenDeploymentRequest extends AppDeploymentRequest {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(OpenShiftMavenDeploymentRequest.class);
+	private static final Logger logger = LoggerFactory.getLogger(OpenShiftMavenDeploymentRequest.class);
 
-	private MavenResourceProjectExtractor mavenResourceProjectExtractor;
 	private GitReference gitReference;
 
 	/**
-	 * The {@link org.springframework.cloud.deployer.resource.maven.MavenResource} is used
-	 * to parse and build a {@link MavenProject}. This is used to get the SCM details for
-	 * use with the different build strategies.
+	 * The {@link org.springframework.cloud.deployer.resource.maven.MavenResource} is used to parse
+	 * and build a {@link MavenProject}. This is used to get the SCM details for use with the
+	 * different build strategies.
 	 *
 	 * @param request
 	 * @param mavenResourceProjectExtractor
@@ -29,15 +27,13 @@ public class OpenShiftMavenDeploymentRequest extends AppDeploymentRequest {
 	 * {@link org.springframework.cloud.deployer.resource.maven.MavenResource}
 	 */
 	public OpenShiftMavenDeploymentRequest(AppDeploymentRequest request,
-			MavenResourceProjectExtractor mavenResourceProjectExtractor,
-			MavenProperties mavenProperties) {
-		super(request.getDefinition(), request.getResource(),
-				request.getDeploymentProperties(), request.getCommandlineArguments());
-		this.mavenResourceProjectExtractor = mavenResourceProjectExtractor;
+			MavenResourceProjectExtractor mavenResourceProjectExtractor, MavenProperties mavenProperties) {
+		super(request.getDefinition(), request.getResource(), request.getDeploymentProperties(),
+				request.getCommandlineArguments());
 
 		try {
-			MavenProject mavenProject = mavenResourceProjectExtractor
-					.extractMavenProject(this.getResource(), mavenProperties);
+			MavenProject mavenProject = mavenResourceProjectExtractor.extractMavenProject(this.getResource(),
+					mavenProperties);
 			Scm scm = mavenProject.getScm();
 			this.gitReference = new GitReference(scm.getConnection(), scm.getTag());
 		}
@@ -46,15 +42,13 @@ public class OpenShiftMavenDeploymentRequest extends AppDeploymentRequest {
 					"Maven project could not be extracted. Maven resource [%s] possibly has no pom extension artifact",
 					getResource()), e);
 		}
-
 	}
 
 	public boolean isMavenProjectExtractable() {
 		return gitReference != null;
 	}
 
-	public OpenShiftMavenDeploymentRequest(AppDeploymentRequest request,
-			MavenProperties mavenProperties) {
+	public OpenShiftMavenDeploymentRequest(AppDeploymentRequest request, MavenProperties mavenProperties) {
 		this(request, new MavenResourceProjectExtractor(), mavenProperties);
 	}
 

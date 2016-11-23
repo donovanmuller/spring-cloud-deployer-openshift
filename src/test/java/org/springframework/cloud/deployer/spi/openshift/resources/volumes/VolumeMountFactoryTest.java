@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.Test;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.core.io.Resource;
 
 import com.google.common.collect.ImmutableMap;
@@ -20,22 +21,22 @@ public class VolumeMountFactoryTest {
 
 	@Test
 	public void addVolumeMounts() {
-		volumeMountFactory = new VolumeMountFactory();
+		volumeMountFactory = new VolumeMountFactory(new OpenShiftDeployerProperties());
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class),
-				ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts", "testVolume:/mnt/test"));
+				mock(Resource.class), ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts",
+						"[{name: 'testVolume', mountPath: '/mnt/test'}]"));
 
 		List<VolumeMount> volumeMounts = volumeMountFactory.addObject(request, "1");
 
-		assertThat(volumeMounts).first().isEqualTo(new VolumeMount("/mnt/test", "testVolume", false, null));
+		assertThat(volumeMounts).first().isEqualTo(new VolumeMount("/mnt/test", "testVolume", null, null));
 	}
 
 	@Test
 	public void addVolumeMountsAsReadOnly() {
-		volumeMountFactory = new VolumeMountFactory();
+		volumeMountFactory = new VolumeMountFactory(new OpenShiftDeployerProperties());
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class),
-				ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts", "testVolume:/mnt/test:true"));
+				mock(Resource.class), ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts",
+						"[{name: 'testVolume', mountPath: '/mnt/test', readOnly: 'true'}]"));
 
 		List<VolumeMount> volumeMounts = volumeMountFactory.addObject(request, "1");
 

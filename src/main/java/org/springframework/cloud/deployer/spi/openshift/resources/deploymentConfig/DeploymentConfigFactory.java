@@ -2,13 +2,16 @@ package org.springframework.cloud.deployer.spi.openshift.resources.deploymentCon
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
 import org.springframework.cloud.deployer.spi.openshift.DataflowSupport;
-import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftSupport;
+import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeFactory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -18,39 +21,38 @@ import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.fabric8.openshift.api.model.DeploymentTriggerPolicyBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
-import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 
-public class DeploymentConfigFactory
-		implements ObjectFactory<DeploymentConfig>, OpenShiftSupport, DataflowSupport {
+public class DeploymentConfigFactory implements ObjectFactory<DeploymentConfig>, OpenShiftSupport, DataflowSupport {
 
 	public static final String SPRING_DEPLOYMENT_TIMESTAMP = "spring-cloud-deployer/redeploy-timestamp";
 
 	private OpenShiftClient client;
-	private OpenShiftDeployerProperties openShiftDeployerProperties;
 	private Container container;
 	private Map<String, String> labels;
 	private ResourceRequirements resourceRequirements;
+	private ImagePullPolicy imagePullPolicy;
+	private VolumeFactory volumeFactory;
 
-	public DeploymentConfigFactory(OpenShiftClient client,
-			OpenShiftDeployerProperties openShiftDeployerProperties, Container container,
-			Map<String, String> labels, ResourceRequirements resourceRequirements) {
+	public DeploymentConfigFactory(OpenShiftClient client, Container container, Map<String, String> labels,
+			ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy, VolumeFactory volumeFactory) {
 		this.client = client;
-		this.openShiftDeployerProperties = openShiftDeployerProperties;
 		this.container = container;
 		this.labels = labels;
 		this.resourceRequirements = resourceRequirements;
+		this.imagePullPolicy = imagePullPolicy;
+		this.volumeFactory = volumeFactory;
 	}
 
 	@Override
 	public DeploymentConfig addObject(AppDeploymentRequest request, String appId) {
-		DeploymentConfig deploymentConfig = build(request, appId, container, labels,
-				resourceRequirements);
+		DeploymentConfig deploymentConfig = build(request, appId, container, labels, resourceRequirements,
+				imagePullPolicy);
 
 		if (getExisting(appId).isPresent()) {
-			deploymentConfig = client.deploymentConfigs().cascading(true).replace(deploymentConfig);
+			deploymentConfig = this.client.deploymentConfigs().createOrReplace(deploymentConfig);
 		}
 		else {
-			deploymentConfig = client.deploymentConfigs().create(deploymentConfig);
+			deploymentConfig = this.client.deploymentConfigs().create(deploymentConfig);
 		}
 
 		return deploymentConfig;
@@ -59,13 +61,12 @@ public class DeploymentConfigFactory
 	@Override
 	public void applyObject(AppDeploymentRequest request, String appId) {
 		// if there are no builds in progress
-		if (client.builds().withLabels(labels).list().getItems().stream()
-				.noneMatch(build -> {
-					String phase = build.getStatus().getPhase();
-					return phase.equals("New") || phase.equals("Pending")
-							|| phase.equals("Running") || phase.equals("Failed");
-				})) {
-			// TODO when https://github.com/fabric8io/kubernetes-client/issues/507#issuecomment-246272404
+		if (client.builds().withLabels(labels).list().getItems().stream().noneMatch(build -> {
+			String phase = build.getStatus().getPhase();
+			return phase.equals("New") || phase.equals("Pending") || phase.equals("Running") || phase.equals("Failed");
+		})) {
+			// TODO when
+			// https://github.com/fabric8io/kubernetes-client/issues/507#issuecomment-246272404
 			// is implemented, rather kick off another deployment
 			//@formatter:off
             client.deploymentConfigs()
@@ -81,13 +82,14 @@ public class DeploymentConfigFactory
 	}
 
 	protected Optional<DeploymentConfig> getExisting(String name) {
-		return Optional
-				.ofNullable(client.deploymentConfigs().withName(name).fromServer().get());
+		return Optional.ofNullable(client.deploymentConfigs().withName(name).fromServer().get());
 	}
 
-	protected DeploymentConfig build(AppDeploymentRequest request, String appId,
-			Container container, Map<String, String> labels,
-			ResourceRequirements resourceRequirements) {
+	protected DeploymentConfig build(AppDeploymentRequest request, String appId, Container container,
+			Map<String, String> labels, ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy) {
+		container.setResources(resourceRequirements);
+		container.setImagePullPolicy(imagePullPolicy.name());
+
 		//@formatter:off
         return new DeploymentConfigBuilder()
             .withNewMetadata()
@@ -116,8 +118,12 @@ public class DeploymentConfigFactory
                                 .getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_ACCOUNT,
                                         StringUtils.EMPTY))
 						.withNodeSelector(getNodeSelectors(request.getDeploymentProperties()))
-						.withVolumes(openShiftDeployerProperties.getVolumes())
-                    .endSpec()
+						// only add volumes with corresponding volume mounts
+						.withVolumes(volumeFactory.addObject(request, appId).stream()
+							.filter(volume -> container.getVolumeMounts().stream()
+									.anyMatch(volumeMount -> volumeMount.getName().equals(volume.getName())))
+							.collect(Collectors.toList()))
+					.endSpec()
                 .endTemplate()
             .endSpec()
             .build();

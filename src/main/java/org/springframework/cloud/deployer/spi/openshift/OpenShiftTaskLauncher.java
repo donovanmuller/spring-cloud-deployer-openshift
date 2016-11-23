@@ -8,19 +8,19 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
 import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.deployer.spi.task.TaskStatus;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class OpenShiftTaskLauncher extends KubernetesTaskLauncher
-		implements TaskLauncher {
+public class OpenShiftTaskLauncher extends KubernetesTaskLauncher implements TaskLauncher {
 
 	private KubernetesDeployerProperties properties;
 	private OpenShiftClient client;
 
-	public OpenShiftTaskLauncher(KubernetesDeployerProperties properties,
-			KubernetesClient client) {
-		super(properties, client);
+	public OpenShiftTaskLauncher(KubernetesDeployerProperties properties, KubernetesClient client) {
+		super(properties, new DefaultOpenShiftClient().inNamespace(client.getNamespace()));
 
 		this.properties = properties;
 		this.client = (OpenShiftClient) client;
@@ -39,15 +39,28 @@ public class OpenShiftTaskLauncher extends KubernetesTaskLauncher
 		return taskId;
 	}
 
+	@Override
+	public TaskStatus status(String id) {
+		return super.status(id);
+	}
+
+	@Override
+	public void cleanup(String id) {
+		client.builds().list().getItems()
+			.forEach(build -> client.builds()
+				.withName(id)
+				.cascading(true)
+				.delete());
+	}
+
 	/**
 	 * Populate the OpenShift objects that will be created/updated and applied.
 	 *
 	 * @param request
-	 * @param appId
+	 * @param taskId
 	 * @return list of {@link ObjectFactory}'s
 	 */
-	protected List<ObjectFactory> populateOpenShiftObjects(AppDeploymentRequest request,
-			String appId) {
+	protected List<ObjectFactory> populateOpenShiftObjects(AppDeploymentRequest request, String taskId) {
 		List<ObjectFactory> factories = new ArrayList<>();
 
 		factories.add(new ObjectFactory() {
@@ -59,14 +72,22 @@ public class OpenShiftTaskLauncher extends KubernetesTaskLauncher
 			}
 
 			@Override
-			public void applyObject(AppDeploymentRequest request, String appId) {
-				AppDeploymentRequest taskDeploymentRequest = new AppDeploymentRequest(
-						request.getDefinition(), request.getResource(),
-						request.getDeploymentProperties(),
-						request.getCommandlineArguments());
+			public void applyObject(AppDeploymentRequest request, String taskId) {
+				AppDeploymentRequest taskDeploymentRequest = new AppDeploymentRequest(request.getDefinition(),
+						request.getResource(), request.getDeploymentProperties(), request.getCommandlineArguments());
 
-				new KubernetesTaskLauncher(properties, client)
-						.launch(taskDeploymentRequest);
+				new KubernetesTaskLauncher(properties, getClient()) {
+
+					/**
+					 * Reuse the taskId created in the {@link OpenShiftTaskLauncher}, otherwise the
+					 * {@link KubernetesTaskLauncher} will generate a new taskId for the actual task
+					 * Pod which does not match the one returned from launch.
+					 */
+					@Override
+					protected String createDeploymentId(AppDeploymentRequest request) {
+						return taskId;
+					}
+				}.launch(taskDeploymentRequest);
 			}
 		});
 

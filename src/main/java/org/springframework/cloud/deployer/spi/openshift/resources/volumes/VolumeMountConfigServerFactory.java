@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.bind.PropertiesConfigurationFactory;
 import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
@@ -25,7 +26,9 @@ public class VolumeMountConfigServerFactory extends VolumeMountFactory {
 
 	private ConfigServicePropertySourceLocator configServicePropertySourceLocator;
 
-	public VolumeMountConfigServerFactory(ConfigServicePropertySourceLocator configServicePropertySourceLocator) {
+	public VolumeMountConfigServerFactory(ConfigServicePropertySourceLocator configServicePropertySourceLocator,
+			OpenShiftDeployerProperties openShiftDeployerProperties) {
+		super(openShiftDeployerProperties);
 		this.configServicePropertySourceLocator = configServicePropertySourceLocator;
 	}
 

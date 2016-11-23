@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
@@ -38,7 +39,8 @@ public class VolumeMountConfigServerFactoryTest {
 
 	@Test
 	public void addVolumeMounts() {
-		volumeMountFactory = new VolumeMountConfigServerFactory(configServicePropertySourceLocator);
+		volumeMountFactory = new VolumeMountConfigServerFactory(configServicePropertySourceLocator,
+				new OpenShiftDeployerProperties());
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class), null);
 
@@ -49,14 +51,15 @@ public class VolumeMountConfigServerFactoryTest {
 
 	@Test
 	public void addVolumeMountsWithOverride() {
-		volumeMountFactory = new VolumeMountConfigServerFactory(configServicePropertySourceLocator);
+		volumeMountFactory = new VolumeMountConfigServerFactory(configServicePropertySourceLocator,
+				new OpenShiftDeployerProperties());
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class), ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts",
-						"testVolume:/mnt/test/overridden"));
+						"[{name: 'testVolume', mountPath: '/mnt/test/overridden'}]"));
 
 		List<VolumeMount> volumeMounts = volumeMountFactory.addObject(request, "1");
 
-		assertThat(volumeMounts).first().isEqualTo(new VolumeMount("/mnt/test/overridden", "testVolume", false, null));
+		assertThat(volumeMounts).first().isEqualTo(new VolumeMount("/mnt/test/overridden", "testVolume", null, null));
 	}
 
 	@Test
@@ -67,13 +70,13 @@ public class VolumeMountConfigServerFactoryTest {
 			public PropertySource<?> locate(Environment environment) {
 				return new MockPropertySource();
 			}
-		});
+		}, new OpenShiftDeployerProperties());
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class), ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts",
-						"testVolume:/mnt/test/deployer"));
+						"[{name: 'testVolume', mountPath: '/mnt/test/deployer'}]"));
 
 		List<VolumeMount> volumeMounts = volumeMountFactory.addObject(request, "1");
 
-		assertThat(volumeMounts).first().isEqualTo(new VolumeMount("/mnt/test/deployer", "testVolume", false, null));
+		assertThat(volumeMounts).first().isEqualTo(new VolumeMount("/mnt/test/deployer", "testVolume", null, null));
 	}
 }

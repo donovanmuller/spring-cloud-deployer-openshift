@@ -8,11 +8,9 @@ import org.springframework.cloud.deployer.spi.openshift.DataflowSupport;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class ServiceWithIndexSuppportFactory extends ServiceFactory
-		implements DataflowSupport {
+public class ServiceWithIndexSuppportFactory extends ServiceFactory implements DataflowSupport {
 
-	public ServiceWithIndexSuppportFactory(OpenShiftClient client, Integer port,
-			Map<String, String> labels) {
+	public ServiceWithIndexSuppportFactory(OpenShiftClient client, Integer port, Map<String, String> labels) {
 		super(client, port, labels);
 	}
 
@@ -32,8 +30,7 @@ public class ServiceWithIndexSuppportFactory extends ServiceFactory
 	}
 
 	@Override
-	protected Service build(AppDeploymentRequest request, String appId, Integer port,
-			Map<String, String> labels) {
+	protected Service build(AppDeploymentRequest request, String appId, Integer port, Map<String, String> labels) {
 		labels.replace("spring-deployment-id", appId);
 		return super.build(request, appId, port, labels);
 	}

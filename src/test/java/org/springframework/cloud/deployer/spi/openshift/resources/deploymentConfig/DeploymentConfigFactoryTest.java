@@ -10,9 +10,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
-import org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig.DeploymentConfigFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeFactory;
 import org.springframework.core.io.Resource;
 
 import com.google.common.collect.ImmutableMap;
@@ -33,14 +34,14 @@ public class DeploymentConfigFactoryTest {
 
 	@Test
 	public void buildDeploymentConfig() {
-		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), new OpenShiftDeployerProperties(),
-				null, null, null);
+		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, null, null,
+				ImagePullPolicy.Always, new VolumeFactory(new OpenShiftDeployerProperties()));
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class));
 
 		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
-				null, null);
+				null, null, ImagePullPolicy.Always);
 
 		assertThat(deploymentConfig.getMetadata().getName()).isEqualTo("testapp-source");
 		assertThat(deploymentConfig.getSpec().getReplicas()).isEqualTo(1);
@@ -50,8 +51,8 @@ public class DeploymentConfigFactoryTest {
 
 	@Test
 	public void buildDeploymentConfigWithServiceAccountAndNodeSelector() {
-		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), new OpenShiftDeployerProperties(),
-				null, null, null);
+		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, null, null,
+				ImagePullPolicy.Always, new VolumeFactory(new OpenShiftDeployerProperties()));
 
 		Map<String, String> deploymentProperties = ImmutableMap.of(
 				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_ACCOUNT, "test-sa",
@@ -60,7 +61,7 @@ public class DeploymentConfigFactoryTest {
 				mock(Resource.class), deploymentProperties);
 
 		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
-				null, null);
+				null, null, ImagePullPolicy.Always);
 
 		assertThat(deploymentConfig.getMetadata().getName()).isEqualTo("testapp-source");
 		assertThat(deploymentConfig.getSpec().getTemplate().getSpec().getServiceAccount()).isEqualTo("test-sa");
@@ -77,8 +78,8 @@ public class DeploymentConfigFactoryTest {
 		server.expect().withPath("/oapi/v1/namespaces/test/deploymentconfigs/testapp-source")
 				.andReturn(200, new DeploymentConfigBuilder().withNewMetadata().endMetadata().build()).times(3);
 
-		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, null, Collections.EMPTY_MAP,
-				null);
+		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, Collections.EMPTY_MAP,
+				null, ImagePullPolicy.Always, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class), null);
@@ -93,8 +94,8 @@ public class DeploymentConfigFactoryTest {
 						.withItems(new BuildBuilder().withNewStatus().withPhase("Running").endStatus().build()).build())
 				.once();
 
-		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), new OpenShiftDeployerProperties(),
-				null, Collections.EMPTY_MAP, null);
+		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, Collections.EMPTY_MAP,
+				null, ImagePullPolicy.Always, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class), null);

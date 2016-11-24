@@ -100,7 +100,7 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 				.classifier("exec").extension("jar").build();
 	}
 
-	@After
+//	@After
 	public void cleanUp() {
 		openShiftClient.services().withLabel("spring-app-id").delete();
 		openShiftClient.routes().withLabel("spring-app-id").delete();
@@ -171,11 +171,11 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
 				timeout.maxAttempts, timeout.pause));
 
-		log.info("Undeploying {}...", deploymentId);
-		timeout = undeploymentTimeout();
-		lbAppDeployer.undeploy(deploymentId);
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-				timeout.maxAttempts, timeout.pause));
+//		log.info("Undeploying {}...", deploymentId);
+//		timeout = undeploymentTimeout();
+//		lbAppDeployer.undeploy(deploymentId);
+//		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+//				timeout.maxAttempts, timeout.pause));
 	}
 
 	@Test

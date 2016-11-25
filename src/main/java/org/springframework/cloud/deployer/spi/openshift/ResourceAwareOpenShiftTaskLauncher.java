@@ -42,12 +42,22 @@ public class ResourceAwareOpenShiftTaskLauncher implements TaskLauncher {
 	}
 
 	@Override
-	public void cancel(String appId) {
-		openShiftTaskLauncher.cancel(appId);
+	public void cancel(String taskId) {
+		openShiftTaskLauncher.cancel(taskId);
 	}
 
 	@Override
-	public TaskStatus status(String appId) {
-		return openShiftTaskLauncher.status(appId);
+	public TaskStatus status(String taskId) {
+		return openShiftTaskLauncher.status(taskId);
+	}
+
+	@Override
+	public void cleanup(final String taskId) {
+		openShiftTaskLauncher.cancel(taskId);
+	}
+
+	@Override
+	public void destroy(final String taskId) {
+		openShiftTaskLauncher.destroy(taskId);
 	}
 }

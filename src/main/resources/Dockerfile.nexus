@@ -12,4 +12,4 @@ RUN wget --quiet \
 
 RUN bash -c 'chmod a+rx /app.jar'
 
-ENTRYPOINT ["java", "$JAVA_OPTS", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]
+ENTRYPOINT exec java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar

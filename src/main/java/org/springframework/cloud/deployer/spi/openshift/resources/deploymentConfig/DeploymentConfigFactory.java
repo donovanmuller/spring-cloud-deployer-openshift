@@ -65,18 +65,10 @@ public class DeploymentConfigFactory implements ObjectFactory<DeploymentConfig>,
 			String phase = build.getStatus().getPhase();
 			return phase.equals("New") || phase.equals("Pending") || phase.equals("Running") || phase.equals("Failed");
 		})) {
-			// TODO when
-			// https://github.com/fabric8io/kubernetes-client/issues/507#issuecomment-246272404
-			// is implemented, rather kick off another deployment
 			//@formatter:off
             client.deploymentConfigs()
 				.withName(appId)
-				.edit()
-					.editMetadata()
-						.addToAnnotations(SPRING_DEPLOYMENT_TIMESTAMP,
-							String.valueOf(System.currentTimeMillis()))
-					.endMetadata()
-				.done();
+				.deployLatest(true);
             //@formatter:on
 		}
 	}

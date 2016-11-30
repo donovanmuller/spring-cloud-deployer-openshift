@@ -2,14 +2,10 @@ package org.springframework.cloud.deployer.spi.openshift;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftAppDeployer;
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftTaskLauncher;
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenResourceJarExtractor;
@@ -19,6 +15,7 @@ import org.springframework.cloud.deployer.spi.openshift.resources.volumes.Volume
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -30,20 +27,22 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
  * @author Donovan Muller
  */
 @Configuration
-@EnableAutoConfiguration(exclude = KubernetesAutoConfiguration.class)
-@EnableConfigurationProperties(OpenShiftDeployerProperties.class)
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
 public class OpenShiftAutoConfiguration {
-
-	@Autowired
-	private OpenShiftDeployerProperties properties;
 
 	@Autowired
 	private MavenProperties mavenProperties;
 
 	@Bean
-	public AppDeployer appDeployer(KubernetesClient kubernetesClient, ContainerFactory containerFactory,
-			MavenResourceJarExtractor mavenResourceJarExtractor, ResourceHash resourceHash) {
+	@Primary // to override org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties
+	public OpenShiftDeployerProperties openShiftDeployerProperties() {
+		return new OpenShiftDeployerProperties();
+	}
+
+	@Bean
+	public AppDeployer appDeployer(OpenShiftDeployerProperties properties, KubernetesClient kubernetesClient,
+			ContainerFactory containerFactory, MavenResourceJarExtractor mavenResourceJarExtractor,
+			ResourceHash resourceHash) {
 		return new ResourceAwareOpenShiftAppDeployer(
 				new OpenShiftAppDeployer(properties, kubernetesClient, containerFactory),
 				new MavenOpenShiftAppDeployer(properties, kubernetesClient, containerFactory, mavenResourceJarExtractor,
@@ -51,7 +50,7 @@ public class OpenShiftAutoConfiguration {
 	}
 
 	@Bean
-	public TaskLauncher taskDeployer(KubernetesClient kubernetesClient,
+	public TaskLauncher taskDeployer(OpenShiftDeployerProperties properties, KubernetesClient kubernetesClient,
 			MavenResourceJarExtractor mavenResourceJarExtractor, ResourceHash resourceHash) {
 		return new ResourceAwareOpenShiftTaskLauncher(new OpenShiftTaskLauncher(properties, kubernetesClient),
 				new MavenOpenShiftTaskLauncher(properties, properties, mavenProperties, kubernetesClient,
@@ -59,12 +58,13 @@ public class OpenShiftAutoConfiguration {
 	}
 
 	@Bean
-	public KubernetesClient kubernetesClient() {
+	public KubernetesClient kubernetesClient(OpenShiftDeployerProperties properties) {
 		return new DefaultOpenShiftClient().inNamespace(properties.getNamespace());
 	}
 
 	@Bean
-	public ContainerFactory containerFactory(VolumeMountFactory volumeMountFactory) {
+	public ContainerFactory containerFactory(OpenShiftDeployerProperties properties,
+			VolumeMountFactory volumeMountFactory) {
 		return new OpenShiftContainerFactory(properties, volumeMountFactory);
 	}
 

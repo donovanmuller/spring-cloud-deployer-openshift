@@ -54,18 +54,18 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	public String deploy(AppDeploymentRequest request) {
 		logger.info("Deploying application: {}", request.getDefinition());
 
-		AppDeploymentRequest compatibleAppDeploymentRequest = enableKubernetedDeployerCompatibility(request);
-		validate(request);
+		AppDeploymentRequest compatibleRequest = enableKubernetesDeployerCompatibility(request);
+		validate(compatibleRequest);
 
-		String appId = createDeploymentId(compatibleAppDeploymentRequest);
+		String appId = createDeploymentId(compatibleRequest);
 
 		if (!status(appId).getState().equals(DeploymentState.unknown)) {
 			throw new IllegalStateException(String.format("App '%s' is already deployed", appId));
 		}
 
-		List<ObjectFactory> factories = populateOpenShiftObjectsForDeployment(compatibleAppDeploymentRequest, appId);
-		factories.forEach(factory -> factory.addObject(compatibleAppDeploymentRequest, appId));
-		factories.forEach(factory -> factory.applyObject(compatibleAppDeploymentRequest, appId));
+		List<ObjectFactory> factories = populateOpenShiftObjectsForDeployment(compatibleRequest, appId);
+		factories.forEach(factory -> factory.addObject(compatibleRequest, appId));
+		factories.forEach(factory -> factory.applyObject(compatibleRequest, appId));
 
 		return appId;
 	}
@@ -79,12 +79,20 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		client.routes().withLabelIn(SPRING_APP_KEY, appId).delete();
 		for (DeploymentConfig deploymentConfig : client.deploymentConfigs().withLabelIn(SPRING_APP_KEY, appId).list()
 				.getItems()) {
+			/**
+			 * Scale down the pod first before deleting. If we don't scale down the Pod first, the
+			 * next deployment that requires a Build will result in the previous deployment being
+			 * scaled while the new build is on progress. The new build will trigger a deployment of
+			 * the new app but having the old app deployed for a period of time during the build is
+			 * not desirable.
+			 */
+			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).scale(0, true);
 			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).cascading(true).delete();
 		}
 		client.replicationControllers().withLabelIn(SPRING_APP_KEY, appId).delete();
 
 		/**
-		 * Remove the deployer pod before we attempt another deployment this used to be in
+		 * Remove the deployer pod before we attempt another deployment. This used to be in
 		 * OpenShiftAppDeployer.undeploy() but if there were quick undeploy/deploy cycles of the
 		 * same app, the deployer pod of the new pod would be deleted before it ever had a chance to
 		 * deploy.
@@ -219,7 +227,7 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		return containerFactory;
 	}
 
-	protected AppDeploymentRequest enableKubernetedDeployerCompatibility(AppDeploymentRequest request) {
+	protected AppDeploymentRequest enableKubernetesDeployerCompatibility(AppDeploymentRequest request) {
 		Map<String, String> kubernetesCompliantDeploymentProperties = new HashMap<>();
 		request.getDeploymentProperties().forEach((key, value) -> {
 			if (key.contains("spring.cloud.deployer.openshift")) {

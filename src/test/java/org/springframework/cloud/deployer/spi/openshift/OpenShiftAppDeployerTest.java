@@ -18,7 +18,7 @@ public class OpenShiftAppDeployerTest {
 		AppDeploymentRequest openShiftRequest = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class), ImmutableMap.of("spring.cloud.deployer.openshift.memory", "8Mi"));
 		AppDeploymentRequest request = new OpenShiftAppDeployer(new OpenShiftDeployerProperties(), null, null)
-				.enableKubernetedDeployerCompatibility(openShiftRequest);
+				.enableKubernetesDeployerCompatibility(openShiftRequest);
 
 		assertThat(request.getDeploymentProperties()).contains(
 				new ImmutablePair<>("spring.cloud.deployer.kubernetes.memory", "8Mi"),

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
@@ -35,6 +34,9 @@ public class ServiceFactoryTest {
 
 	@Test
 	public void buildServiceWithTargetPort() {
+		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
+				.andReturn(200, new ServiceListBuilder().build()).once();
+
 		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
@@ -48,6 +50,9 @@ public class ServiceFactoryTest {
 
 	@Test
 	public void buildServiceWithRandomNodePort() {
+		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
+				.andReturn(200, new ServiceListBuilder().build()).once();
+
 		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
@@ -61,6 +66,9 @@ public class ServiceFactoryTest {
 
 	@Test
 	public void buildServiceWithNodePort() {
+		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
+				.andReturn(200, new ServiceListBuilder().build()).once();
+
 		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
@@ -77,7 +85,7 @@ public class ServiceFactoryTest {
 	public void buildServiceWithServicesGrouped() {
 		//@formatter:off
 		server.expect().get().withPath("/api/v1/namespaces/test/services?" +
-				"labelSelector=spring.cloud.deployer.group%3Dtest-stream")
+				"labelSelector=spring-group-id")
 			.andReturn(200, new ServiceListBuilder()
 				.withItems(new ServiceBuilder()
 					.withNewMetadata()
@@ -91,14 +99,15 @@ public class ServiceFactoryTest {
 				.build())
 			.once();
 		//@formatter:on
+
 		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-sink", null),
-				mock(Resource.class), ImmutableMap.of(AppDeployer.GROUP_PROPERTY_KEY, "test-stream"));
+				mock(Resource.class), ImmutableMap.of("spring-group-id", "test-stream"));
 
 		Service service = serviceFactory.build(request, "testapp-sink", 7777, null);
 
 		assertThat(service.getMetadata().getAnnotations()).containsEntry("service.alpha.openshift.io/dependencies",
-				"[{'name': 'test-source','kind': 'Service'}]");
+				"[{\"name\":\"test-source\",\"namespace\":\"\",\"kind\":\"Service\"}]");
 	}
 }

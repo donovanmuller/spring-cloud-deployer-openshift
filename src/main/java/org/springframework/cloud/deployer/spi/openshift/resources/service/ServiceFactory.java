@@ -91,14 +91,14 @@ public class ServiceFactory implements ObjectFactory<Service> {
 	private Map<String, String> determineDependencies(AppDeploymentRequest request) {
 		Map<String, String> dependencies = new HashMap<>();
 		client.services()
-				.withLabel(AppDeployer.GROUP_PROPERTY_KEY,
+				.withLabel("spring-group-id",
 						request.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY))
 				.list().getItems().stream()
 					.findFirst()
 					.ifPresent((Service service) ->
 						dependencies.put(
 							"service.alpha.openshift.io/dependencies",
-							String.format("[{'name': '%s','kind': 'Service'}]",
+							String.format("[{\"name\":\"%s\",\"namespace\":\"\",\"kind\":\"Service\"}]",
 								service.getMetadata().getName())));
 
 		return dependencies;

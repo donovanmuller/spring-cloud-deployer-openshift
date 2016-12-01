@@ -29,20 +29,19 @@ public interface OpenShiftDeploymentPropertyKeys {
 	String OPENSHIFT_DEPLOYMENT_DOCKERFILE = "spring.cloud.deployer.openshift.deployment.dockerfile";
 
 	/**
+	 * Use the specified default Dockerfile provided by the Data Flow Server to resolve and download
+	 * Maven artifacts during a build. This property overrides the deployer property
+	 * {@link OpenShiftDeployerProperties#defaultDockerfile}
+	 */
+	String OPENSHIFT_DEPLOYMENT_DEFAULT_DOCKERFILE = "spring.cloud.deployer.openshift.defaultDockerfile";
+
+	/**
 	 * An optional nodeSelector to indicate where to schedule pods. All of the following are valid:
 	 * <code>spring.cloud.deployer.openshift.deployment.nodeSelector=region: primary,role:processor,label : something</code>
 	 * See https://docs.openshift.org/latest/dev_guide/deployments.html#assigning-pods-to-
 	 * specific-nodes
 	 */
 	String OPENSHIFT_DEPLOYMENT_NODE_SELECTOR = "spring.cloud.deployer.openshift.deployment.nodeSelector";
-
-	/**
-	 * An optional host value for a {@link io.fabric8.openshift.api.model.Route}. This value will
-	 * override the default of combining the appId, namespace/project and default routing subdomain
-	 * (see {@link OpenShiftDeployerProperties#defaultRoutingSubdomain}). See
-	 * https://docs.openshift.org/latest/architecture/core_concepts/routes.html#route- hostnames
-	 */
-	String OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME = "spring.cloud.deployer.openshift.deployment.route.host";
 
 	/**
 	 * An optional list of {@link io.fabric8.kubernetes.api.model.VolumeMount}s. See
@@ -74,10 +73,17 @@ public interface OpenShiftDeploymentPropertyKeys {
 	String OPENSHIFT_CREATE_ROUTE = "spring.cloud.deployer.openshift.createRoute";
 
 	/**
+	 * An optional host value for a {@link io.fabric8.openshift.api.model.Route}. This value will
+	 * override the default of combining the appId, namespace/project and default routing subdomain
+	 * (see {@link OpenShiftDeployerProperties#defaultRoutingSubdomain}). See
+	 * https://docs.openshift.org/latest/architecture/core_concepts/routes.html#route- hostnames
+	 */
+	String OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME = "spring.cloud.deployer.openshift.deployment.route.host";
+
+	/**
 	 * Create a NodePort instead of a Route. Either "true" or a number at deployment time. The value
 	 * "true" will choose a random port. If a number is given it must be in the range that is
 	 * configured for the cluster (service-node-port-range, default is 30000-32767).
 	 */
 	String OPENSHIFT_CREATE_NODE_PORT = "spring.cloud.deployer.openshift.createNodePort";
-
 }

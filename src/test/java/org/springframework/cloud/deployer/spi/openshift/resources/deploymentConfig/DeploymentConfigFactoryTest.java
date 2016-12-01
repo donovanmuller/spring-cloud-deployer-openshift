@@ -76,20 +76,7 @@ public class DeploymentConfigFactoryTest {
 				.once();
 
 		server.expect().withPath("/oapi/v1/namespaces/test/deploymentconfigs/testapp-source")
-				.andReturn(200, new DeploymentConfigBuilder()
-					.withNewMetadata()
-						.withGeneration(0L)
-					.endMetadata()
-					.withNewSpec()
-						.withReplicas(1)
-					.endSpec()
-					.withNewStatus()
-						.withLatestVersion(1L)
-						.withReplicas(1)
-						.withObservedGeneration(1L)
-					.endStatus()
-					.build())
-			.always();
+				.andReturn(200, new DeploymentConfigBuilder().withNewMetadata().endMetadata().build()).times(3);
 
 		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, Collections.EMPTY_MAP,
 				null, ImagePullPolicy.Always, null);

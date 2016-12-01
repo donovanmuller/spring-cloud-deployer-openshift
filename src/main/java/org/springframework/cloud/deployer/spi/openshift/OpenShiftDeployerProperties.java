@@ -27,6 +27,16 @@ public class OpenShiftDeployerProperties extends KubernetesDeployerProperties {
 	 */
 	private long undeployDelay = 1000;
 
+	/**
+	 * When deploying Maven resource apps, use this provided default Dockerfile. Allowable values
+	 * are <code>Dockerfile.artifactory</code> or <code>Dockerfile.nexus</code>. The Dockerfiles are
+	 * targeted at the two most common Maven repository distributions, Nexus and Artifactory, where
+	 * the API used to download the Maven artifacts is specific to each distribution.
+	 * <code>Dockerfile.artifactory</code> is the default because that is the distribution used by
+	 * the Spring Maven repository.
+	 */
+	private String defaultDockerfile = "Dockerfile.artifactory";
+
 	public boolean isForceBuild() {
 		return forceBuild;
 	}
@@ -57,5 +67,13 @@ public class OpenShiftDeployerProperties extends KubernetesDeployerProperties {
 
 	public void setUndeployDelay(final long undeployDelay) {
 		this.undeployDelay = undeployDelay;
+	}
+
+	public String getDefaultDockerfile() {
+		return defaultDockerfile;
+	}
+
+	public void setDefaultDockerfile(final String defaultDockerfile) {
+		this.defaultDockerfile = defaultDockerfile;
 	}
 }

@@ -72,7 +72,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory implement
 		@Override
 		public URI getURI() throws IOException {
 			try {
-				return new URIBuilder("docker://" + appId).build();
+				return new URIBuilder("docker:" + appId).build();
 			}
 			catch (URISyntaxException e) {
 				throw new IllegalStateException("Could not create masked URI for Maven build", e);

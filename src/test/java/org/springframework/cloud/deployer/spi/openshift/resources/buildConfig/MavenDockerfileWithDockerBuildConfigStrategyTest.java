@@ -71,4 +71,15 @@ public class MavenDockerfileWithDockerBuildConfigStrategyTest {
 
 		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim()).isEqualTo("FROM an inline Dockerfile");
 	}
+
+	@Test
+	public void buildBuildConfigWithDeploymentDockerfile() {
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
+				mock(Resource.class), ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DEFAULT_DOCKERFILE,
+						"Dockerfile.test"));
+
+		BuildConfig buildConfig = buildConfigStrategy.buildBuildConfig(request, "testapp-source", null);
+
+		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim()).isEqualTo("FROM default Dockerfile");
+	}
 }

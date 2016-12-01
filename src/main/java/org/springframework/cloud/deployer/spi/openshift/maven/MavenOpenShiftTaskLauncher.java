@@ -2,6 +2,7 @@ package org.springframework.cloud.deployer.spi.openshift.maven;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.kubernetes.EntryPointStyle;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftApplicationPropertyKeys;
@@ -161,9 +163,25 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 				protected String createDeploymentId(AppDeploymentRequest request) {
 					return taskId;
 				}
-			}.launch(taskDeploymentRequest);
+			}.launch(applyDefaultEntryPoint(taskDeploymentRequest));
 
 			watch.close();
 		}
+	}
+
+	/**
+	 * If there is no explicit {@link EntryPointStyle} provided, then use
+	 * {@link EntryPointStyle#boot} because the default Dockerfiles uses the shell ENTRYPOINT form
+	 * See https://docs.docker.com/engine/reference/builder/#/shell-form-entrypoint-example.
+	 *
+	 * We should use the {@link EntryPointStyle#shell} style but unfortunately because of
+	 * https://github.com/spring-cloud/spring-cloud-stream/issues/459 we cannot :(
+	 */
+	private AppDeploymentRequest applyDefaultEntryPoint(AppDeploymentRequest request) {
+		Map<String, String> deploymentProperties = new HashMap<>(request.getDeploymentProperties());
+		deploymentProperties.putIfAbsent("spring.cloud.deployer.kubernetes.entryPointStyle",
+			EntryPointStyle.boot.name());
+		return new AppDeploymentRequest(request.getDefinition(), request.getResource(), deploymentProperties,
+			request.getCommandlineArguments());
 	}
 }

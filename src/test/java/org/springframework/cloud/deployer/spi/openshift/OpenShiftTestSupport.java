@@ -1,6 +1,7 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
 import org.springframework.boot.Banner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -40,6 +41,7 @@ public class OpenShiftTestSupport extends AbstractExternalResourceTestSupport<Ku
 
 	@TestConfiguration
 	@Import(OpenShiftAutoConfiguration.class)
+	@ConditionalOnProperty(value = "openshift.enabled", matchIfMissing = true)
 	public static class Config {
 
 		@Bean

@@ -29,7 +29,7 @@ public abstract class DockerfileWithDockerBuildConfigStrategy extends BuildConfi
                 .editSpec()
                 .withNewSource()
 					.withType("Dockerfile")
-                    .withDockerfile(getDockerfile(request))
+                    .withDockerfile(getDockerfile(request, openShiftDeployerProperties))
                 .endSource()
                 .withNewStrategy()
                     .withType("Docker")
@@ -61,5 +61,5 @@ public abstract class DockerfileWithDockerBuildConfigStrategy extends BuildConfi
 	 * @param request
 	 * @return an inline Dockerfile definition
 	 */
-	protected abstract String getDockerfile(AppDeploymentRequest request);
+	protected abstract String getDockerfile(AppDeploymentRequest request, OpenShiftDeployerProperties properties);
 }

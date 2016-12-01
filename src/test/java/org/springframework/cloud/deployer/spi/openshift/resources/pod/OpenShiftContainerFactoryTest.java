@@ -30,7 +30,7 @@ public class OpenShiftContainerFactoryTest {
 		Container container = containerFactory.create("app-test", appDeploymentRequestShell, null, null);
 
 		assertNotNull(container);
-		assertThat(container.getImage()).isEqualTo("//app-test");
+		assertThat(container.getImage()).isEqualTo("app-test");
 	}
 
 	private Resource getResource() {

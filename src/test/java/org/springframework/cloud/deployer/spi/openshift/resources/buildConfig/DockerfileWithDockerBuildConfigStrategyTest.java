@@ -39,7 +39,7 @@ public class DockerfileWithDockerBuildConfigStrategyTest {
 		}, new OpenShiftDeployerProperties(), server.getOpenshiftClient(), null) {
 
 			@Override
-			protected String getDockerfile(final AppDeploymentRequest request) {
+			protected String getDockerfile(AppDeploymentRequest request, OpenShiftDeployerProperties properties) {
 				return "FROM java:8";
 			}
 		};

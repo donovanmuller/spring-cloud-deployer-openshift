@@ -23,7 +23,7 @@ public class MavenDockerfileWithDockerBuildConfigStrategy extends DockerfileWith
 	}
 
 	@Override
-	protected String getDockerfile(AppDeploymentRequest request) {
+	protected String getDockerfile(AppDeploymentRequest request, OpenShiftDeployerProperties properties) {
 		String dockerFile = request.getDeploymentProperties()
 				.get(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DOCKERFILE);
 		try {
@@ -33,7 +33,9 @@ public class MavenDockerfileWithDockerBuildConfigStrategy extends DockerfileWith
 				}
 			}
 			else {
-				dockerFile = resourceToString(new ClassPathResource("Dockerfile.artifactory"));
+				dockerFile = resourceToString(new ClassPathResource(request.getDeploymentProperties().getOrDefault(
+						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DEFAULT_DOCKERFILE,
+						properties.getDefaultDockerfile())));
 			}
 		}
 		catch (IOException e) {

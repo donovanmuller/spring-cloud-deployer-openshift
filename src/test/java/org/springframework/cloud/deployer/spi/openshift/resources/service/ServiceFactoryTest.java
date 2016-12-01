@@ -29,13 +29,13 @@ public class ServiceFactoryTest {
 	@Before
 	public void setup() {
 		server.expect().withPath("/api/v1/namespaces/test/services?labelSelector=spring.cloud.deployer.group")
-				.andReturn(200, new ServiceListBuilder().build()).once();
+				.andReturn(200, new ServiceListBuilder().build()).times(2);
 	}
 
 	@Test
 	public void buildServiceWithTargetPort() {
 		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
-				.andReturn(200, new ServiceListBuilder().build()).once();
+				.andReturn(200, new ServiceListBuilder().build()).times(2);
 
 		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
 
@@ -51,7 +51,7 @@ public class ServiceFactoryTest {
 	@Test
 	public void buildServiceWithRandomNodePort() {
 		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
-				.andReturn(200, new ServiceListBuilder().build()).once();
+				.andReturn(200, new ServiceListBuilder().build()).times(2);
 
 		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
 
@@ -67,7 +67,7 @@ public class ServiceFactoryTest {
 	@Test
 	public void buildServiceWithNodePort() {
 		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
-				.andReturn(200, new ServiceListBuilder().build()).once();
+				.andReturn(200, new ServiceListBuilder().build()).times(2);
 
 		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
 
@@ -97,7 +97,31 @@ public class ServiceFactoryTest {
 					.endMetadata()
 					.build())
 				.build())
-			.once();
+			.times(2);
+
+		server.expect().get().withPath("/api/v1/namespaces/test/services/test-source")
+			.andReturn(200, new ServiceBuilder()
+				.withNewMetadata()
+					.withName("test-source")
+					.withAnnotations(ImmutableMap.of("service.alpha.openshift.io/dependencies", "something"))
+				.endMetadata()
+								.withNewSpec()
+					.withClusterIP("10.1.1.1")
+				.endSpec()
+				.build())
+			.times(2);
+
+		server.expect().get().withPath("/api/v1/namespaces/test/services/test-processor")
+			.andReturn(200, new ServiceBuilder()
+				.withNewMetadata()
+					.withName("test-processor")
+					.withAnnotations(ImmutableMap.of("service.alpha.openshift.io/dependencies", "something"))
+				.endMetadata()
+				.withNewSpec()
+					.withClusterIP("10.1.1.1")
+				.endSpec()
+				.build())
+			.times(2);
 		//@formatter:on
 
 		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
@@ -108,6 +132,6 @@ public class ServiceFactoryTest {
 		Service service = serviceFactory.build(request, "testapp-sink", 7777, null);
 
 		assertThat(service.getMetadata().getAnnotations()).containsEntry("service.alpha.openshift.io/dependencies",
-				"[{\"name\":\"test-source\",\"namespace\":\"\",\"kind\":\"Service\"}]");
+				"[{\"name\":\"test-source\",\"kind\":\"Service\"},{\"name\":\"test-processor\",\"kind\":\"Service\"}]");
 	}
 }

@@ -3,7 +3,12 @@ package org.springframework.cloud.deployer.spi.openshift.resources.service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -90,16 +95,42 @@ public class ServiceFactory implements ObjectFactory<Service> {
 
 	private Map<String, String> determineDependencies(AppDeploymentRequest request) {
 		Map<String, String> dependencies = new HashMap<>();
+
+		ServiceDependencies serviceDependencies = new ServiceDependencies(client.services()
+			.withLabel("spring-group-id",
+				request.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY))
+			.list().getItems().stream()
+			.map(service -> new ServiceDependency(service.getMetadata().getName()))
+			.collect(Collectors.toList()));
+		try {
+			dependencies.put("service.alpha.openshift.io/dependencies",
+				new ObjectMapper()
+					.writeValueAsString(serviceDependencies.getDependencies()));
+		} catch (JsonProcessingException e) {
+			// oh well, this is a nice to have feature
+		}
+
+		/**
+		 * Remove dependencies from the other apps.
+		 * Apps are deployed in reverse order by the deployer, so the last app deployed in a stream
+		 * is generally the app that should carry the dependency annotation. This makes most sense
+		 * when the Source app is exposed as a Route.
+		 *
+		 * Below removes the annotation from the other services as they should no carry the depedency annotation.
+		 * I.e. only one app per stream should depend on the others.
+		 */
 		client.services()
-				.withLabel("spring-group-id",
-						request.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY))
-				.list().getItems().stream()
-					.findFirst()
-					.ifPresent((Service service) ->
-						dependencies.put(
-							"service.alpha.openshift.io/dependencies",
-							String.format("[{\"name\":\"%s\",\"namespace\":\"\",\"kind\":\"Service\"}]",
-								service.getMetadata().getName())));
+			.withLabel("spring-group-id",
+				request.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY))
+			.list().getItems()
+				.forEach(service -> client.services()
+					.withName(service.getMetadata().getName())
+					.edit()
+					.editMetadata()
+						.removeFromAnnotations("service.alpha.openshift.io/dependencies")
+					.endMetadata()
+					.done()
+				);
 
 		return dependencies;
 	}

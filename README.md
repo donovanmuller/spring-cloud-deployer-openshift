@@ -1,8 +1,8 @@
-# Spring Cloud Deployer for OpenShift
+# Spring Cloud Deployer for OpenShift [![Build Status](https://travis-ci.org/donovanmuller/spring-cloud-deployer-openshift.svg?branch=master)](https://travis-ci.org/donovanmuller/spring-cloud-deployer-openshift)
 
 A Spring Cloud Deployer SPI implementation which extends 
 [Spring Cloud Deployer Kubernetes](https://github.com/spring-cloud/spring-cloud-deployer-kubernetes)
-and adds functionality afforded by OpenShift 3 as the deployment environment.
+and adds functionality afforded by [OpenShift](https://www.openshift.com/) as the deployment environment.
 
 Please refer to the reference documentation on how to get started.
 

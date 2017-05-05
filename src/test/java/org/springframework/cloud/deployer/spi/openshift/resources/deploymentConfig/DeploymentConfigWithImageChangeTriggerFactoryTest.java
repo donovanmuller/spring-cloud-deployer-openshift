@@ -49,7 +49,8 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
-						&& imageChangeParams.getFrom().getName().equals("testapp-source:latest");
+					&& imageChangeParams.getFrom().getName().equals("testapp-source:latest")
+					&& imageChangeParams.getFrom().getNamespace().equals("default");
 			}
 		}, Index.atIndex(1));
 	}
@@ -73,7 +74,34 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
-						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev");
+					&& imageChangeParams.getFrom().getName().equals("testapp-source:dev")
+					&& imageChangeParams.getFrom().getNamespace().equals("default");
+			}
+		}, Index.atIndex(1));
+	}
+
+	@Test
+	public void buildDeploymentConfigWithImageTagAndImageNamespace() {
+		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
+				server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null, null,
+				ImagePullPolicy.Always);
+
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
+				mock(Resource.class),
+				ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev",
+						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_NAMESPACE, "namespace"));
+
+		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
+			new HashMap<>(), null, ImagePullPolicy.Always);
+
+		assertThat(deploymentConfig.getSpec().getTriggers()).has(new Condition<DeploymentTriggerPolicy>() {
+
+			@Override
+			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
+				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
+				return imageChangeParams.getContainerNames().contains("testapp-source")
+					&& imageChangeParams.getFrom().getName().equals("testapp-source:dev")
+					&& imageChangeParams.getFrom().getNamespace().equals("namespace");
 			}
 		}, Index.atIndex(1));
 	}

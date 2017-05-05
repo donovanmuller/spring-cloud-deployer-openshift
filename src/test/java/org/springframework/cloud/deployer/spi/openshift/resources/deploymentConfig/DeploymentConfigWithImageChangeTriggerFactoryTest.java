@@ -49,8 +49,8 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
-					&& imageChangeParams.getFrom().getName().equals("testapp-source:latest")
-					&& imageChangeParams.getFrom().getNamespace().equals("default");
+						&& imageChangeParams.getFrom().getName().equals("testapp-source:latest")
+						&& imageChangeParams.getFrom().getNamespace().equals("default");
 			}
 		}, Index.atIndex(1));
 	}
@@ -74,8 +74,8 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
-					&& imageChangeParams.getFrom().getName().equals("testapp-source:dev")
-					&& imageChangeParams.getFrom().getNamespace().equals("default");
+						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev")
+						&& imageChangeParams.getFrom().getNamespace().equals("default");
 			}
 		}, Index.atIndex(1));
 	}
@@ -100,8 +100,8 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
-					&& imageChangeParams.getFrom().getName().equals("testapp-source:dev")
-					&& imageChangeParams.getFrom().getNamespace().equals("namespace");
+						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev")
+						&& imageChangeParams.getFrom().getNamespace().equals("namespace");
 			}
 		}, Index.atIndex(1));
 	}

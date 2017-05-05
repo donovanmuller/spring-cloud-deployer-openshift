@@ -33,9 +33,9 @@ public interface OpenShiftSupport extends DataflowSupport {
 				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, properties.getDefaultImageTag()));
 	}
 
-	default String getImageNamespace(AppDeploymentRequest request, OpenShiftDeployerProperties properties, String appId) {
+	default String getImageNamespace(AppDeploymentRequest request, OpenShiftDeployerProperties properties) {
 		return format("%s",request.getDeploymentProperties().getOrDefault(
-			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_NAMESPACE, properties.getDefaultImageNamespace()));
+				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_NAMESPACE, properties.getDefaultImageNamespace()));
 	}
 
 	default String getEnvironmentVariable(String[] properties, String name) {

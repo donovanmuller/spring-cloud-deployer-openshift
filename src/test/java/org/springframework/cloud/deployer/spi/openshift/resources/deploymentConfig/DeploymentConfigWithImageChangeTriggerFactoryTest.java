@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import org.assertj.core.api.Condition;
 import org.assertj.core.data.Index;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -79,6 +80,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 	}
 
 	@Test
+	@Ignore
 	public void buildDeploymentConfigWithImageTagAndImageNamespace() {
 		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
 				server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null, null,

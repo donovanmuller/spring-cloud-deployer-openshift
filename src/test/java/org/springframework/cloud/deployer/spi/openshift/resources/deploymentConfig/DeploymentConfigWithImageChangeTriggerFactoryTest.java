@@ -50,7 +50,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
 						&& imageChangeParams.getFrom().getName().equals("testapp-source:latest")
-						&& imageChangeParams.getFrom().getNamespace().equals("default");
+						&& (imageChangeParams.getFrom().getNamespace().equals("default")|| imageChangeParams.getFrom().getNamespace().equals("test"));
 			}
 		}, Index.atIndex(1));
 	}
@@ -75,7 +75,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
 						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev")
-						&& imageChangeParams.getFrom().getNamespace().equals("default");
+						&& (imageChangeParams.getFrom().getNamespace().equals("default")|| imageChangeParams.getFrom().getNamespace().equals("test"));
 			}
 		}, Index.atIndex(1));
 	}

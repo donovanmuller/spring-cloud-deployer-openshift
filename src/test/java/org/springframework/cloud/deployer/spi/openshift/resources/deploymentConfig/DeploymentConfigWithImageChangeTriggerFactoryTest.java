@@ -87,8 +87,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 				ImagePullPolicy.Always);
 
 		Map<String, String> deploymentProperties = ImmutableMap.of(
-			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev2",
-			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_NAMESPACE, "namespace");
+			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev2");
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class), deploymentProperties);
 

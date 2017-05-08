@@ -79,6 +79,10 @@ public class OpenShiftDeployerProperties extends KubernetesDeployerProperties {
 		this.defaultImageTag = defaultImageTag;
 	}
 
+	public String getDefaultImageNamespace(){
+		return getNamespace();
+	}
+
 	public long getUndeployDelay() {
 		return undeployDelay;
 	}

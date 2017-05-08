@@ -45,6 +45,7 @@ public class DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory
                     .withContainerNames(appId)
                     .withNewFrom()
                         .withKind("ImageStreamTag")
+                        .withNamespace(getImageNamespace(request,openShiftDeployerProperties))
                         .withName(getIndexedImageTag(request, openShiftDeployerProperties, appId))
                     .endFrom()
                 .endImageChangeParams()

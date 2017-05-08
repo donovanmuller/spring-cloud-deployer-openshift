@@ -88,7 +88,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 			mock(Resource.class),
-			ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev"));
+			ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev2"));
 
 		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
 			new HashMap<>(), null, ImagePullPolicy.Always);
@@ -99,7 +99,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
-					&& imageChangeParams.getFrom().getName().equals("testapp-source:dev");
+					&& imageChangeParams.getFrom().getName().equals("testapp-source:dev2");
 			}
 		}, Index.atIndex(1));
 	}

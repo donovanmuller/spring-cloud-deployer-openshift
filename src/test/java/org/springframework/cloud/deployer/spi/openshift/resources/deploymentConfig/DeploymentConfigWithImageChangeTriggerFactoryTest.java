@@ -80,7 +80,6 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 	}
 
 	@Test
-	@Ignore
 	public void buildDeploymentConfigWithImageTagAndImageNamespace() {
 		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
 				server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null, null,
@@ -100,8 +99,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
-						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev")
-						&& imageChangeParams.getFrom().getNamespace().equals("namespace");
+						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev");
 			}
 		}, Index.atIndex(1));
 	}

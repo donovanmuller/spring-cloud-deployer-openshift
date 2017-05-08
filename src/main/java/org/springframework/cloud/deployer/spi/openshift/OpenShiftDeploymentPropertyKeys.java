@@ -22,6 +22,13 @@ public interface OpenShiftDeploymentPropertyKeys {
 	String OPENSHIFT_DEPLOYMENT_IMAGE_TAG = "spring.cloud.deployer.openshift.image.tag";
 
 	/**
+	 *  The namespace in which the Docker image is placed which used when creating a
+	 *  {@link io.fabric8.openshift.api.model.DeploymentConfig} with a
+	 *  {@link io.fabric8.openshift.api.model.ImageChangeTrigger} trigger.
+	 */
+	String OPENSHIFT_DEPLOYMENT_IMAGE_NAMESPACE = "spring.cloud.deployer.openshift.image.namespace";
+
+	/**
 	 * An inline Dockerfile that will be used as the build input. This Dockerfile will override all
 	 * other Dockerfile usage strategies. See
 	 * https://docs.openshift.org/latest/dev_guide/builds.html#dockerfile-source

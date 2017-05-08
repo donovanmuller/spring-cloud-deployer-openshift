@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.assertj.core.api.Condition;
 import org.assertj.core.data.Index;
@@ -85,9 +86,11 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 				server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null, null,
 				ImagePullPolicy.Always);
 
+		Map<String, String> deploymentProperties = ImmutableMap.of(
+			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev2",
+			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_NAMESPACE, "namespace");
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class),
-				ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev"));
+				mock(Resource.class), deploymentProperties);
 
 		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
 			new HashMap<>(), null, ImagePullPolicy.Always);
@@ -98,7 +101,7 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
-						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev");
+						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev2");
 			}
 		}, Index.atIndex(1));
 	}

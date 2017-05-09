@@ -81,18 +81,18 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 	}
 
 	@Test
-	public void buildDeploymentConfigWithImageTag2() {
+	public void buildDeploymentConfigWithImageTagAndImageNamespace() {
 		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
 			server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null, null,
 			ImagePullPolicy.Always);
 		Map<String, String> deploymentProperties = ImmutableMap.of(
-			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev",
-			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_NAMESPACE, "test");
+			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "env",
+			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_NAMESPACE, "images");
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("image-stream-source", null),
 			mock(Resource.class),deploymentProperties);
 
-		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
+		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "image-stream-source", new Container(),
 			new HashMap<>(), null, ImagePullPolicy.Always);
 
 		assertThat(deploymentConfig.getSpec().getTriggers()).has(new Condition<DeploymentTriggerPolicy>() {
@@ -100,8 +100,9 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 			@Override
 			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
-				return imageChangeParams.getContainerNames().contains("testapp-source")
-					&& imageChangeParams.getFrom().getName().equals("testapp-source:dev") && imageChangeParams.getFrom().getNamespace().equals("test");
+				return imageChangeParams.getContainerNames().contains("image-stream-source")
+					&& imageChangeParams.getFrom().getName().equals("image-stream-source:env")
+					&& imageChangeParams.getFrom().getNamespace().equals("images");
 			}
 		}, Index.atIndex(1));
 	}

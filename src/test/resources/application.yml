@@ -4,7 +4,3 @@ spring:
       discovery:
         enabled: false
       enabled: false
-
-logging:
-  level:
-    org.hibernate.validator.internal.metadata: 'INFO'

@@ -1,13 +1,12 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.buildConfig;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.openshift.api.model.BuildRequest;
+import io.fabric8.openshift.client.server.mock.OpenShiftServer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -15,9 +14,10 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.openshift.api.model.BuildRequest;
-import io.fabric8.openshift.client.mock.OpenShiftServer;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MavenBuildConfigFactoryTest {
 

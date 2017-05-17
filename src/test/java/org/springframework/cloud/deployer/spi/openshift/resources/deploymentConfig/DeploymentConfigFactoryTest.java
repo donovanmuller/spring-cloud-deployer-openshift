@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import java.util.Collections;
 import java.util.Map;
 
+import io.fabric8.openshift.client.server.mock.OpenShiftServer;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -23,7 +24,6 @@ import io.fabric8.openshift.api.model.BuildBuilder;
 import io.fabric8.openshift.api.model.BuildListBuilder;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
-import io.fabric8.openshift.client.mock.OpenShiftServer;
 
 public class DeploymentConfigFactoryTest {
 

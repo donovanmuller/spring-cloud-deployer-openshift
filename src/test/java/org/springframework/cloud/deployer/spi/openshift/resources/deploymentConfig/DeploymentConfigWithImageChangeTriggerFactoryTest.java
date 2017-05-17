@@ -1,14 +1,18 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 import java.util.HashMap;
 
+import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.openshift.api.model.DeploymentConfig;
+import io.fabric8.openshift.api.model.DeploymentTriggerImageChangeParams;
+import io.fabric8.openshift.api.model.DeploymentTriggerPolicy;
+import io.fabric8.openshift.client.server.mock.OpenShiftServer;
 import org.assertj.core.api.Condition;
 import org.assertj.core.data.Index;
 import org.junit.Rule;
 import org.junit.Test;
+
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
@@ -16,13 +20,8 @@ import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerPropert
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.core.io.Resource;
 
-import com.google.common.collect.ImmutableMap;
-
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.openshift.api.model.DeploymentConfig;
-import io.fabric8.openshift.api.model.DeploymentTriggerImageChangeParams;
-import io.fabric8.openshift.api.model.DeploymentTriggerPolicy;
-import io.fabric8.openshift.client.mock.OpenShiftServer;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 

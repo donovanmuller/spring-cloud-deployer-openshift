@@ -20,11 +20,13 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.junit.After;
+import com.google.common.collect.ImmutableMap;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -38,10 +40,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import com.google.common.collect.ImmutableMap;
-
-import io.fabric8.openshift.client.OpenShiftClient;
 
 @Ignore("Tests are a little flaky. See #21.")
 @RunWith(SpringRunner.class)

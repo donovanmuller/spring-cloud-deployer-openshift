@@ -1,33 +1,32 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
+import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.api.model.ServiceListBuilder;
+import io.fabric8.kubernetes.api.model.ServicePortBuilder;
+import io.fabric8.openshift.client.server.mock.OpenShiftMockServer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
 import org.springframework.core.io.Resource;
 
-import com.google.common.collect.ImmutableMap;
-
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.api.model.ServiceListBuilder;
-import io.fabric8.kubernetes.api.model.ServicePortBuilder;
-import io.fabric8.openshift.client.mock.OpenShiftServer;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class ServiceFactoryTest {
 
-	@Rule
-	public OpenShiftServer server = new OpenShiftServer();
+	public OpenShiftMockServer server = new OpenShiftMockServer();
 
 	private ServiceFactory serviceFactory;
 
 	@Before
 	public void setup() {
+		server.init();
 		server.expect().withPath("/api/v1/namespaces/test/services?labelSelector=spring.cloud.deployer.group")
 				.andReturn(200, new ServiceListBuilder().build()).times(2);
 	}
@@ -37,7 +36,7 @@ public class ServiceFactoryTest {
 		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
 				.andReturn(200, new ServiceListBuilder().build()).times(2);
 
-		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
+		serviceFactory = new ServiceFactory(server.createOpenShiftClient(), 8080, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class));
@@ -53,7 +52,7 @@ public class ServiceFactoryTest {
 		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
 				.andReturn(200, new ServiceListBuilder().build()).times(2);
 
-		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
+		serviceFactory = new ServiceFactory(server.createOpenShiftClient(), 8080, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class),
@@ -69,7 +68,7 @@ public class ServiceFactoryTest {
 		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
 				.andReturn(200, new ServiceListBuilder().build()).times(2);
 
-		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
+		serviceFactory = new ServiceFactory(server.createOpenShiftClient(), 8080, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class),
@@ -124,7 +123,7 @@ public class ServiceFactoryTest {
 			.times(2);
 		//@formatter:on
 
-		serviceFactory = new ServiceFactory(server.getOpenshiftClient(), 8080, null);
+		serviceFactory = new ServiceFactory(server.createOpenShiftClient(), 8080, null);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-sink", null),
 				mock(Resource.class), ImmutableMap.of("spring-group-id", "test-stream"));

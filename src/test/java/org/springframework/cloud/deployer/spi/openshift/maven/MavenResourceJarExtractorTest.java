@@ -1,7 +1,5 @@
 package org.springframework.cloud.deployer.spi.openshift.maven;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
@@ -9,6 +7,8 @@ import java.util.Optional;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MavenResourceJarExtractorTest {
 

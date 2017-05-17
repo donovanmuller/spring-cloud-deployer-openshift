@@ -1,27 +1,31 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.buildConfig;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
+import com.google.common.collect.ImmutableMap;
+import io.fabric8.openshift.api.model.BuildConfig;
+import io.fabric8.openshift.api.model.BuildRequest;
+import io.fabric8.openshift.api.model.BuildTriggerPolicyBuilder;
+import io.fabric8.openshift.client.server.mock.OpenShiftMockServer;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.Resource;
 
-import com.google.common.collect.ImmutableMap;
-
-import io.fabric8.openshift.api.model.BuildConfig;
-import io.fabric8.openshift.api.model.BuildRequest;
-import io.fabric8.openshift.api.model.BuildTriggerPolicyBuilder;
-import io.fabric8.openshift.client.mock.OpenShiftServer;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class BuildConfigFactoryTest {
 
-	@Rule
-	public OpenShiftServer server = new OpenShiftServer();
+	public OpenShiftMockServer server = new OpenShiftMockServer();
 
 	private BuildConfigFactory buildConfigFactory;
+
+	@Before
+	public void setup() {
+		server.init();
+	}
 
 	@Test
 	public void buildBuildConfig() {

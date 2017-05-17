@@ -60,15 +60,8 @@ public class MavenOpenShiftTaskLauncherIntegrationTest extends AbstractTaskLaunc
 	private ResourceAwareOpenShiftTaskLauncher taskLauncher;
 
 	@Override
-	protected TaskLauncher taskLauncher() {
-		return this.taskLauncher;
-	}
-
-	@After
-	public void cleanUp() {
-		for (String id : deployments) {
-			taskLauncher.cleanup(id);
-		}
+	protected TaskLauncher provideTaskLauncher() {
+		return taskLauncher;
 	}
 
 	@Test

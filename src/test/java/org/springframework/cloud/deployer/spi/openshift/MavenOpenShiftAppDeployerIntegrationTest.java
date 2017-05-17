@@ -79,7 +79,7 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 	private ResourceHash resourceHash;
 
 	@Override
-	protected AppDeployer appDeployer() {
+	protected AppDeployer provideAppDeployer() {
 		return appDeployer;
 	}
 
@@ -195,7 +195,7 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		//@formatter:on
 		openShiftDeployerProperties
 				.setVolumeMounts(Collections.singletonList(new VolumeMount(hostPath, mountName, false, null)));
-		ContainerFactory containerFactory = new OpenShiftContainerFactory(new KubernetesDeployerProperties(),
+		ContainerFactory containerFactory = new OpenShiftContainerFactory(new OpenShiftDeployerProperties(),
 				new VolumeMountFactory(openShiftDeployerProperties));
 		AppDeployer lbAppDeployer = new MavenOpenShiftAppDeployer(openShiftDeployerProperties, openShiftClient,
 				containerFactory, mavenResourceJarExtractor, mavenProperties, resourceHash);

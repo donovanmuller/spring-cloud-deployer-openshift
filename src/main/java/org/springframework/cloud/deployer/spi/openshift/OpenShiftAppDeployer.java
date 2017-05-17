@@ -11,6 +11,7 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.core.AppRedeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAppDeployer;
@@ -59,15 +60,20 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 
 		String appId = createDeploymentId(compatibleRequest);
 
-		if (!status(appId).getState().equals(DeploymentState.unknown)) {
-			throw new IllegalStateException(String.format("App '%s' is already deployed", appId));
-		}
+//		if (!status(appId).getState().equals(DeploymentState.unknown)) {
+//			throw new IllegalStateException(String.format("App '%s' is already deployed", appId));
+//		}
 
 		List<ObjectFactory> factories = populateOpenShiftObjectsForDeployment(compatibleRequest, appId);
 		factories.forEach(factory -> factory.addObject(compatibleRequest, appId));
 		factories.forEach(factory -> factory.applyObject(compatibleRequest, appId));
 
 		return appId;
+	}
+
+	@Override
+	public String redeploy(AppRedeploymentRequest request) {
+		return null;
 	}
 
 	@Override
@@ -79,6 +85,15 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		client.routes().withLabelIn(SPRING_APP_KEY, appId).delete();
 		for (DeploymentConfig deploymentConfig : client.deploymentConfigs().withLabelIn(SPRING_APP_KEY, appId).list()
 				.getItems()) {
+			// scale down deployments (replication controllers) before deployment configs
+			// when there are errored Pods, scaling down the deployment config never returns
+//			client.replicationControllers()
+//				.withLabelIn("openshift.io/deployment-config.name", deploymentConfig.getMetadata().getName())
+//				.list()
+//				.getItems()
+//				.forEach(replicationController -> client.replicationControllers()
+//					.withName(replicationController.getMetadata().getName())
+//				.scale(0, true));
 			/**
 			 * Scale down the pod first before deleting. If we don't scale down the Pod first, the
 			 * next deployment that requires a Build will result in the previous deployment being
@@ -155,7 +170,7 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		labels.putAll(toLabels(request.getDeploymentProperties()));
 		int externalPort = configureExternalPort(request);
 
-		Container container = getContainerFactory().create(createDeploymentId(request), request, externalPort, null);
+		Container container = getContainerFactory().create(createDeploymentId(request), request, externalPort, null, false);
 
 		factories.add(getDeploymentConfigFactory(request, labels, container));
 		factories.add(new ServiceWithIndexSuppportFactory(getClient(), externalPort, labels));

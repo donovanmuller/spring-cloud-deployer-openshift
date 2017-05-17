@@ -6,6 +6,8 @@ import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.core.AppRedeploymentRequest;
+import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftAppDeployer;
 
 public class ResourceAwareOpenShiftAppDeployer implements AppDeployer {
@@ -42,6 +44,11 @@ public class ResourceAwareOpenShiftAppDeployer implements AppDeployer {
 	}
 
 	@Override
+	public String redeploy(AppRedeploymentRequest request) {
+		return null;
+	}
+
+	@Override
 	public void undeploy(String appId) {
 		openShiftAppDeployer.undeploy(appId);
 	}
@@ -49,5 +56,10 @@ public class ResourceAwareOpenShiftAppDeployer implements AppDeployer {
 	@Override
 	public AppStatus status(String appId) {
 		return openShiftAppDeployer.status(appId);
+	}
+
+	@Override
+	public RuntimeEnvironmentInfo environmentInfo() {
+		return openShiftAppDeployer.environmentInfo();
 	}
 }

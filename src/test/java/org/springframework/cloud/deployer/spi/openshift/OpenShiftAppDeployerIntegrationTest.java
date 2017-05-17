@@ -79,7 +79,7 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 	private OpenShiftClient openShiftClient;
 
 	@Override
-	protected AppDeployer appDeployer() {
+	protected AppDeployer provideAppDeployer() {
 		return appDeployer;
 	}
 
@@ -175,7 +175,7 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 		//@formatter:on
 		openShiftDeployerProperties
 				.setVolumeMounts(Collections.singletonList(new VolumeMount(hostPath, mountName, false, null)));
-		ContainerFactory containerFactory = new OpenShiftContainerFactory(new KubernetesDeployerProperties(),
+		ContainerFactory containerFactory = new OpenShiftContainerFactory(new OpenShiftDeployerProperties(),
 				new VolumeMountFactory(openShiftDeployerProperties));
 		AppDeployer lbAppDeployer = new OpenShiftAppDeployer(openShiftDeployerProperties, openShiftClient,
 				containerFactory);

@@ -27,7 +27,7 @@ public class OpenShiftContainerFactoryTest {
 		Resource resource = getResource();
 
 		AppDeploymentRequest appDeploymentRequestShell = new AppDeploymentRequest(definition, resource, null);
-		Container container = containerFactory.create("app-test", appDeploymentRequestShell, null, null);
+		Container container = containerFactory.create("app-test", appDeploymentRequestShell, null, null, false);
 
 		assertNotNull(container);
 		assertThat(container.getImage()).isEqualTo("app-test");

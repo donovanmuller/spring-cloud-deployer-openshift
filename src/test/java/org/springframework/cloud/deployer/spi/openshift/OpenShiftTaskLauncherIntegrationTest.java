@@ -49,15 +49,13 @@ public class OpenShiftTaskLauncherIntegrationTest extends AbstractTaskLauncherIn
 	TaskLauncher taskLauncher;
 
 	@Override
-	protected TaskLauncher taskLauncher() {
-		return this.taskLauncher;
+	protected TaskLauncher provideTaskLauncher() {
+		return taskLauncher;
 	}
 
-	@After
-	public void cleanUp() {
-		for (String id : deployments) {
-			taskLauncher.cleanup(id);
-		}
+	@Override
+	protected TaskLauncher taskLauncher() {
+		return this.taskLauncher;
 	}
 
 	@Test

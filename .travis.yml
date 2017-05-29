@@ -3,4 +3,4 @@ jdk:
   - oraclejdk8
 
 script:
-  - mvn clean install -Dopenshift.enabled=false
+  - ./mvnw install -Dopenshift.enabled=false

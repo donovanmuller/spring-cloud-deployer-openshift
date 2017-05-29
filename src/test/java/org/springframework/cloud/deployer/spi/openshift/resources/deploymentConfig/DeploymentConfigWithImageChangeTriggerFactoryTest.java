@@ -1,6 +1,7 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
@@ -10,6 +11,7 @@ import io.fabric8.openshift.api.model.DeploymentTriggerPolicy;
 import io.fabric8.openshift.client.server.mock.OpenShiftServer;
 import org.assertj.core.api.Condition;
 import org.assertj.core.data.Index;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -73,6 +75,33 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
 				return imageChangeParams.getContainerNames().contains("testapp-source")
 						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev");
+			}
+		}, Index.atIndex(1));
+	}
+
+	@Test
+	public void buildDeploymentConfigWithImageTagAndImageNamespace() {
+		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
+			server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null, null,
+			ImagePullPolicy.Always);
+		Map<String, String> deploymentProperties = ImmutableMap.of(
+			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "env",
+			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_NAMESPACE, "images");
+
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("image-stream-source", null),
+			mock(Resource.class),deploymentProperties);
+
+		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "image-stream-source", new Container(),
+			new HashMap<>(), null, ImagePullPolicy.Always);
+
+		assertThat(deploymentConfig.getSpec().getTriggers()).has(new Condition<DeploymentTriggerPolicy>() {
+
+			@Override
+			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
+				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
+				return imageChangeParams.getContainerNames().contains("image-stream-source")
+					&& imageChangeParams.getFrom().getName().equals("image-stream-source:env")
+					&& imageChangeParams.getFrom().getNamespace().equals("images");
 			}
 		}, Index.atIndex(1));
 	}

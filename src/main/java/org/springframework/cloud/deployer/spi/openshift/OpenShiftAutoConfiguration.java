@@ -2,6 +2,7 @@ package org.springframework.cloud.deployer.spi.openshift;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -71,6 +72,12 @@ public class OpenShiftAutoConfiguration {
 	@Bean
 	public MavenResourceJarExtractor mavenResourceJarExtractor() {
 		return new MavenResourceJarExtractor();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public MavenProperties mavenProperties() {
+		return new MavenProperties();
 	}
 
 	@Bean

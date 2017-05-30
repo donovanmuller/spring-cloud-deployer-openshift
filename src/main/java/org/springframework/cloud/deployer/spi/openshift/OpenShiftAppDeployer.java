@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.google.common.collect.Iterables;
 import io.fabric8.kubernetes.api.model.Container;
@@ -38,6 +44,8 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	private OpenShiftDeployerProperties openShiftDeployerProperties;
 	private ContainerFactory containerFactory;
 	private OpenShiftClient client;
+
+	private final ExecutorService executorService = Executors.newCachedThreadPool();
 
 	public OpenShiftAppDeployer(OpenShiftDeployerProperties properties, KubernetesClient client,
 			ContainerFactory containerFactory) {
@@ -86,14 +94,9 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 //				.forEach(replicationController -> client.replicationControllers()
 //					.withName(replicationController.getMetadata().getName())
 //				.scale(0, true));
-			/**
-			 * Scale down the pod first before deleting. If we don't scale down the Pod first, the
-			 * next deployment that requires a Build will result in the previous deployment being
-			 * scaled while the new build is on progress. The new build will trigger a deployment of
-			 * the new app but having the old app deployed for a period of time during the build is
-			 * not desirable.
-			 */
-			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).scale(0, true);
+
+
+			scaleDownPod(client, deploymentConfig);
 			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).cascading(true).delete();
 		}
 		client.replicationControllers().withLabelIn(SPRING_APP_KEY, appId).delete();
@@ -251,4 +254,26 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 			throw new IllegalArgumentException("Application name cannot be more than 24 characters");
 		}
 	}
+
+	/**
+	 * Scale down the pod first before deleting. If we don't scale down the Pod first, the
+	 * next deployment that requires a Build will result in the previous deployment being
+	 * scaled while the new build is on progress. The new build will trigger a deployment of
+	 * the new app but having the old app deployed for a period of time during the build is
+	 * not desirable.
+	 */
+	private void scaleDownPod(OpenShiftClient client, DeploymentConfig deploymentConfig) {
+		Future<Object> scaleDownTask = null;
+		try {
+			scaleDownTask = executorService.submit(() ->
+				client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).scale(0, true)
+			);
+			scaleDownTask.get(30, TimeUnit.SECONDS);
+		} catch (TimeoutException e) {
+			scaleDownTask.cancel(true);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 }

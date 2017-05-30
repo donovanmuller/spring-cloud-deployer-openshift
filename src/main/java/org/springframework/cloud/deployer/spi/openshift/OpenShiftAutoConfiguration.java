@@ -76,6 +76,7 @@ public class OpenShiftAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
+	@ConfigurationProperties(prefix = "maven")
 	public MavenProperties mavenProperties() {
 		return new MavenProperties();
 	}

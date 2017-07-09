@@ -1,13 +1,13 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.Test;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
-
 import io.fabric8.kubernetes.api.model.ContainerStatusBuilder;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.openshift.api.model.BuildBuilder;
+import org.junit.Test;
+
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OpenShiftAppInstanceStatusTest {
 
@@ -15,7 +15,7 @@ public class OpenShiftAppInstanceStatusTest {
 
 	@Test
 	public void getState() {
-		appInstanceStatus = new OpenShiftAppInstanceStatus("testapp-source",
+		appInstanceStatus = new OpenShiftAppInstanceStatus(
 				new PodBuilder().withNewMetadata().withName("test-pod").endMetadata()
 						.withNewStatus()
 						.withContainerStatuses(
@@ -31,9 +31,8 @@ public class OpenShiftAppInstanceStatusTest {
 
 	@Test
 	public void getStateWithRunningBuild() {
-		appInstanceStatus = new OpenShiftAppInstanceStatus("testapp-source", null, null,
-				new BuildBuilder().withNewStatus().withPhase("Running").endStatus()
-						.build());
+		appInstanceStatus = new OpenShiftAppInstanceStatus(null, null, new BuildBuilder()
+				.withNewStatus().withPhase("Running").endStatus().build());
 
 		DeploymentState state = appInstanceStatus.getState();
 

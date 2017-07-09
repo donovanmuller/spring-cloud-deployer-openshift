@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.openshift.api.model.Build;
 import io.fabric8.openshift.api.model.DeploymentConfig;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
@@ -65,9 +67,9 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 
 		String appId = createDeploymentId(compatibleRequest);
 
-//		if (!status(appId).getState().equals(DeploymentState.unknown)) {
-//			throw new IllegalStateException(String.format("App '%s' is already deployed", appId));
-//		}
+		if (!status(appId).getState().equals(DeploymentState.unknown)) {
+			throw new IllegalStateException(String.format("App '%s' is already deployed", appId));
+		}
 
 		List<ObjectFactory> factories = populateOpenShiftObjectsForDeployment(compatibleRequest, appId);
 		factories.forEach(factory -> factory.addObject(compatibleRequest, appId));
@@ -80,22 +82,18 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	public void undeploy(String appId) {
 		logger.info("Undeploying application: {}", appId);
 
+		AppStatus status = status(appId);
+		if (status.getState().equals(DeploymentState.unknown)) {
+			throw new IllegalStateException(String.format("App '%s' is not deployed", appId));
+		}
+
 		// don't delete BuildConfig/Builds
 		client.services().withLabelIn(SPRING_APP_KEY, appId).delete();
 		client.routes().withLabelIn(SPRING_APP_KEY, appId).delete();
-		for (DeploymentConfig deploymentConfig : client.deploymentConfigs().withLabelIn(SPRING_APP_KEY, appId).list()
+		for (DeploymentConfig deploymentConfig : client.deploymentConfigs()
+				.withLabelIn(SPRING_APP_KEY, appId)
+				.list()
 				.getItems()) {
-			// scale down deployments (replication controllers) before deployment configs
-			// when there are errored Pods, scaling down the deployment config never returns
-//			client.replicationControllers()
-//				.withLabelIn("openshift.io/deployment-config.name", deploymentConfig.getMetadata().getName())
-//				.list()
-//				.getItems()
-//				.forEach(replicationController -> client.replicationControllers()
-//					.withName(replicationController.getMetadata().getName())
-//				.scale(0, true));
-
-
 			scaleDownPod(client, deploymentConfig);
 			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).cascading(true).delete();
 		}
@@ -132,18 +130,28 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	 * {@link org.springframework.cloud.deployer.spi.kubernetes.AbstractKubernetesDeployer#buildAppStatus}
 	 */
 	@Override
-	protected AppStatus buildAppStatus(String appId, PodList list) {
+	protected AppStatus buildAppStatus(String appId, PodList list, ServiceList services) {
 		AppStatus.Builder statusBuilder = AppStatus.of(appId);
 
 		List<Build> builds = client.builds().withLabelIn(SPRING_APP_KEY, appId).list().getItems();
 		Build build = (builds.isEmpty()) ? null : Iterables.getLast(builds);
 
 		if (list == null) {
-			statusBuilder.with(new OpenShiftAppInstanceStatus(appId, null, openShiftDeployerProperties, build));
+			statusBuilder.with(new OpenShiftAppInstanceStatus(null, openShiftDeployerProperties, build));
 		}
-		else {
+		else if (list.getItems().isEmpty()) {
+			this.client.replicationControllers().withLabelIn(SPRING_APP_KEY, appId).list().getItems().stream()
+				.findFirst().ifPresent(replicationController -> {
+				if (replicationController
+					.getMetadata()
+					.getAnnotations()
+					.get("openshift.io/deployment.phase").equals("Failed")) {
+					statusBuilder.generalState(DeploymentState.failed);
+				}
+			});
+		} else {
 			for (Pod pod : list.getItems()) {
-				statusBuilder.with(new OpenShiftAppInstanceStatus(appId, pod, openShiftDeployerProperties, build));
+				statusBuilder.with(new OpenShiftAppInstanceStatus(pod, openShiftDeployerProperties, build));
 			}
 		}
 

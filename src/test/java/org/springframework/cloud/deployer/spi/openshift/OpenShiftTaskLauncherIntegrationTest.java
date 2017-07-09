@@ -46,7 +46,7 @@ public class OpenShiftTaskLauncherIntegrationTest extends AbstractTaskLauncherIn
 	public static OpenShiftTestSupport openShiftTestSupport = new OpenShiftTestSupport();
 
 	@Autowired
-	TaskLauncher taskLauncher;
+	private TaskLauncher taskLauncher;
 
 	@Override
 	protected TaskLauncher provideTaskLauncher() {

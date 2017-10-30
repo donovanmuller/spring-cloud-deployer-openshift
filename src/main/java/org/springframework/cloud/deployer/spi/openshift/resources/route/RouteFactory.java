@@ -77,18 +77,23 @@ public class RouteFactory implements ObjectFactory<Route> {
 	 * Builds the <code>host</code> value for a Route. If there is a
 	 * <code>spring.cloud.deployer.openshift.deployment.route.hostname</code> deployment variable
 	 * with a value, this will be used as the <code>host</code> value for the Route (see
-	 * https://docs.openshift.org/latest/architecture/core_concepts/routes.html#route- hostnames)
+	 * https://docs.openshift.com/container-platform/latest/architecture/networking/routes.html#route-hostnames)
 	 * Alternatively, the <code>host</code> value is built up using:
 	 *
 	 * <ul>
 	 * <li>application Id</li>
 	 * <li>the namespace currently connected too</li>
 	 * <li>the configured default routing subdomain - see
-	 * https://docs.openshift.org/latest/install_config/install/deploy_router.html#
-	 * customizing-the-default-routing-subdomain</li>
+	 * https://docs.openshift.com/container-platform/latest/install_config/router/default_haproxy_router.html#customizing-the-default-routing-subdomain</li>
 	 * </ul>
 	 *
-	 * See https://docs.openshift.org/latest/dev_guide/routes.html
+	 * The format of the Route host is built as follows:
+	 *
+	 * <p>
+	 * 	<code>{application}-{namespace}-{default routing subdomain}</code>
+	 * </p>
+	 *
+	 * See https://docs.openshift.com/container-platform/latest/architecture/networking/routes.html
 	 *
 	 * @param request
 	 * @param appId
@@ -96,7 +101,7 @@ public class RouteFactory implements ObjectFactory<Route> {
 	 */
 	protected String buildHost(AppDeploymentRequest request, String appId) {
 		return request.getDeploymentProperties()
-				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME, format("%s.%s.%s",
+				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME, format("%s-%s.%s",
 						appId, client.getNamespace(), openShiftDeployerProperties.getDefaultRoutingSubdomain()));
 	}
 }

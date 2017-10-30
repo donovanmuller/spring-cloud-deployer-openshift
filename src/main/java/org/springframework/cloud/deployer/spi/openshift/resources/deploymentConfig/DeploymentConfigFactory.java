@@ -117,7 +117,6 @@ public class DeploymentConfigFactory implements ObjectFactory<DeploymentConfig>,
                         .withServiceAccount(request.getDeploymentProperties()
                                 .getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_ACCOUNT,
                                         StringUtils.EMPTY))
-						.withNodeSelector(getNodeSelectors(request.getDeploymentProperties()))
 						// only add volumes with corresponding volume mounts
 						.withVolumes(volumeFactory.addObject(request, appId).stream()
 							.filter(volume -> container.getVolumeMounts().stream()

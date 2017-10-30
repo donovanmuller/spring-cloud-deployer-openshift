@@ -1,19 +1,3 @@
-/*
- * Copyright 2016 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.springframework.cloud.deployer.spi.openshift;
 
 import static org.hamcrest.Matchers.is;
@@ -36,18 +20,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.resources.pod.OpenShiftContainerFactory;
 import org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeMountFactory;
 import org.springframework.cloud.deployer.spi.test.AbstractAppDeployerIntegrationTests;
 import org.springframework.cloud.deployer.spi.test.Timeout;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -257,16 +238,5 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 	@Override
 	protected Resource testApplication() {
 		return new DockerResource("springcloud/spring-cloud-deployer-spi-test-app:latest");
-	}
-
-	@TestConfiguration
-	public static class Config {
-
-		@Bean
-		public KubernetesDeployerProperties kubernetesDeployerProperties() {
-			KubernetesDeployerProperties properties = new KubernetesDeployerProperties();
-			properties.setRequests(new KubernetesDeployerProperties.Resources("100m", "128Mi"));
-			return properties;
-		}
 	}
 }

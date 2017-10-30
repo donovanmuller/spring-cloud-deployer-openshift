@@ -50,13 +50,12 @@ public class DeploymentConfigFactoryTest {
 	}
 
 	@Test
-	public void buildDeploymentConfigWithServiceAccountAndNodeSelector() {
+	public void buildDeploymentConfigWithServiceAccount() {
 		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, null, null,
 				ImagePullPolicy.Always, new VolumeFactory(new OpenShiftDeployerProperties()));
 
 		Map<String, String> deploymentProperties = ImmutableMap.of(
-				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_ACCOUNT, "test-sa",
-				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_NODE_SELECTOR, "region: test");
+				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_ACCOUNT, "test-sa");
 		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
 				mock(Resource.class), deploymentProperties);
 
@@ -65,8 +64,6 @@ public class DeploymentConfigFactoryTest {
 
 		assertThat(deploymentConfig.getMetadata().getName()).isEqualTo("testapp-source");
 		assertThat(deploymentConfig.getSpec().getTemplate().getSpec().getServiceAccount()).isEqualTo("test-sa");
-		assertThat(deploymentConfig.getSpec().getTemplate().getSpec().getNodeSelector()).containsEntry("region",
-				"test");
 	}
 
 	@Test

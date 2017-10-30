@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -17,7 +18,6 @@ import org.springframework.cloud.deployer.spi.openshift.resources.volumes.Volume
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -30,16 +30,11 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
  */
 @Configuration
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
+@EnableConfigurationProperties(OpenShiftDeployerProperties.class)
 public class OpenShiftAutoConfiguration {
 
 	@Autowired
 	private MavenProperties mavenProperties;
-
-	@Bean
-	@Primary // to override org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties
-	public OpenShiftDeployerProperties openShiftDeployerProperties() {
-		return new OpenShiftDeployerProperties();
-	}
 
 	@Bean
 	public AppDeployer appDeployer(OpenShiftDeployerProperties properties, KubernetesClient kubernetesClient,

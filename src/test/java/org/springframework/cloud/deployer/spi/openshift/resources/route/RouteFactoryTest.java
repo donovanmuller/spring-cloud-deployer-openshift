@@ -31,7 +31,7 @@ public class RouteFactoryTest {
 
 		Route route = routeFactory.build(request, "testapp-source", 7777, null);
 
-		assertThat(route.getSpec().getHost()).isEqualTo("testapp-source.test.router.default.svc.cluster.local");
+		assertThat(route.getSpec().getHost()).isEqualTo("testapp-source-test.router.default.svc.cluster.local");
 	}
 
 	@Test
@@ -45,7 +45,7 @@ public class RouteFactoryTest {
 
 		Route route = routeFactory.build(request, "testapp-source", 7777, null);
 
-		assertThat(route.getSpec().getHost()).isEqualTo("testapp-source.test.ose.test.com");
+		assertThat(route.getSpec().getHost()).isEqualTo("testapp-source-test.ose.test.com");
 	}
 
 	@Test

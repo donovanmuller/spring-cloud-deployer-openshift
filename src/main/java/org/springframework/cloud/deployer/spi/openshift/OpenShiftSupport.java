@@ -84,23 +84,4 @@ public interface OpenShiftSupport extends DataflowSupport {
 
 		return labels;
 	}
-
-	default Map<String, String> getNodeSelectors(Map<String, String> properties) {
-		Map<String, String> nodeSelectors = new HashMap<>();
-
-		String nodeSelectorsProperty = properties
-				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_NODE_SELECTOR, StringUtils.EMPTY);
-
-		if (StringUtils.isNotBlank(nodeSelectorsProperty)) {
-			String[] nodeSelectorPairs = nodeSelectorsProperty.split(",");
-			for (String nodeSelectorPair : nodeSelectorPairs) {
-				String[] nodeSelector = nodeSelectorPair.split(":");
-				Assert.isTrue(nodeSelector.length == 2, format("Invalid nodeSelector value: '{}'", nodeSelectorPair));
-
-				nodeSelectors.put(nodeSelector[0].trim(), nodeSelector[1].trim());
-			}
-		}
-
-		return nodeSelectors;
-	}
 }

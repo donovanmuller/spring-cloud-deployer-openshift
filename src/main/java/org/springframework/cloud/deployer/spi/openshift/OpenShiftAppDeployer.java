@@ -95,26 +95,29 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 				.list()
 				.getItems()) {
 			scaleDownPod(client, deploymentConfig);
-			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).cascading(true).delete();
+			client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName())
+				.cascading(true)
+				.withGracePeriod(0)
+				.delete();
 		}
-		client.replicationControllers().withLabelIn(SPRING_APP_KEY, appId).delete();
 
 		/**
-		 * Remove the deployer pod before we attempt another deployment. This used to be in
-		 * OpenShiftAppDeployer.undeploy() but if there were quick undeploy/deploy cycles of the
-		 * same app, the deployer pod of the new pod would be deleted before it ever had a chance to
-		 * deploy.
-		 *
-		 * Can be removed after https://github.com/fabric8io/kubernetes-client/issues/548 is
-		 * resolved
+		 * Explicitly delete the Deployment's Pods.
+		 * This is actually only relevant when running in Travis :(
+		 * The OpenShift instance started there has issues unmounting the Pod's volumes and
+		 * results in the Pod never getting out of a "Terminating" status.
+		 * It shouldn't be applicable in an actual "real" OpenShift cluster.
 		 */
-		//@formatter:off
-		this.client.pods().withLabel("openshift.io/deployer-pod-for.name").list().getItems().stream()
-			.filter(pod -> pod.getMetadata().getName().startsWith(appId))
+		// @formatter:off
+		this.client.pods().withLabelIn(SPRING_APP_KEY, appId).list().getItems().stream()
+			.peek(pod -> logger.debug("Deleting Pod: {}", pod.getMetadata().getName()))
 			.forEach(pod -> this.client.pods()
 				.withName(pod.getMetadata().getName())
+				.cascading(true)
+				.withGracePeriod(0)
 				.delete());
 		//@formatter:on
+
 		try {
 			// Give some time for resources to be deleted.
 			// This is nasty and probably should be investigated for a better solution
@@ -276,6 +279,7 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 			scaleDownTask = executorService.submit(() ->
 				client.deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).scale(0, true)
 			);
+			// TODO make this a deployer property
 			scaleDownTask.get(30, TimeUnit.SECONDS);
 		} catch (TimeoutException e) {
 			scaleDownTask.cancel(true);

@@ -278,7 +278,7 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 	 */
 	@Override
 	protected Timeout deploymentTimeout() {
-		return new Timeout(50, 5000);
+		return new Timeout(36, 5000);
 	}
 
 	@TestConfiguration
@@ -291,13 +291,6 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 			mavenProperties.setRemoteRepositories(ImmutableMap.of("maven.remote-repositories.spring.url",
 					new MavenProperties.RemoteRepository("http://repo.spring.io/libs-snapshot")));
 			return mavenProperties;
-		}
-
-		@Bean
-		public KubernetesDeployerProperties kubernetesDeployerProperties() {
-			KubernetesDeployerProperties properties = new KubernetesDeployerProperties();
-			properties.setRequests(new KubernetesDeployerProperties.Resources("100m", "128Mi"));
-			return properties;
 		}
 	}
 }

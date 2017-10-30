@@ -33,18 +33,6 @@ public class OpenShiftSupportTest implements OpenShiftSupport {
 				ImmutableMap.of("label1", "value1", "label2", "value2", "label3", "value3"));
 	}
 
-	@Test
-	public void getNodeSelector() {
-		ImmutableMap<String, String> properties = ImmutableMap.of(
-				"spring.cloud.deployer.openshift.deployment.nodeSelector",
-				"region: primary,role : node, label :test");
-
-		Map<String, String> nodeSelectors = getNodeSelectors(properties);
-
-		assertThat(nodeSelectors).containsAllEntriesOf(
-				ImmutableMap.of("region", "primary", "role", "node", "label", "test"));
-	}
-
 	@SuppressWarnings("unchecked")
 	@Test
 	public void toEnvVarsWithoutOverrides() {

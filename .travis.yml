@@ -1,21 +1,34 @@
-language: java
-
 sudo: required
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
+language: java
+jdk:
+  - oraclejdk8
+cache:
+  directories:
+    - $HOME/.m2
 
 env:
   global:
-    - OPENSHIFT_VERSIONS="v3.6.1"
-    - OPENSHIFT_OC_VERSION="v3.6.1"
-    - OPENSHIFT_OC_COMMIT_ID="008f2d5"
+    # GITHUB_ACCESS_TOKEN
+    - secure: "kXMYdRPH2jqBCihxuwILnDkqUBv1IaxvJVwzg9r3j+baC9lu7fcExTMv/sDAS19mgq3tlc8nN/Yb1nWPA4rDPfMqs3yBghWaMoYNH3O3qV4nsmeJgG9H/A7GTdwwbit4Em+tF6agrpohu7DFP+UtkpltFJKW5xGapRbV4APoRLvnC6fHrFyTgfqcVjKtVFq57bL4i5XvBjz6LIw7bZ/cN6lj9BWnPq7zVJ7D2eji/ev1foI3wOY07GulW6B9Cp/vvIk8D5Txp6J+9Z3Ag1XHyqPeOrASIlVQOdcvNQab4/b3/Ml2qO9zh+2oJsaZrmhFsFPF8BMlI9GUPNp98AEiApkSyYl7VnoC7r4+9quYyd/CtaWlMnZWN5EFpKfSryY0vCzAxgKT66Yx3IgcB9iV7/P99KNMqbLTwynLgg7R0+efAO9zYY8HjKnbemoU9itpIlY7TXNWnjh/1NjPYaP78eMCbtIdXOUBkIgZ44NnmgQDDWTiMGBZfg/ai0QPPXX6ipg8li+syKV+J0p4n1lW0IAUZl58k28ucCwniENRXQ8sI/kf8uRcJeaCaxWfVYcCbwoy3SK8fesP0XvQ0VSoLJm2W2NDZ0TTAJVqvBUKF7ZV5pfrZ42ErPa0Yh3E76LWyDpcjMv3QH5RwbM8MUVAomO5myjX9XZFMKFvD5CwnlU="
+    # GITHUB_USERNAME
+    - secure: "LxZ1ke0o1vCyI4VndXClOCAhh1Tcm2TTxePLcoPTJolZdxPV01ULYY3SrRqaqgrYzuTanGWdlPozYdjZ54zQhrej56iVuIUSDg+ArwEzxJOG1LE0m04RCsDC51dCVQXdBkDlDDLBbaIr1R+ZtkrInW6Xh8FsK0GeYWOQo1Xr7hsDZAzdZeY1osjqyAb9c8JGSvxjI+ThHjHdefNeW9tLzSXd0rMe1gqpIf98GO6wRm6kcRmHrzu3oT514eQTVQ6u/Vh2CYVOhiWPdoJnPyZdMKYC4YUzmY/pmY1mq9VCsCvgL8a0iBwaDtMjx2MXfxq12vvpZqGu4tecpzOJDj0wpr5AbajjAK/0jj90cdqMkFDX4pumNCXW4JOT0G8NYP3wewCkep3UTp9zNlnGTlSfw/by+rZ6v6EJCKLeCecMOjoSZcMfvT6gFUQ7Zsmc8NHOKKe2FzvCH3lF7Tq8pWnBmfamcs/Atyv9/JI3VhBHPc+AyPb7iBU1lgjcJdV7MSDDEU2vaIonTIgsNr4US1hOdk7muDCnuJW04drEhoLjpBODIA4XqY8fFUwK3iig0BHSY1PW+ZJusZ8tUICXn93ip0w+9V8D36wEKbKzue5aPkJ4tKw3/R6v5o1hV7uvwcs70tRjweX+0FJTLDLVzmoOAP2yK5SfZv0UoyzsTxMtHYA="
+    # BINTRAY_PASSWORD
+    - secure: "gr/IddNmS2eWwxTUQxRqCDBJp/AFEt31pEmsb8wQQimjKDxVnYbPTUVN8qD1ia9RF7hy79LM7ofmsw47MzVo8XgIGMjWmTr1axk4HHoQ7pR249qxMi/HYlSa5osaBifK4Y3OZ5JJiqcBq8nC7EkBoHnihnE7UArPrCz9dp8oFvFcaPYI6q6sbpl+SYnl+s3s0IHEMMVeyqDdF9eCUBs7Y/QrHVdPPpW0OUd6JxnVTWlzN4Ft7+GgdaZzblBCWzzQ6RLJI5xIs3Lup12EjRvAMuEM6iHUD34h2Jy+WWEvxgthtCvR/bzgGl3WSXvkvuNSf/HFZBoxsvd4rzEKi2UgwEwtUgYdu1JQppzzn/J2mOR0LtuQUpA/v9pkq2pX1jxk+UeHRxy73i2IKM/2af9wGV+whc8QBWPpGFh8zreuD1p57O4tpcsV4AN/2DEyzXWL4NAMkswFIEI6IDGu4u2H1Zes3ym/LQYwfsNs1rrnqc/1yg9iLxCJdM+In6N5wfQ2SYhh6rt6Pe4ckFatSAVFOCYKkB9kWpT68xA2ZL6C5LtzZkwpCbxbtHgs6n65lM0XG+C8++blbkdz2ng8n0AkQcBN63icW9v3L5ln04vXISKSge3YtyWGZNqajIb6lLnIw+541Hs/NHHAZclrQKxhDDSMicqkgSXy39ABfdx3pDQ="
+    # GPG_PASSPHRASE
+    - secure: "SFjW7hERMw1ktjZxOQPIYtDAfH8BVQ+QQkU1wkUgBriYa8EuOO5Whe5qTicgqiwB18fnu40Fm7pAN2pm0PWrtdt2QoesgmbstubgIW5GpC6xdNUWOJOcZn3/mbA5o8I7FYD8Wp7xeQq/FV6QLkLux7gCv/zbPsqlthkNnBEfc8j4oXNPW6okKsa+UgsSYORfYfzKYiy7DN0DhFyJ+BXFVPA0Lp/lbXP5HBpIwSaEc+uZ8S1lGXAPhhNDCtyn2yLBKOTfeWPnNfEDEtJ6ABTWFd16KWyHzsOUDsGwuiKXJzoxJMBpHD53iBYYxjev0N060pwk0Qxt4FAUXmqAiD5JzU2E2+/Mj5/fyZok1hXeYHl1PpfxsUcB1TDhCN5pTTgBXpe4mxQAIat0DsNbxHX2ZPMDGpnxzT9yxKtNPRyQhbTMmdmEW08NbcwpdQr+l4Dp4b0j4hTQAtu/K+cOb27l3JKkgyd/tj8ben1uf7GoXix8X3ZxoGqTWCUvDMi6VXTZznkkQkADxNtZCU6As/UWsS2jOVbp2vJbotaXWGOi75yatnBIzin66FptUycMzRqOTLPzZwQuSBqB7/Ea+t0ziJd+Hrr4Lgipg1IdB3zI7QmndzPDRVHjlgOQadmRWlS5bHfrKYCk0IoZVGuN73BiBT/H1GfMv8qdKElZ7kCqeHk="
+    # GPG_OWNERTRUST
+    - secure: "lrNY4HU/aq++2tTBCvkEr3yb6dLj+iJWOEe0zboD+M0Y56ldasXvTBrFKaygn97msSplPPwk2grjfFhiVC/S6m1oUiIHjufILTgLSsf7AC0vZ3gCpHV5iRsGTg3aYCpr+RLg5WH8tgg7XetKmGGMBsPex5Oh+w2cW7i5cG+66z2ydTzcUdBIz+hjSFikCb2zYuPj/Mo8PuM2VX94h4OhkP+qXT55rgFO/H3/4xnQoOMs2H8KEsrptOUiwwU98w1QVoFM/azaUoHbJFvrr0IZlsCorAFieEoOx9kwWIB0b3GDWT7c9N8sxRYs0jTLSUvhdMHSh974UPAH70mAAZ8mKi4Z0ns5hBKezKOBkALKyMAuflB+G4mI7SJbHu4B9sJuZEpEuAXIGwTeJaj9rN73At2PUZQGPyFRajSR0IWOFKbryGQV/lfpYIvRQOVfUr9IkD9e0mYqAhzWx8wGLL0Ef3w4M/8LnlMTVaDgSS3qORapxSYz68MiMtY/qh5Lz+GlzJlET77OOEMaRBx/SCyQrQWbtIEgxiqOyrJIpL85fYCY9cm86iF26imoqn+fCH5Rn943dc2SS3xLh67y2S5ShhJWUjlYRYkb0QqBBKoCJBbEnZKqQOZgEfizR6dWcmcF462rn0ZVdFCd/FUsJW8yusH3HKvhvl05KjHT1+9Cj/Q="
 
-#before_install:
-#  - sudo apt-get update
-#  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
-#  - docker --version
+  matrix:
+    - OPENSHIFT_VERSION="v3.6.1" OPENSHIFT_OC_VERSION="v3.6.1" OPENSHIFT_OC_COMMIT_ID="008f2d5"
+    # See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/48
+#    - OPENSHIFT_VERSION="v3.7.0-rc.0" OPENSHIFT_OC_VERSION="v3.7.0-rc.0" OPENSHIFT_OC_COMMIT_ID="e92d5c5"
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_aac50e078c1d_key -iv $encrypted_aac50e078c1d_iv -in .travis/gpg_secret_key.enc -out /tmp/gpg_secret_key -d
+  - gpg_secret_key=$(< /tmp/gpg_secret_key)
+  - if [ ! -z "$gpg_secret_key" ]; then echo $gpg_secret_key | base64 --decode | gpg --import; fi
+  - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust; fi
 
 before_script:
   - sudo mount --make-shared /
@@ -26,14 +39,15 @@ before_script:
   - tar xvzOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.tar.gz > oc.bin
   - sudo mv oc.bin /usr/bin/oc
   - sudo chmod 755 /usr/bin/oc
+  - oc cluster up --version=${OPENSHIFT_VERSION}
+  - oc login -u system:admin
+  - oc new-project scdf
+  - oc adm policy add-scc-to-user hostaccess -z default
+  - mvn install:install-file -Dfile=src/test/resources/test-app-1.0-SNAPSHOT.jar -DpomFile=src/test/resources/test-app-1.0-SNAPSHOT.pom
 
 script:
   - |
-    oc cluster up --version=${version}
-    oc login -u system:admin
-    oc new-project scdf
-    oc adm policy add-scc-to-user hostaccess -z default
-
+    set -e
     # run OpenShift deployer tests
     export KUBERNETES_NAMESPACE=scdf
     ./mvnw --batch-mode test \
@@ -41,14 +55,22 @@ script:
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
       -Dspring.cloud.deployer.openshift.readinessProbeDelay=20
+    ./mvnw --batch-mode cobertura:cobertura -Dopenshift.enabled=false -Dlogging.level.=ERROR
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+deploy:
+  provider: script
+  # see https://github.com/travis-ci/travis-ci/issues/5538
+  script: chmod +x .travis/release.sh && .travis/release.sh
+  skip_cleanup: true
+  on:
+    jdk: openjdk8
+    tags: true
+    condition: "OPENSHIFT_VERSION = v3.6.1"
 
 after_failure:
  - oc login -u system:admin
  - oc get all -n scdf -o yaml
  - oc get events --all-namespaces --sort-by='.metadata.creationTimestamp'
-
-after_success:
-  - |
-    if [[ "${TRAVIS_BRANCH}" == "master" && "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
-      echo "Should we use this?"
-    fi

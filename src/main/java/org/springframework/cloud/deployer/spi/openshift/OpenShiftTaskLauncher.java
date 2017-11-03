@@ -51,6 +51,8 @@ public class OpenShiftTaskLauncher extends KubernetesTaskLauncher implements Tas
 				.withName(id)
 				.cascading(true)
 				.delete());
+
+		super.cleanup(id);
 	}
 
 	/**

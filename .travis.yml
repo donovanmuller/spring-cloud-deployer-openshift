@@ -66,9 +66,9 @@ deploy:
   script: chmod +x .travis/release.sh && .travis/release.sh
   skip_cleanup: true
   on:
-    jdk: openjdk8
+    jdk: oraclejdk8
     tags: true
-    condition: "OPENSHIFT_VERSION = v3.6.1"
+    condition: "$OPENSHIFT_VERSION = v3.6.1"
 
 after_failure:
  - oc login -u system:admin

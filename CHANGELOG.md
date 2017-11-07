@@ -2,7 +2,25 @@
 
 ## [Unreleased](https://github.com/donovanmuller/spring-cloud-deployer-openshift/tree/HEAD)
 
-[Full Changelog](https://github.com/donovanmuller/spring-cloud-deployer-openshift/compare/v1.2.0.RELEASE...HEAD)
+[Full Changelog](https://github.com/donovanmuller/spring-cloud-deployer-openshift/compare/v1.2.1.RELEASE...HEAD)
+
+**Implemented enhancements:**
+
+- Update to 1.2.2 release of s-c-deployer [\#44](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/44)
+
+**Fixed bugs:**
+
+- SCDF route naming uses '.' rather than '-' as a separator [\#47](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/47)
+
+**Closed issues:**
+
+- Not able to pass custom spring.cloud.deployer.kubernetes.serviceAnnotations property [\#45](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/45)
+- Investigate why Apache Velocity logs are being logged at DEBUG level on testCompile [\#42](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/42)
+- Fix 'MavenResourceProjectExtractorTest\#extractMavenProject' that fails on Travis [\#31](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/31)
+- Add CI configuration [\#9](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/9)
+
+## [v1.2.1.RELEASE](https://github.com/donovanmuller/spring-cloud-deployer-openshift/tree/v1.2.1.RELEASE) (2017-11-07)
+[Full Changelog](https://github.com/donovanmuller/spring-cloud-deployer-openshift/compare/v1.2.0.RELEASE...v1.2.1.RELEASE)
 
 **Fixed bugs:**
 

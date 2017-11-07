@@ -24,7 +24,7 @@ previous_release_tag=$(curl -s \
 
 # Create GitHub release
 echo -e "\033[0;32mCreating GitHub release...\033[0m"
-release_name="${TRAVIS_TAG:1}.RELEASE"
+release_name="${TRAVIS_TAG:1}"
 github_changelog_generator -t ${GITHUB_ACCESS_TOKEN} -o /tmp/CHANGELOG.md --since-tag ${previous_release_tag}
 cat <(sed -e '$ d' /tmp/CHANGELOG.md) <(echo "Bintray artifacts: https://bintray.com/${GITHUB_USERNAME}/switchbit-public/spring-cloud-deployer-openshift/${release_name}") > /tmp/CHANGELOG.md.release
 release_changelog=$(< /tmp/CHANGELOG.md.release)

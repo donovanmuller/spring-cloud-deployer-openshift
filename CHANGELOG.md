@@ -1,8 +1,7 @@
 # Change Log
 
-## [Unreleased](https://github.com/donovanmuller/spring-cloud-deployer-openshift/tree/HEAD)
-
-[Full Changelog](https://github.com/donovanmuller/spring-cloud-deployer-openshift/compare/v1.2.1.RELEASE...HEAD)
+## [v1.2.1.RELEASE](https://github.com/donovanmuller/spring-cloud-deployer-openshift/tree/v1.2.1.RELEASE) (2017-11-07)
+[Full Changelog](https://github.com/donovanmuller/spring-cloud-deployer-openshift/compare/v1.2.0.RELEASE...v1.2.1.RELEASE)
 
 **Implemented enhancements:**
 
@@ -10,26 +9,17 @@
 
 **Fixed bugs:**
 
-- SCDF route naming uses '.' rather than '-' as a separator [\#47](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/47)
-
-**Closed issues:**
-
-- Not able to pass custom spring.cloud.deployer.kubernetes.serviceAnnotations property [\#45](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/45)
-- Investigate why Apache Velocity logs are being logged at DEBUG level on testCompile [\#42](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/42)
-- Fix 'MavenResourceProjectExtractorTest\#extractMavenProject' that fails on Travis [\#31](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/31)
-- Add CI configuration [\#9](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/9)
-
-## [v1.2.1.RELEASE](https://github.com/donovanmuller/spring-cloud-deployer-openshift/tree/v1.2.1.RELEASE) (2017-11-07)
-[Full Changelog](https://github.com/donovanmuller/spring-cloud-deployer-openshift/compare/v1.2.0.RELEASE...v1.2.1.RELEASE)
-
-**Fixed bugs:**
-
 - Deployer should cancel all in progress deployments when undeploying [\#29](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/29)
+- SCDF route naming uses '.' rather than '-' as a separator [\#47](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/47)
 
 **Closed issues:**
 
 - Investigate 504 Gateway Time-out errors when resolving Maven artifacts for the first time [\#28](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/28)
 - Maven task launcher should use a deployment triggered by a build [\#21](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/21)
+- Not able to pass custom spring.cloud.deployer.kubernetes.serviceAnnotations property [\#45](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/45)
+- Investigate why Apache Velocity logs are being logged at DEBUG level on testCompile [\#42](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/42)
+- Fix 'MavenResourceProjectExtractorTest\#extractMavenProject' that fails on Travis [\#31](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/31)
+- Add CI configuration [\#9](https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/9)
 
 ## [v1.2.0.RELEASE](https://github.com/donovanmuller/spring-cloud-deployer-openshift/tree/v1.2.0.RELEASE) (2017-07-09)
 [Full Changelog](https://github.com/donovanmuller/spring-cloud-deployer-openshift/compare/v1.1.0.RELEASE...v1.2.0.RELEASE)

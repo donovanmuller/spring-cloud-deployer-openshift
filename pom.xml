@@ -10,7 +10,7 @@
 
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-deployer-openshift</artifactId>
-	<version>1.2.1.BUILD-SNAPSHOT</version>
+	<version>1.2.2-SNAPSHOT</version>
 
 	<name>spring-cloud-deployer-openshift</name>
 	<description>Spring Cloud Deployer for OpenShift 3</description>

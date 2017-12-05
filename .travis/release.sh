@@ -56,7 +56,7 @@ echo -e "\033[0;32mDeploying to Bintray...\033[0m"
 echo -e "\033[0;32mSetting next development version...\033[0m"
 ./mvnw --settings .travis/settings.xml \
     org.codehaus.mojo:build-helper-maven-plugin:3.0.0:parse-version \
-    versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT \
+    versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}.BUILD-SNAPSHOT \
     versions:commit
 git add pom.xml
 git commit -m "Set next development version [ci skip]" && git push origin HEAD:master      

@@ -22,7 +22,7 @@ env:
   matrix:
     - OPENSHIFT_VERSION="v3.6.1" OPENSHIFT_OC_VERSION="v3.6.1" OPENSHIFT_OC_COMMIT_ID="008f2d5"
     # See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/48
-    - OPENSHIFT_VERSION="v3.7.0" OPENSHIFT_OC_VERSION="v3.7.0" OPENSHIFT_OC_COMMIT_ID="7ed6862"
+    # - OPENSHIFT_VERSION="v3.7.0" OPENSHIFT_OC_VERSION="v3.7.0" OPENSHIFT_OC_COMMIT_ID="7ed6862"
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_aac50e078c1d_key -iv $encrypted_aac50e078c1d_iv -in .travis/gpg_secret_key.enc -out /tmp/gpg_secret_key -d
@@ -47,7 +47,6 @@ before_script:
 
 script:
   - |
-    set -e
     # run OpenShift deployer tests
     export KUBERNETES_NAMESPACE=scdf
     ./mvnw --batch-mode test \
@@ -74,3 +73,4 @@ after_failure:
  - oc login -u system:admin
  - oc get all -n scdf -o yaml
  - oc get events --all-namespaces --sort-by='.metadata.creationTimestamp'
+ - docker logs origin

@@ -8,9 +8,9 @@ import org.springframework.cloud.deployer.spi.openshift.DataflowSupport;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class ServiceWithIndexSuppportFactory extends ServiceFactory implements DataflowSupport {
+public class ServiceWithIndexSupportFactory extends ServiceFactory implements DataflowSupport {
 
-	public ServiceWithIndexSuppportFactory(OpenShiftClient client, Integer port, Map<String, String> labels) {
+	public ServiceWithIndexSupportFactory(OpenShiftClient client, Integer port, Map<String, String> labels) {
 		super(client, port, labels);
 	}
 

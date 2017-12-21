@@ -36,7 +36,7 @@ import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 import org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig.DeploymentConfigFactory;
 import org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig.DeploymentConfigWithIndexSuppportFactory;
 import org.springframework.cloud.deployer.spi.openshift.resources.route.RouteFactory;
-import org.springframework.cloud.deployer.spi.openshift.resources.service.ServiceWithIndexSuppportFactory;
+import org.springframework.cloud.deployer.spi.openshift.resources.service.ServiceWithIndexSupportFactory;
 import org.springframework.util.StringUtils;
 
 public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDeployer, OpenShiftSupport {
@@ -179,7 +179,7 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 		Container container = getContainerFactory().create(createDeploymentId(request), request, externalPort, null, false);
 
 		factories.add(getDeploymentConfigFactory(request, labels, container));
-		factories.add(new ServiceWithIndexSuppportFactory(getClient(), externalPort, labels));
+		factories.add(new ServiceWithIndexSupportFactory(getClient(), externalPort, labels));
 
 		if (createRoute(request)) {
 			factories.add(new RouteFactory(getClient(), openShiftDeployerProperties, externalPort, labels));

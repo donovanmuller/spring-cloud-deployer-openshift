@@ -93,4 +93,9 @@ public interface OpenShiftDeploymentPropertyKeys {
 	 * configured for the cluster (service-node-port-range, default is 30000-32767).
 	 */
 	String OPENSHIFT_CREATE_NODE_PORT = "spring.cloud.deployer.openshift.createNodePort";
+
+	/**
+	 * Allows you to override the default service name (appId).
+	 */
+	String OPENSHIFT_DEPLOYMENT_SERVICE_NAME = "spring.cloud.deployer.openshift.service.name";
 }

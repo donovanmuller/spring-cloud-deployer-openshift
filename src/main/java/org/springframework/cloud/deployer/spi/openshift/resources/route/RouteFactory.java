@@ -53,16 +53,19 @@ public class RouteFactory implements ObjectFactory<Route> {
 	}
 
 	protected Route build(AppDeploymentRequest request, String appId, Integer port, Map<String, String> labels) {
+		String serviceNameOrAppId = request.getDeploymentProperties().getOrDefault(
+			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_NAME, appId);
+
 		//@formatter:off
         return new RouteBuilder()
             .withNewMetadata()
-                .withName(appId)
+                .withName(serviceNameOrAppId)
                 .withLabels(labels)
             .endMetadata()
             .withNewSpec()
-                .withHost(buildHost(request, appId))
+                .withHost(buildHost(request, serviceNameOrAppId))
                 .withNewTo()
-                    .withName(appId)
+                    .withName(serviceNameOrAppId)
                     .withKind("Service")
                 .endTo()
                 .withNewPort()

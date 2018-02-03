@@ -20,10 +20,10 @@ env:
     - secure: "lrNY4HU/aq++2tTBCvkEr3yb6dLj+iJWOEe0zboD+M0Y56ldasXvTBrFKaygn97msSplPPwk2grjfFhiVC/S6m1oUiIHjufILTgLSsf7AC0vZ3gCpHV5iRsGTg3aYCpr+RLg5WH8tgg7XetKmGGMBsPex5Oh+w2cW7i5cG+66z2ydTzcUdBIz+hjSFikCb2zYuPj/Mo8PuM2VX94h4OhkP+qXT55rgFO/H3/4xnQoOMs2H8KEsrptOUiwwU98w1QVoFM/azaUoHbJFvrr0IZlsCorAFieEoOx9kwWIB0b3GDWT7c9N8sxRYs0jTLSUvhdMHSh974UPAH70mAAZ8mKi4Z0ns5hBKezKOBkALKyMAuflB+G4mI7SJbHu4B9sJuZEpEuAXIGwTeJaj9rN73At2PUZQGPyFRajSR0IWOFKbryGQV/lfpYIvRQOVfUr9IkD9e0mYqAhzWx8wGLL0Ef3w4M/8LnlMTVaDgSS3qORapxSYz68MiMtY/qh5Lz+GlzJlET77OOEMaRBx/SCyQrQWbtIEgxiqOyrJIpL85fYCY9cm86iF26imoqn+fCH5Rn943dc2SS3xLh67y2S5ShhJWUjlYRYkb0QqBBKoCJBbEnZKqQOZgEfizR6dWcmcF462rn0ZVdFCd/FUsJW8yusH3HKvhvl05KjHT1+9Cj/Q="
 
   matrix:
-    - OPENSHIFT_VERSION="v3.6.1" OPENSHIFT_OC_VERSION="v3.6.1" OPENSHIFT_OC_COMMIT_ID="008f2d5"
+    - OPENSHIFT_VERSION="v3.6.1" OPENSHIFT_OC_VERSION="v3.6.1" OPENSHIFT_OC_COMMIT_ID="008f2d5" ASSET_EXTENSION="tar.gz"
     # See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/48
-    - OPENSHIFT_VERSION="v3.7.1" OPENSHIFT_OC_VERSION="v3.7.1" OPENSHIFT_OC_COMMIT_ID="ab0f056"
-    - OPENSHIFT_VERSION="v3.9.0-alpha.3" OPENSHIFT_OC_VERSION="v3.9.0-alpha.3" OPENSHIFT_OC_COMMIT_ID="78ddc10"
+#    - OPENSHIFT_VERSION="v3.7.1" OPENSHIFT_OC_VERSION="v3.7.1" OPENSHIFT_OC_COMMIT_ID="ab0f056"
+    - OPENSHIFT_VERSION="v3.9.0-alpha.3" OPENSHIFT_OC_VERSION="v3.9.0-alpha.3" OPENSHIFT_OC_COMMIT_ID="78ddc10" ASSET_EXTENSION="tar"
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_aac50e078c1d_key -iv $encrypted_aac50e078c1d_iv -in .travis/gpg_secret_key.enc -out /tmp/gpg_secret_key -d
@@ -32,12 +32,13 @@ before_install:
   - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust; fi
 
 before_script:
+  # credit to https://travis-ci.org/bucharest-gold/mean-booster/jobs/331001570/config for the basic OpenShift configuration
   - sudo mount --make-shared /
   - sudo service docker stop
   - sudo sed -i 's/DOCKER_OPTS=\"/DOCKER_OPTS=\"--insecure-registry 172.30.0.0\/16 /' /etc/default/docker
   - sudo service docker start
-  - wget https://github.com/openshift/origin/releases/download/${OPENSHIFT_OC_VERSION}/openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.tar.gz
-  - tar xvzOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.tar.gz > oc.bin
+  - wget https://github.com/openshift/origin/releases/download/${OPENSHIFT_OC_VERSION}/openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION}
+  - tar xvzOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION} > oc.bin
   - sudo mv oc.bin /usr/bin/oc
   - sudo chmod 755 /usr/bin/oc
   - oc cluster up --version=${OPENSHIFT_VERSION}
@@ -49,7 +50,7 @@ script:
   - |
     # run OpenShift deployer tests
     export KUBERNETES_NAMESPACE=scdf
-    ./mvnw --batch-mode test \
+    travis_wait ./mvnw --batch-mode test \
       -Dspring.cloud.deployer.openshift.limits.memory=0Mi \
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \

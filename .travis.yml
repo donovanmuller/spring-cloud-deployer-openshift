@@ -38,7 +38,7 @@ before_script:
   - sudo sed -i 's/DOCKER_OPTS=\"/DOCKER_OPTS=\"--insecure-registry 172.30.0.0\/16 /' /etc/default/docker
   - sudo service docker start
   - wget https://github.com/openshift/origin/releases/download/${OPENSHIFT_OC_VERSION}/openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION}
-  - tar xvzOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION} > oc.bin
+  - tar xvzOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION} > oc.bin || tar xvOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION} > oc.bin
   - sudo mv oc.bin /usr/bin/oc
   - sudo chmod 755 /usr/bin/oc
   - oc cluster up --version=${OPENSHIFT_VERSION}

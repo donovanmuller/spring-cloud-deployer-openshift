@@ -59,7 +59,7 @@ public class MavenOpenShiftTaskLauncher extends OpenShiftTaskLauncher {
 			logger.info(String.format("Building application '%s' with resource: '%s'", taskId, mavenResource));
 
 			factories.add(new ImageStreamFactory(getClient()));
-			factories.add(chooseBuildStrategy(taskId, request, createIdMap(taskId, request, null), mavenResource));
+			factories.add(chooseBuildStrategy(taskId, request, createIdMap(taskId, request), mavenResource));
 		}
 
 		return factories;

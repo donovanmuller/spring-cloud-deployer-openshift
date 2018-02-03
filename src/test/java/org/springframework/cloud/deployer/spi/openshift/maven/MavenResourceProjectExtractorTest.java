@@ -23,10 +23,11 @@ public class MavenResourceProjectExtractorTest {
 				"target/.m2/repository/org/test/test-app/1.0-SNAPSHOT");
 		copy("src/test/resources/test-app-1.0-SNAPSHOT.jar",
 				"target/.m2/repository/org/test/test-app/1.0-SNAPSHOT");
-		System.setProperty("user.home", new File("target").getAbsolutePath());
+		MavenProperties mavenProperties = new MavenProperties();
+		mavenProperties.setLocalRepository("target/.m2/repository");
 		MavenProject mavenProject = mavenResourceProjectExtractor.extractMavenProject(
 				MavenResource.parse("org.test:test-app:1.0-SNAPSHOT"),
-				new MavenProperties());
+			mavenProperties);
 
 		assertNotNull(mavenProject);
 	}

@@ -172,7 +172,7 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer implements AppDe
 	protected List<ObjectFactory> populateOpenShiftObjectsForDeployment(AppDeploymentRequest request, String appId) {
 		List<ObjectFactory> factories = new ArrayList<>();
 
-		Map<String, String> labels = createIdMap(appId, request, null);
+		Map<String, String> labels = createIdMap(appId, request);
 		labels.putAll(toLabels(request.getDeploymentProperties()));
 		int externalPort = configureExternalPort(request);
 

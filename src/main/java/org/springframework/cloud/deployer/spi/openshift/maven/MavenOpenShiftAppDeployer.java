@@ -58,7 +58,7 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 			logger.info("Building application '{}' with resource: {}", appId, mavenResource);
 
 			factories.add(new ImageStreamFactory(getClient()));
-			factories.add(chooseBuildStrategy(request, createIdMap(appId, request, null), mavenResource));
+			factories.add(chooseBuildStrategy(request, createIdMap(appId, request), mavenResource));
 		}
 
 		factories.addAll(super.populateOpenShiftObjectsForDeployment(request, appId));

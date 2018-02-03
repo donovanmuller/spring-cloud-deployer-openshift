@@ -22,7 +22,8 @@ env:
   matrix:
     - OPENSHIFT_VERSION="v3.6.1" OPENSHIFT_OC_VERSION="v3.6.1" OPENSHIFT_OC_COMMIT_ID="008f2d5"
     # See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/48
-    # - OPENSHIFT_VERSION="v3.7.0" OPENSHIFT_OC_VERSION="v3.7.0" OPENSHIFT_OC_COMMIT_ID="7ed6862"
+    - OPENSHIFT_VERSION="v3.7.1" OPENSHIFT_OC_VERSION="v3.7.1" OPENSHIFT_OC_COMMIT_ID="ab0f056"
+    - OPENSHIFT_VERSION="v3.9.0-alpha.3" OPENSHIFT_OC_VERSION="v3.9.0-alpha.3" OPENSHIFT_OC_COMMIT_ID="78ddc10"
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_aac50e078c1d_key -iv $encrypted_aac50e078c1d_iv -in .travis/gpg_secret_key.enc -out /tmp/gpg_secret_key -d
@@ -43,7 +44,6 @@ before_script:
   - oc login -u system:admin
   - oc new-project scdf
   - oc adm policy add-scc-to-user hostaccess -z default
-  - mvn install:install-file -Dfile=src/test/resources/test-app-1.0-SNAPSHOT.jar -DpomFile=src/test/resources/test-app-1.0-SNAPSHOT.pom
 
 script:
   - |
@@ -53,8 +53,12 @@ script:
       -Dspring.cloud.deployer.openshift.limits.memory=0Mi \
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
-      -Dspring.cloud.deployer.openshift.readinessProbeDelay=20
-    ./mvnw --batch-mode cobertura:cobertura -Dopenshift.enabled=false -Dlogging.level.=ERROR
+      -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
+      -Dmaven.test.redirectTestOutputToFile=true
+    ./mvnw --batch-mode cobertura:cobertura \
+      -Dopenshift.enabled=false \
+      -Dlogging.level.=ERROR \
+      -Dmaven.test.redirectTestOutputToFile=true
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

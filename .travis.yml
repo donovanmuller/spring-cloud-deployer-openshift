@@ -23,7 +23,7 @@ env:
     - OPENSHIFT_VERSION="v3.6.1" OPENSHIFT_OC_VERSION="v3.6.1" OPENSHIFT_OC_COMMIT_ID="008f2d5" ASSET_EXTENSION="tar.gz"
     # See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/48
 #    - OPENSHIFT_VERSION="v3.7.1" OPENSHIFT_OC_VERSION="v3.7.1" OPENSHIFT_OC_COMMIT_ID="ab0f056"
-    - OPENSHIFT_VERSION="v3.9.0-alpha.3" OPENSHIFT_OC_VERSION="v3.9.0-alpha.3" OPENSHIFT_OC_COMMIT_ID="78ddc10" ASSET_EXTENSION="tar"
+    - OPENSHIFT_VERSION="v3.9.0" OPENSHIFT_OC_VERSION="v3.9.0" OPENSHIFT_OC_COMMIT_ID="191fece" ASSET_EXTENSION="tar.gz"
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_aac50e078c1d_key -iv $encrypted_aac50e078c1d_iv -in .travis/gpg_secret_key.enc -out /tmp/gpg_secret_key -d

@@ -24,37 +24,44 @@ public class RouteFactoryTest {
 
 	@Test
 	public void buildRoute() {
-		routeFactory = new RouteFactory(server.getOpenshiftClient(), new OpenShiftDeployerProperties(), 7777, null);
+		routeFactory = new RouteFactory(server.getOpenshiftClient(),
+				new OpenShiftDeployerProperties(), 7777, null);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class));
 
 		Route route = routeFactory.build(request, "testapp-source", 7777, null);
 
-		assertThat(route.getSpec().getHost()).isEqualTo("testapp-source-test.router.default.svc.cluster.local");
+		assertThat(route.getSpec().getHost())
+				.isEqualTo("testapp-source-test.router.default.svc.cluster.local");
 	}
 
 	@Test
 	public void buildRouteWithCustomRoutingSubdomain() {
 		OpenShiftDeployerProperties openShiftDeployerProperties = new OpenShiftDeployerProperties();
 		openShiftDeployerProperties.setDefaultRoutingSubdomain("ose.test.com");
-		routeFactory = new RouteFactory(server.getOpenshiftClient(), openShiftDeployerProperties, 7777, null);
+		routeFactory = new RouteFactory(server.getOpenshiftClient(),
+				openShiftDeployerProperties, 7777, null);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class));
 
 		Route route = routeFactory.build(request, "testapp-source", 7777, null);
 
-		assertThat(route.getSpec().getHost()).isEqualTo("testapp-source-test.ose.test.com");
+		assertThat(route.getSpec().getHost())
+				.isEqualTo("testapp-source-test.ose.test.com");
 	}
 
 	@Test
 	public void buildRouteWithHostname() {
-		routeFactory = new RouteFactory(server.getOpenshiftClient(), new OpenShiftDeployerProperties(), 7777, null);
+		routeFactory = new RouteFactory(server.getOpenshiftClient(),
+				new OpenShiftDeployerProperties(), 7777, null);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class),
-				ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME, "www.test.com"));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class),
+				ImmutableMap.of(
+						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME,
+						"www.test.com"));
 
 		Route route = routeFactory.build(request, "testapp-source", 7777, null);
 

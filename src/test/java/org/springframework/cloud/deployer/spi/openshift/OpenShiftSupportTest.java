@@ -29,14 +29,14 @@ public class OpenShiftSupportTest implements OpenShiftSupport {
 
 		Map<String, String> labels = toLabels(properties);
 
-		assertThat(labels).containsAllEntriesOf(
-				ImmutableMap.of("label1", "value1", "label2", "value2", "label3", "value3"));
+		assertThat(labels).containsAllEntriesOf(ImmutableMap.of("label1", "value1",
+				"label2", "value2", "label3", "value3"));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void toEnvVarsWithoutOverrides() {
-		List<EnvVar> envVars = toEnvVars(new String[]{"test=ing"});
+		List<EnvVar> envVars = toEnvVars(new String[] { "test=ing" });
 
 		assertThat(envVars).first().isEqualTo(new EnvVar("test", "ing", null));
 	}
@@ -44,8 +44,10 @@ public class OpenShiftSupportTest implements OpenShiftSupport {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void toEnvVarsWithOverrides() {
-		List<EnvVar> envVars = toEnvVars(new String[]{"test=ing"}, ImmutableMap.of("test", "ing this thing"));
+		List<EnvVar> envVars = toEnvVars(new String[] { "test=ing" },
+				ImmutableMap.of("test", "ing this thing"));
 
 		assertThat(envVars).first().isEqualTo(new EnvVar("test", "ing this thing", null));
 	}
+
 }

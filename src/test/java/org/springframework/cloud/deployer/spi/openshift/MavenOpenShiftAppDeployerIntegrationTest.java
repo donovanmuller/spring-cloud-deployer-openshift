@@ -57,7 +57,8 @@ import static org.springframework.cloud.deployer.spi.test.EventuallyMatcher.even
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = { MavenOpenShiftAppDeployerIntegrationTest.Config.class,
 		OpenShiftAutoConfiguration.class })
-public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerIntegrationTests {
+public class MavenOpenShiftAppDeployerIntegrationTest
+		extends AbstractAppDeployerIntegrationTests {
 
 	@ClassRule
 	public static OpenShiftTestSupport openShiftAvailable = new OpenShiftTestSupport();
@@ -89,14 +90,19 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 	protected Resource testApplication() {
 		Properties properties = new Properties();
 		try {
-			properties.load(new ClassPathResource("integration-test-app.properties").getInputStream());
+			properties.load(new ClassPathResource("integration-test-app.properties")
+					.getInputStream());
 		}
 		catch (IOException e) {
-			throw new RuntimeException("Failed to determine which version of integration-test-app to use", e);
+			throw new RuntimeException(
+					"Failed to determine which version of integration-test-app to use",
+					e);
 		}
-		return new MavenResource.Builder(mavenProperties).groupId("org.springframework.cloud")
-				.artifactId("spring-cloud-deployer-spi-test-app").version(properties.getProperty("version"))
-				.classifier("exec").extension("jar").build();
+		return new MavenResource.Builder(mavenProperties)
+				.groupId("org.springframework.cloud")
+				.artifactId("spring-cloud-deployer-spi-test-app")
+				.version(properties.getProperty("version")).classifier("exec")
+				.extension("jar").build();
 	}
 
 	@After
@@ -124,29 +130,34 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		openShiftDeployerProperties.setLivenessProbePeriod(10);
 		openShiftDeployerProperties.setMaxTerminatedErrorRestarts(1);
 		openShiftDeployerProperties.setMaxCrashLoopBackOffRestarts(1);
-		ContainerFactory containerFactory = new OpenShiftContainerFactory(openShiftDeployerProperties,
+		ContainerFactory containerFactory = new OpenShiftContainerFactory(
+				openShiftDeployerProperties,
 				new VolumeMountFactory(new OpenShiftDeployerProperties()));
-		AppDeployer lbAppDeployer = new MavenOpenShiftAppDeployer(openShiftDeployerProperties, openShiftClient,
-				containerFactory, mavenResourceJarExtractor, mavenProperties, resourceHash);
+		AppDeployer lbAppDeployer = new MavenOpenShiftAppDeployer(
+				openShiftDeployerProperties, openShiftClient, containerFactory,
+				mavenResourceJarExtractor, mavenProperties, resourceHash);
 
 		AppDefinition definition = new AppDefinition(randomName(), null);
 		Resource resource = testApplication();
 		Map<String, String> props = new HashMap<>();
 		// setting to small memory value will cause app to fail to be deployed
 		props.put("spring.cloud.deployer.kubernetes.memory", "8Mi");
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, props);
+		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource,
+				props);
 
 		log.info("Deploying {}...", request.getDefinition().getName());
 		String deploymentId = lbAppDeployer.deploy(request);
 		Timeout timeout = deploymentTimeout();
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(failed))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(failed))),
+						timeout.maxAttempts, timeout.pause));
 
 		log.info("Undeploying {}...", deploymentId);
 		timeout = undeploymentTimeout();
 		lbAppDeployer.undeploy(deploymentId);
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+						timeout.maxAttempts, timeout.pause));
 	}
 
 	@Test
@@ -155,10 +166,12 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		OpenShiftDeployerProperties openShiftDeployerProperties = new OpenShiftDeployerProperties();
 		openShiftDeployerProperties.setCreateLoadBalancer(true);
 		openShiftDeployerProperties.setMinutesToWaitForLoadBalancer(1);
-		ContainerFactory containerFactory = new OpenShiftContainerFactory(openShiftDeployerProperties,
+		ContainerFactory containerFactory = new OpenShiftContainerFactory(
+				openShiftDeployerProperties,
 				new VolumeMountFactory(openShiftDeployerProperties));
-		AppDeployer lbAppDeployer = new MavenOpenShiftAppDeployer(openShiftDeployerProperties, openShiftClient,
-				containerFactory, mavenResourceJarExtractor, mavenProperties, resourceHash);
+		AppDeployer lbAppDeployer = new MavenOpenShiftAppDeployer(
+				openShiftDeployerProperties, openShiftClient, containerFactory,
+				mavenResourceJarExtractor, mavenProperties, resourceHash);
 
 		AppDefinition definition = new AppDefinition(randomName(), null);
 		Resource resource = testApplication();
@@ -167,14 +180,16 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		log.info("Deploying {}...", request.getDefinition().getName());
 		String deploymentId = lbAppDeployer.deploy(request);
 		Timeout timeout = deploymentTimeout();
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
+						timeout.maxAttempts, timeout.pause));
 
 		log.info("Undeploying {}...", deploymentId);
 		timeout = undeploymentTimeout();
 		lbAppDeployer.undeploy(deploymentId);
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+						timeout.maxAttempts, timeout.pause));
 	}
 
 	@Test
@@ -192,12 +207,14 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 				.withName(mountName)
 				.build()));
 		//@formatter:on
-		openShiftDeployerProperties
-				.setVolumeMounts(Collections.singletonList(new VolumeMount(hostPath, mountName, false, null)));
-		ContainerFactory containerFactory = new OpenShiftContainerFactory(new OpenShiftDeployerProperties(),
+		openShiftDeployerProperties.setVolumeMounts(Collections
+				.singletonList(new VolumeMount(hostPath, mountName, false, null)));
+		ContainerFactory containerFactory = new OpenShiftContainerFactory(
+				new OpenShiftDeployerProperties(),
 				new VolumeMountFactory(openShiftDeployerProperties));
-		AppDeployer lbAppDeployer = new MavenOpenShiftAppDeployer(openShiftDeployerProperties, openShiftClient,
-				containerFactory, mavenResourceJarExtractor, mavenProperties, resourceHash);
+		AppDeployer lbAppDeployer = new MavenOpenShiftAppDeployer(
+				openShiftDeployerProperties, openShiftClient, containerFactory,
+				mavenResourceJarExtractor, mavenProperties, resourceHash);
 
 		AppDefinition definition = new AppDefinition(randomName(),
 				Collections.singletonMap("logging.file", containerPath + subPath));
@@ -207,11 +224,14 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		log.info("Deploying {}...", request.getDefinition().getName());
 		String deploymentId = lbAppDeployer.deploy(request);
 		Timeout timeout = deploymentTimeout();
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
+						timeout.maxAttempts, timeout.pause));
 
-		Map<String, String> selector = Collections.singletonMap("spring-app-id", deploymentId);
-		PodSpec spec = openShiftClient.pods().withLabels(selector).list().getItems().get(0).getSpec();
+		Map<String, String> selector = Collections.singletonMap("spring-app-id",
+				deploymentId);
+		PodSpec spec = openShiftClient.pods().withLabels(selector).list().getItems()
+				.get(0).getSpec();
 		assertThat(spec.getVolumes(), is(notNullValue()));
 		//@formatter:off
 		Volume volume = spec.getVolumes().stream()
@@ -225,8 +245,9 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		log.info("Undeploying {}...", deploymentId);
 		timeout = undeploymentTimeout();
 		lbAppDeployer.undeploy(deploymentId);
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+						timeout.maxAttempts, timeout.pause));
 	}
 
 	@Test
@@ -238,16 +259,20 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		Map<String, String> props = new HashMap<>();
 		props.put(AppDeployer.GROUP_PROPERTY_KEY, "foo");
 		props.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, props);
+		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource,
+				props);
 
 		log.info("Deploying {}...", request.getDefinition().getName());
 		String deploymentId = appDeployer.deploy(request);
 		Timeout timeout = deploymentTimeout();
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
+						timeout.maxAttempts, timeout.pause));
 
-		Map<String, String> selector = Collections.singletonMap("spring-app-id", deploymentId);
-		PodSpec spec = openShiftClient.pods().withLabels(selector).list().getItems().get(0).getSpec();
+		Map<String, String> selector = Collections.singletonMap("spring-app-id",
+				deploymentId);
+		PodSpec spec = openShiftClient.pods().withLabels(selector).list().getItems()
+				.get(0).getSpec();
 		Map<String, String> envVars = new HashMap<>();
 		for (EnvVar e : spec.getContainers().get(0).getEnv()) {
 			envVars.put(e.getName(), e.getValue());
@@ -258,14 +283,15 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		log.info("Undeploying {}...", deploymentId);
 		timeout = undeploymentTimeout();
 		appDeployer.undeploy(deploymentId);
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+						timeout.maxAttempts, timeout.pause));
 	}
 
 	/**
-	 * Don't be "too random" as the builds can be reused. This is mostly useful running test during
-	 * development. I.e. builds will not constantly download the spring-cloud-deployer-spi-test-app
-	 * as part of the image build.
+	 * Don't be "too random" as the builds can be reused. This is mostly useful running
+	 * test during development. I.e. builds will not constantly download the
+	 * spring-cloud-deployer-spi-test-app as part of the image build.
 	 */
 	@Override
 	protected String randomName() {
@@ -274,7 +300,8 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 	}
 
 	/**
-	 * Extra time to account for downloading the spring-cloud-deployer-spi-test-app exec.jar
+	 * Extra time to account for downloading the spring-cloud-deployer-spi-test-app
+	 * exec.jar
 	 */
 	@Override
 	protected Timeout deploymentTimeout() {
@@ -288,9 +315,13 @@ public class MavenOpenShiftAppDeployerIntegrationTest extends AbstractAppDeploye
 		@ConfigurationProperties("maven")
 		public MavenProperties mavenProperties() {
 			MavenProperties mavenProperties = new MavenProperties();
-			mavenProperties.setRemoteRepositories(ImmutableMap.of("maven.remote-repositories.spring.url",
-					new MavenProperties.RemoteRepository("http://repo.spring.io/libs-snapshot")));
+			mavenProperties.setRemoteRepositories(
+					ImmutableMap.of("maven.remote-repositories.spring.url",
+							new MavenProperties.RemoteRepository(
+									"http://repo.spring.io/libs-snapshot")));
 			return mavenProperties;
 		}
+
 	}
+
 }

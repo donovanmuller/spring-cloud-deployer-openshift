@@ -18,10 +18,13 @@ public class DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory
 
 	private final OpenShiftDeployerProperties openShiftDeployerProperties;
 
-	public DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(OpenShiftClient client,
-			OpenShiftDeployerProperties openShiftDeployerProperties, Container container, Map<String, String> labels,
-			ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy) {
-		super(client, openShiftDeployerProperties, container, labels, resourceRequirements, imagePullPolicy);
+	public DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
+			OpenShiftClient client,
+			OpenShiftDeployerProperties openShiftDeployerProperties, Container container,
+			Map<String, String> labels, ResourceRequirements resourceRequirements,
+			ImagePullPolicy imagePullPolicy) {
+		super(client, openShiftDeployerProperties, container, labels,
+				resourceRequirements, imagePullPolicy);
 		this.openShiftDeployerProperties = openShiftDeployerProperties;
 	}
 
@@ -31,10 +34,11 @@ public class DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory
 	}
 
 	@Override
-	protected DeploymentConfig build(AppDeploymentRequest request, String appId, Container container,
-			Map<String, String> labels, ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy) {
-		DeploymentConfig deploymentConfig = super.build(request, appId, container, labels, resourceRequirements,
-				imagePullPolicy);
+	protected DeploymentConfig build(AppDeploymentRequest request, String appId,
+			Container container, Map<String, String> labels,
+			ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy) {
+		DeploymentConfig deploymentConfig = super.build(request, appId, container, labels,
+				resourceRequirements, imagePullPolicy);
 		//@formatter:off
         return new DeploymentConfigBuilder(deploymentConfig)
             .editSpec()
@@ -54,4 +58,5 @@ public class DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory
             .build();
         //@formatter:on
 	}
+
 }

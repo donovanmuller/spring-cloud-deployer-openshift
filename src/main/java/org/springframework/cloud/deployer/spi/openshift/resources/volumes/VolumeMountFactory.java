@@ -17,16 +17,16 @@ import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 
 /**
- * Use the Fabric8 {@link VolumeMount} model to allow all volume plugins currently supported. Volume
- * mount deployment properties are specified in YAML format:
+ * Use the Fabric8 {@link VolumeMount} model to allow all volume plugins currently
+ * supported. Volume mount deployment properties are specified in YAML format:
  *
  * <code>
  *     spring.cloud.deployer.kubernetes.volumeMounts=[{name: 'testhostpath', mountPath: '/test/hostPath'},
  *     	{name: 'testpvc', mountPath: '/test/pvc'}, {name: 'testnfs', mountPath: '/test/nfs'}]
  * </code>
  *
- * Volume mounts can be specified as deployer properties as well as app deployment properties.
- * Deployment properties override deployer properties.
+ * Volume mounts can be specified as deployer properties as well as app deployment
+ * properties. Deployment properties override deployer properties.
  */
 public class VolumeMountFactory implements ObjectFactory<List<VolumeMount>> {
 
@@ -52,27 +52,37 @@ public class VolumeMountFactory implements ObjectFactory<List<VolumeMount>> {
 		List<VolumeMount> volumeMounts = new ArrayList<>();
 
 		String volumeMountDeploymentProperty = request.getDeploymentProperties()
-				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_VOLUME_MOUNTS, StringUtils.EMPTY);
-		if (!org.springframework.util.StringUtils.isEmpty(volumeMountDeploymentProperty)) {
+				.getOrDefault(
+						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_VOLUME_MOUNTS,
+						StringUtils.EMPTY);
+		if (!org.springframework.util.StringUtils
+				.isEmpty(volumeMountDeploymentProperty)) {
 			YamlConfigurationFactory<KubernetesDeployerProperties> volumeMountYamlConfigurationFactory = new YamlConfigurationFactory<>(
 					KubernetesDeployerProperties.class);
-			volumeMountYamlConfigurationFactory.setYaml("{ volumeMounts: " + volumeMountDeploymentProperty + " }");
+			volumeMountYamlConfigurationFactory
+					.setYaml("{ volumeMounts: " + volumeMountDeploymentProperty + " }");
 			try {
 				volumeMountYamlConfigurationFactory.afterPropertiesSet();
-				volumeMounts.addAll(volumeMountYamlConfigurationFactory.getObject().getVolumeMounts());
+				volumeMounts.addAll(volumeMountYamlConfigurationFactory.getObject()
+						.getVolumeMounts());
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException(
-						String.format("Invalid volume mount '%s'", volumeMountDeploymentProperty), e);
+				throw new IllegalArgumentException(String.format(
+						"Invalid volume mount '%s'", volumeMountDeploymentProperty), e);
 			}
 		}
-		// only add volume mounts that have not already been added, based on the volume mount's name
-		// i.e. allow provided deployment volume mounts to override deployer defined volume mounts
+		// only add volume mounts that have not already been added, based on the volume
+		// mount's
+		// name
+		// i.e. allow provided deployment volume mounts to override deployer defined
+		// volume mounts
 		volumeMounts.addAll(properties.getVolumeMounts().stream()
 				.filter(volumeMount -> volumeMounts.stream()
-						.noneMatch(existingVolumeMount -> existingVolumeMount.getName().equals(volumeMount.getName())))
+						.noneMatch(existingVolumeMount -> existingVolumeMount.getName()
+								.equals(volumeMount.getName())))
 				.collect(Collectors.toList()));
 
 		return volumeMounts;
 	}
+
 }

@@ -31,4 +31,5 @@ public class MavenResourceJarExtractorTest {
 
 		assertThat(resource).isNotPresent();
 	}
+
 }

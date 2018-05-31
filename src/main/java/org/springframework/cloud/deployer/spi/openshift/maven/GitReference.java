@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class GitReference {
 
 	private String uri;
+
 	private String branch = "master";
 
 	public GitReference(String uri) {
@@ -77,4 +78,5 @@ public class GitReference {
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37).append(uri).toHashCode();
 	}
+
 }

@@ -16,6 +16,7 @@ public class ResourceAwareOpenShiftAppDeployer implements AppDeployer {
 			.getLogger(ResourceAwareOpenShiftAppDeployer.class);
 
 	private OpenShiftAppDeployer openShiftAppDeployer;
+
 	private MavenOpenShiftAppDeployer mavenOpenShiftAppDeployer;
 
 	public ResourceAwareOpenShiftAppDeployer(OpenShiftAppDeployer openShiftAppDeployer,
@@ -59,4 +60,5 @@ public class ResourceAwareOpenShiftAppDeployer implements AppDeployer {
 	public RuntimeEnvironmentInfo environmentInfo() {
 		return openShiftAppDeployer.environmentInfo();
 	}
+
 }

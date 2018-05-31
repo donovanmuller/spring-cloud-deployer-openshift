@@ -28,17 +28,21 @@ public class DockerfileWithDockerBuildConfigStrategyTest {
 	@Before
 	public void setup() {
 		server.expect().post().withPath("/oapi/v1/namespaces/test/buildconfigs")
-				.andReturn(201, new BuildConfigBuilder().withNewSpec().endSpec().build()).once();
-		buildConfigStrategy = new MavenDockerfileWithDockerBuildConfigStrategy(new BuildConfigFactory() {
+				.andReturn(201, new BuildConfigBuilder().withNewSpec().endSpec().build())
+				.once();
+		buildConfigStrategy = new MavenDockerfileWithDockerBuildConfigStrategy(
+				new BuildConfigFactory() {
+
+					@Override
+					protected BuildRequest buildBuildRequest(AppDeploymentRequest request,
+							String appId) {
+						return null;
+					}
+				}, new OpenShiftDeployerProperties(), server.getOpenshiftClient(), null) {
 
 			@Override
-			protected BuildRequest buildBuildRequest(AppDeploymentRequest request, String appId) {
-				return null;
-			}
-		}, new OpenShiftDeployerProperties(), server.getOpenshiftClient(), null) {
-
-			@Override
-			protected String getDockerfile(AppDeploymentRequest request, OpenShiftDeployerProperties properties) {
+			protected String getDockerfile(AppDeploymentRequest request,
+					OpenShiftDeployerProperties properties) {
 				return "FROM java:8";
 			}
 		};
@@ -46,25 +50,33 @@ public class DockerfileWithDockerBuildConfigStrategyTest {
 
 	@Test
 	public void buildBuildConfig() {
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class));
 
-		BuildConfig buildConfig = buildConfigStrategy.buildBuildConfig(request, "testapp-source", null);
+		BuildConfig buildConfig = buildConfigStrategy.buildBuildConfig(request,
+				"testapp-source", null);
 
 		assertThat(buildConfig.getSpec().getSource().getType()).isEqualTo("Dockerfile");
 		assertThat(buildConfig.getSpec().getStrategy().getType()).isEqualTo("Docker");
-		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim()).startsWith("FROM java:8");
-		assertThat(buildConfig.getSpec().getOutput().getTo().getName()).isEqualTo("testapp-source:latest");
+		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim())
+				.startsWith("FROM java:8");
+		assertThat(buildConfig.getSpec().getOutput().getTo().getName())
+				.isEqualTo("testapp-source:latest");
 	}
 
 	@Test
 	public void buildBuildConfigWithImageTag() {
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class),
-				ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev"));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class),
+				ImmutableMap.of(
+						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG,
+						"dev"));
 
-		BuildConfig buildConfig = buildConfigStrategy.buildBuildConfig(request, "testapp-source", null);
+		BuildConfig buildConfig = buildConfigStrategy.buildBuildConfig(request,
+				"testapp-source", null);
 
-		assertThat(buildConfig.getSpec().getOutput().getTo().getName()).isEqualTo("testapp-source:dev");
+		assertThat(buildConfig.getSpec().getOutput().getTo().getName())
+				.isEqualTo("testapp-source:dev");
 	}
+
 }

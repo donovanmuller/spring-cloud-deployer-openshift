@@ -15,4 +15,5 @@ public class GitReferenceTest {
 				.isEqualTo("ssh://git@github.com/spring-cloud/spring-cloud-deployer.git");
 		assertThat(gitReference.getBranch()).isEqualTo("HEAD");
 	}
+
 }

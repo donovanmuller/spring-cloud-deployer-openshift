@@ -19,11 +19,13 @@ import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFactory implements DataflowSupport {
+public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFactory
+		implements DataflowSupport {
 
 	public DeploymentConfigWithIndexSuppportFactory(OpenShiftClient client,
-			OpenShiftDeployerProperties openShiftDeployerProperties, Container container, Map<String, String> labels,
-			ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy) {
+			OpenShiftDeployerProperties openShiftDeployerProperties, Container container,
+			Map<String, String> labels, ResourceRequirements resourceRequirements,
+			ImagePullPolicy imagePullPolicy) {
 		super(client, container, labels, resourceRequirements, imagePullPolicy,
 				new VolumeFactory(openShiftDeployerProperties));
 	}
@@ -59,8 +61,9 @@ public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFa
 	}
 
 	@Override
-	protected DeploymentConfig build(AppDeploymentRequest request, String appId, Container container,
-			Map<String, String> labels, ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy) {
+	protected DeploymentConfig build(AppDeploymentRequest request, String appId,
+			Container container, Map<String, String> labels,
+			ResourceRequirements resourceRequirements, ImagePullPolicy imagePullPolicy) {
 		labels.replace("spring-deployment-id", appId);
 		container.setName(appId);
 
@@ -69,18 +72,25 @@ public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFa
 		}
 
 		Optional<EnvVar> instanceIndexEnvVar = container.getEnv().stream()
-				.filter(envVar -> envVar.getName().equals(AppDeployer.INSTANCE_INDEX_PROPERTY_KEY)).findFirst();
-		String instanceIndex = NumberUtils.isNumber(StringUtils.substringAfterLast(appId, "-"))
-				? StringUtils.substringAfterLast(appId, "-") : Integer.valueOf(0).toString();
+				.filter(envVar -> envVar.getName()
+						.equals(AppDeployer.INSTANCE_INDEX_PROPERTY_KEY))
+				.findFirst();
+		String instanceIndex = NumberUtils
+				.isNumber(StringUtils.substringAfterLast(appId, "-"))
+						? StringUtils.substringAfterLast(appId, "-")
+						: Integer.valueOf(0).toString();
 		if (instanceIndexEnvVar.isPresent()) {
 			instanceIndexEnvVar.get().setValue(instanceIndex);
 		}
 		else {
-			container.getEnv().add(new EnvVar(AppDeployer.INSTANCE_INDEX_PROPERTY_KEY, instanceIndex, null));
-			container.getEnv().add(new EnvVar("SPRING_APPLICATION_INDEX", instanceIndex, null));
+			container.getEnv().add(new EnvVar(AppDeployer.INSTANCE_INDEX_PROPERTY_KEY,
+					instanceIndex, null));
+			container.getEnv()
+					.add(new EnvVar("SPRING_APPLICATION_INDEX", instanceIndex, null));
 		}
 
-		return super.build(request, appId, container, labels, resourceRequirements, imagePullPolicy);
+		return super.build(request, appId, container, labels, resourceRequirements,
+				imagePullPolicy);
 	}
 
 	protected Integer getReplicas(AppDeploymentRequest request) {

@@ -15,14 +15,18 @@ import io.fabric8.openshift.api.model.BuildConfig;
 import io.fabric8.openshift.api.model.BuildConfigBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class GitWithDockerBuildConfigStrategy extends BuildConfigStrategy implements OpenShiftSupport {
+public class GitWithDockerBuildConfigStrategy extends BuildConfigStrategy
+		implements OpenShiftSupport {
 
 	private BuildConfigFactory buildConfigFactory;
+
 	private GitReference gitReference;
+
 	private KubernetesDeployerProperties properties;
 
-	public GitWithDockerBuildConfigStrategy(BuildConfigFactory buildConfigFactory, GitReference gitReference,
-			KubernetesDeployerProperties properties, OpenShiftClient client, Map<String, String> labels) {
+	public GitWithDockerBuildConfigStrategy(BuildConfigFactory buildConfigFactory,
+			GitReference gitReference, KubernetesDeployerProperties properties,
+			OpenShiftClient client, Map<String, String> labels) {
 		super(buildConfigFactory, client, labels);
 		this.buildConfigFactory = buildConfigFactory;
 		this.gitReference = gitReference;
@@ -30,8 +34,8 @@ public class GitWithDockerBuildConfigStrategy extends BuildConfigStrategy implem
 	}
 
 	@Override
-	protected BuildConfig buildBuildConfig(final AppDeploymentRequest request, final String appId,
-			final Map<String, String> labels) {
+	protected BuildConfig buildBuildConfig(final AppDeploymentRequest request,
+			final String appId, final Map<String, String> labels) {
 		//@formatter:off
 		BuildConfig buildConfig = new BuildConfigBuilder(buildConfigFactory.buildBuildConfig(request, appId, labels))
 			.editSpec()
@@ -80,21 +84,21 @@ public class GitWithDockerBuildConfigStrategy extends BuildConfigStrategy implem
 	}
 
 	/**
-	 * Get the source context directory, the path where the Dockerfile is expected. Defaults to
-	 * src/main/docker
-	 *
+	 * Get the source context directory, the path where the Dockerfile is expected.
+	 * Defaults to src/main/docker
 	 * @param request
 	 * @return the context directory/path where the Dockerfile is expected
 	 */
 	protected String getContextDirectory(AppDeploymentRequest request) {
-		return request.getDefinition().getProperties()
-				.getOrDefault(OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH, "src/main/docker");
+		return request.getDefinition().getProperties().getOrDefault(
+				OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH,
+				"src/main/docker");
 	}
 
 	/**
-	 * Attempt to get the Secret from the app deployment properties or from the deployer environment
-	 * variables. See https://docs.openshift.org/latest/dev_guide/builds.html#using-secrets
-	 *
+	 * Attempt to get the Secret from the app deployment properties or from the deployer
+	 * environment variables. See
+	 * https://docs.openshift.org/latest/dev_guide/builds.html#using-secrets
 	 * @param request
 	 * @return a Secret if there is one available
 	 */
@@ -104,4 +108,5 @@ public class GitWithDockerBuildConfigStrategy extends BuildConfigStrategy implem
 				getEnvironmentVariable(properties.getEnvironmentVariables(),
 						OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_SOURCE_SECRET));
 	}
+
 }

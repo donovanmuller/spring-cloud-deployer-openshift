@@ -14,8 +14,8 @@ public interface DataflowSupport {
 
 	default boolean isIndexed(AppDeploymentRequest request) {
 		String indexedProperty = request.getDeploymentProperties()
-			.get(INDEXED_PROPERTY_KEY);
-		return  (indexedProperty != null)
-			? Boolean.valueOf(indexedProperty) : false;
+				.get(INDEXED_PROPERTY_KEY);
+		return (indexedProperty != null) ? Boolean.valueOf(indexedProperty) : false;
 	}
+
 }

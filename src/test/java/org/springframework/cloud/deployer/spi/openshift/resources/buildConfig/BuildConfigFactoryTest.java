@@ -32,18 +32,23 @@ public class BuildConfigFactoryTest {
 		buildConfigFactory = new BuildConfigFactory() {
 
 			@Override
-			protected BuildRequest buildBuildRequest(final AppDeploymentRequest request, final String appId) {
+			protected BuildRequest buildBuildRequest(final AppDeploymentRequest request,
+					final String appId) {
 				return null;
 			}
 		};
 
 		BuildConfig buildConfig = buildConfigFactory.buildBuildConfig(
-				new AppDeploymentRequest(new AppDefinition("testapp", null), mock(Resource.class)), "testapp-source",
-				ImmutableMap.of("spring-app-id", "testapp-source"));
+				new AppDeploymentRequest(new AppDefinition("testapp", null),
+						mock(Resource.class)),
+				"testapp-source", ImmutableMap.of("spring-app-id", "testapp-source"));
 
 		assertThat(buildConfig.getMetadata().getName()).isEqualTo("testapp-source");
-		assertThat(buildConfig.getMetadata().getLabels()).isEqualTo(ImmutableMap.of("spring-app-id", "testapp-source"));
+		assertThat(buildConfig.getMetadata().getLabels())
+				.isEqualTo(ImmutableMap.of("spring-app-id", "testapp-source"));
 		assertThat(buildConfig.getSpec().getTriggers())
-				.containsOnly(new BuildTriggerPolicyBuilder().withNewImageChange().endImageChange().build());
+				.containsOnly(new BuildTriggerPolicyBuilder().withNewImageChange()
+						.endImageChange().build());
 	}
+
 }

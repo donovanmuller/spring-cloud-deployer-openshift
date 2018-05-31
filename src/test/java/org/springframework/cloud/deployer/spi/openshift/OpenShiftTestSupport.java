@@ -13,9 +13,11 @@ import org.springframework.context.annotation.Import;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 /**
- * JUnit {@link org.junit.Rule} that detects the fact that a OpenShift installation is available.
+ * JUnit {@link org.junit.Rule} that detects the fact that a OpenShift installation is
+ * available.
  */
-public class OpenShiftTestSupport extends AbstractExternalResourceTestSupport<KubernetesClient> {
+public class OpenShiftTestSupport
+		extends AbstractExternalResourceTestSupport<KubernetesClient> {
 
 	private ConfigurableApplicationContext context;
 
@@ -30,11 +32,8 @@ public class OpenShiftTestSupport extends AbstractExternalResourceTestSupport<Ku
 
 	@Override
 	protected void obtainResource() throws Exception {
-		context = new SpringApplicationBuilder()
-			.web(false)
-			.bannerMode(Banner.Mode.OFF)
-			.sources(Config.class)
-			.run();
+		context = new SpringApplicationBuilder().web(false).bannerMode(Banner.Mode.OFF)
+				.sources(Config.class).run();
 		resource = context.getBean(KubernetesClient.class);
 		resource.namespaces().list();
 	}
@@ -48,5 +47,7 @@ public class OpenShiftTestSupport extends AbstractExternalResourceTestSupport<Ku
 		public MavenProperties mavenProperties() {
 			return new MavenProperties();
 		}
+
 	}
+
 }

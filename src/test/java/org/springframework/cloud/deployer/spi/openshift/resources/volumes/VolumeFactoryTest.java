@@ -24,10 +24,11 @@ public class VolumeFactoryTest {
 	@Test
 	public void addVolumeMounts() {
 		OpenShiftDeployerProperties properties = new OpenShiftDeployerProperties();
-		properties.setVolumes(ImmutableList
-				.of(new VolumeBuilder().withName("testpvc").withNewPersistentVolumeClaim("testClaim", true).build()));
+		properties.setVolumes(ImmutableList.of(new VolumeBuilder().withName("testpvc")
+				.withNewPersistentVolumeClaim("testClaim", true).build()));
 		volumeFactory = new VolumeFactory(properties);
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null),
 				//@formatter:off
 				mock(Resource.class), ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumes",
 					"["
@@ -39,9 +40,13 @@ public class VolumeFactoryTest {
 		List<Volume> volumes = volumeFactory.addObject(request, "1");
 
 		assertThat(volumes).containsOnly(
-				new VolumeBuilder().withName("testhostpath").withNewHostPath("/test/override/hostPath").build(),
-				new VolumeBuilder().withName("testpvc").withNewPersistentVolumeClaim("testClaim", true).build(),
-				new VolumeBuilder().withName("testnfs").withNewNfs("/test/override/nfs", null, "192.168.1.1:111")
+				new VolumeBuilder().withName("testhostpath")
+						.withNewHostPath("/test/override/hostPath").build(),
+				new VolumeBuilder().withName("testpvc")
+						.withNewPersistentVolumeClaim("testClaim", true).build(),
+				new VolumeBuilder().withName("testnfs")
+						.withNewNfs("/test/override/nfs", null, "192.168.1.1:111")
 						.build());
 	}
+
 }

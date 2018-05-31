@@ -17,11 +17,15 @@ import io.fabric8.openshift.client.OpenShiftClient;
 public class RouteFactory implements ObjectFactory<Route> {
 
 	private OpenShiftClient client;
+
 	private OpenShiftDeployerProperties openShiftDeployerProperties;
+
 	private Integer port;
+
 	private Map<String, String> labels;
 
-	public RouteFactory(OpenShiftClient client, OpenShiftDeployerProperties openShiftDeployerProperties, Integer port,
+	public RouteFactory(OpenShiftClient client,
+			OpenShiftDeployerProperties openShiftDeployerProperties, Integer port,
 			Map<String, String> labels) {
 		this.client = client;
 		this.openShiftDeployerProperties = openShiftDeployerProperties;
@@ -52,9 +56,10 @@ public class RouteFactory implements ObjectFactory<Route> {
 		return Optional.ofNullable(client.routes().withName(name).fromServer().get());
 	}
 
-	protected Route build(AppDeploymentRequest request, String appId, Integer port, Map<String, String> labels) {
+	protected Route build(AppDeploymentRequest request, String appId, Integer port,
+			Map<String, String> labels) {
 		String serviceNameOrAppId = request.getDeploymentProperties().getOrDefault(
-			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_NAME, appId);
+				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_NAME, appId);
 
 		//@formatter:off
         return new RouteBuilder()
@@ -78,8 +83,9 @@ public class RouteFactory implements ObjectFactory<Route> {
 
 	/**
 	 * Builds the <code>host</code> value for a Route. If there is a
-	 * <code>spring.cloud.deployer.openshift.deployment.route.hostname</code> deployment variable
-	 * with a value, this will be used as the <code>host</code> value for the Route (see
+	 * <code>spring.cloud.deployer.openshift.deployment.route.hostname</code> deployment
+	 * variable with a value, this will be used as the <code>host</code> value for the
+	 * Route (see
 	 * https://docs.openshift.com/container-platform/latest/architecture/networking/routes.html#route-hostnames)
 	 * Alternatively, the <code>host</code> value is built up using:
 	 *
@@ -93,18 +99,20 @@ public class RouteFactory implements ObjectFactory<Route> {
 	 * The format of the Route host is built as follows:
 	 *
 	 * <p>
-	 * 	<code>{application}-{namespace}-{default routing subdomain}</code>
+	 * <code>{application}-{namespace}-{default routing subdomain}</code>
 	 * </p>
 	 *
-	 * See https://docs.openshift.com/container-platform/latest/architecture/networking/routes.html
-	 *
+	 * See
+	 * https://docs.openshift.com/container-platform/latest/architecture/networking/routes.html
 	 * @param request
 	 * @param appId
 	 * @return host value for the Route
 	 */
 	protected String buildHost(AppDeploymentRequest request, String appId) {
-		return request.getDeploymentProperties()
-				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME, format("%s-%s.%s",
-						appId, client.getNamespace(), openShiftDeployerProperties.getDefaultRoutingSubdomain()));
+		return request.getDeploymentProperties().getOrDefault(
+				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_ROUTE_HOSTNAME,
+				format("%s-%s.%s", appId, client.getNamespace(),
+						openShiftDeployerProperties.getDefaultRoutingSubdomain()));
 	}
+
 }

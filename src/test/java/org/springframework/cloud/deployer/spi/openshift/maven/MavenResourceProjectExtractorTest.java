@@ -26,8 +26,7 @@ public class MavenResourceProjectExtractorTest {
 		MavenProperties mavenProperties = new MavenProperties();
 		mavenProperties.setLocalRepository("target/.m2/repository");
 		MavenProject mavenProject = mavenResourceProjectExtractor.extractMavenProject(
-				MavenResource.parse("org.test:test-app:1.0-SNAPSHOT"),
-			mavenProperties);
+				MavenResource.parse("org.test:test-app:1.0-SNAPSHOT"), mavenProperties);
 
 		assertNotNull(mavenProject);
 	}
@@ -45,4 +44,5 @@ public class MavenResourceProjectExtractorTest {
 						source.getFileName().toString()).toPath(),
 				StandardCopyOption.REPLACE_EXISTING);
 	}
+
 }

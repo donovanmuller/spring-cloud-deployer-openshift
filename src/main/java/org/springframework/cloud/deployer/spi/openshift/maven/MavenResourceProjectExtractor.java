@@ -58,7 +58,6 @@ public class MavenResourceProjectExtractor {
 	/**
 	 * See
 	 * {@link org.springframework.cloud.deployer.resource.maven.MavenArtifactResolver#toArtifact}
-	 *
 	 * @param resource
 	 * @return a Maven {@link Artifact}
 	 */
@@ -68,4 +67,5 @@ public class MavenResourceProjectExtractor {
 				resource.getClassifier() != null ? resource.getClassifier() : "",
 				new DefaultArtifactHandler());
 	}
+
 }

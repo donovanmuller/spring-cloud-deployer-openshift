@@ -12,11 +12,13 @@ import io.fabric8.openshift.client.OpenShiftClient;
 public abstract class BuildConfigStrategy implements ObjectFactory<BuildConfig> {
 
 	private OpenShiftClient client;
+
 	private BuildConfigFactory buildConfigFactory;
+
 	private Map<String, String> labels;
 
-	protected BuildConfigStrategy(BuildConfigFactory buildConfigFactory, OpenShiftClient client,
-			Map<String, String> labels) {
+	protected BuildConfigStrategy(BuildConfigFactory buildConfigFactory,
+			OpenShiftClient client, Map<String, String> labels) {
 		this.buildConfigFactory = buildConfigFactory;
 		this.client = client;
 		this.labels = labels;
@@ -28,9 +30,9 @@ public abstract class BuildConfigStrategy implements ObjectFactory<BuildConfig> 
 
 		if (getExisting(appId).isPresent()) {
 			/**
-			 * Replacing a BuildConfig doesn't currently work because of "already modified" issues.
-			 * Need to investigate if there is a clean way around it. For now, delete and
-			 * recreate...
+			 * Replacing a BuildConfig doesn't currently work because of "already
+			 * modified" issues. Need to investigate if there is a clean way around it.
+			 * For now, delete and recreate...
 			 */
 			// buildConfig = client.buildConfigs().createOrReplace(buildConfig);
 			client.buildConfigs().withName(appId).delete();
@@ -46,11 +48,12 @@ public abstract class BuildConfigStrategy implements ObjectFactory<BuildConfig> 
 
 	@Override
 	public void applyObject(AppDeploymentRequest request, String appId) {
-		client.buildConfigs().withName(appId).instantiate(buildConfigFactory.buildBuildRequest(request, appId));
+		client.buildConfigs().withName(appId)
+				.instantiate(buildConfigFactory.buildBuildRequest(request, appId));
 	}
 
-	protected abstract BuildConfig buildBuildConfig(AppDeploymentRequest request, String appId,
-			Map<String, String> labels);
+	protected abstract BuildConfig buildBuildConfig(AppDeploymentRequest request,
+			String appId, Map<String, String> labels);
 
 	protected Optional<BuildConfig> getExisting(String name) {
 		//@formatter:off
@@ -62,4 +65,5 @@ public abstract class BuildConfigStrategy implements ObjectFactory<BuildConfig> 
 		return Optional.ofNullable(value);
 		//@formatter:on
 	}
+
 }

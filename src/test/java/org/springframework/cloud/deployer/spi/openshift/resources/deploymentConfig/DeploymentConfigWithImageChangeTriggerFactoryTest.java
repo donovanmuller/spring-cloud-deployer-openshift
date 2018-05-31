@@ -33,48 +33,62 @@ public class DeploymentConfigWithImageChangeTriggerFactoryTest {
 	@Test
 	public void buildDeploymentConfig() {
 		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
-				server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null, null,
+				server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null,
+				null, null, ImagePullPolicy.Always);
+
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class));
+
+		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request,
+				"testapp-source", new Container(), new HashMap<>(), null,
 				ImagePullPolicy.Always);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class));
+		assertThat(deploymentConfig.getSpec().getTriggers())
+				.has(new Condition<DeploymentTriggerPolicy>() {
 
-		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
-				new HashMap<>(), null, ImagePullPolicy.Always);
-
-		assertThat(deploymentConfig.getSpec().getTriggers()).has(new Condition<DeploymentTriggerPolicy>() {
-
-			@Override
-			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
-				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
-				return imageChangeParams.getContainerNames().contains("testapp-source")
-						&& imageChangeParams.getFrom().getName().equals("testapp-source:latest");
-			}
-		}, Index.atIndex(1));
+					@Override
+					public boolean matches(
+							final DeploymentTriggerPolicy deploymentTriggerPolicy) {
+						DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy
+								.getImageChangeParams();
+						return imageChangeParams.getContainerNames()
+								.contains("testapp-source")
+								&& imageChangeParams.getFrom().getName()
+										.equals("testapp-source:latest");
+					}
+				}, Index.atIndex(1));
 	}
 
 	@Test
 	public void buildDeploymentConfigWithImageTag() {
 		deploymentConfigFactory = new DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory(
-				server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null, null, null,
+				server.getOpenshiftClient(), new OpenShiftDeployerProperties(), null,
+				null, null, ImagePullPolicy.Always);
+
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class),
+				ImmutableMap.of(
+						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG,
+						"dev"));
+
+		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request,
+				"testapp-source", new Container(), new HashMap<>(), null,
 				ImagePullPolicy.Always);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class),
-				ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_IMAGE_TAG, "dev"));
+		assertThat(deploymentConfig.getSpec().getTriggers())
+				.has(new Condition<DeploymentTriggerPolicy>() {
 
-		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
-				new HashMap<>(), null, ImagePullPolicy.Always);
-
-		assertThat(deploymentConfig.getSpec().getTriggers()).has(new Condition<DeploymentTriggerPolicy>() {
-
-			@Override
-			public boolean matches(final DeploymentTriggerPolicy deploymentTriggerPolicy) {
-				DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy.getImageChangeParams();
-				return imageChangeParams.getContainerNames().contains("testapp-source")
-						&& imageChangeParams.getFrom().getName().equals("testapp-source:dev");
-			}
-		}, Index.atIndex(1));
+					@Override
+					public boolean matches(
+							final DeploymentTriggerPolicy deploymentTriggerPolicy) {
+						DeploymentTriggerImageChangeParams imageChangeParams = deploymentTriggerPolicy
+								.getImageChangeParams();
+						return imageChangeParams.getContainerNames()
+								.contains("testapp-source")
+								&& imageChangeParams.getFrom().getName()
+										.equals("testapp-source:dev");
+					}
+				}, Index.atIndex(1));
 	}
 
 }

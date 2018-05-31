@@ -14,4 +14,5 @@ public abstract class AbstractObjectFactory<T> implements ObjectFactory {
 	protected abstract T createObject(AppDeploymentRequest request, String appId);
 
 	protected abstract Optional<T> getExisting(String name);
+
 }

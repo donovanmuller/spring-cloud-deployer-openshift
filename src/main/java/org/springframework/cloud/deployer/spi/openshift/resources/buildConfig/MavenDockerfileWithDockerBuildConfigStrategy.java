@@ -15,15 +15,19 @@ import org.springframework.util.FileCopyUtils;
 
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class MavenDockerfileWithDockerBuildConfigStrategy extends DockerfileWithDockerBuildConfigStrategy {
-	public MavenDockerfileWithDockerBuildConfigStrategy(BuildConfigFactory buildConfigFactory,
-			OpenShiftDeployerProperties openShiftDeployerProperties, OpenShiftClient client,
-			Map<String, String> labels) {
+public class MavenDockerfileWithDockerBuildConfigStrategy
+		extends DockerfileWithDockerBuildConfigStrategy {
+
+	public MavenDockerfileWithDockerBuildConfigStrategy(
+			BuildConfigFactory buildConfigFactory,
+			OpenShiftDeployerProperties openShiftDeployerProperties,
+			OpenShiftClient client, Map<String, String> labels) {
 		super(buildConfigFactory, openShiftDeployerProperties, client, labels);
 	}
 
 	@Override
-	protected String getDockerfile(AppDeploymentRequest request, OpenShiftDeployerProperties properties) {
+	protected String getDockerfile(AppDeploymentRequest request,
+			OpenShiftDeployerProperties properties) {
 		String dockerFile = request.getDeploymentProperties()
 				.get(OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DOCKERFILE);
 		try {
@@ -33,13 +37,15 @@ public class MavenDockerfileWithDockerBuildConfigStrategy extends DockerfileWith
 				}
 			}
 			else {
-				dockerFile = resourceToString(new ClassPathResource(request.getDeploymentProperties().getOrDefault(
-						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DEFAULT_DOCKERFILE,
-						properties.getDefaultDockerfile())));
+				dockerFile = resourceToString(new ClassPathResource(
+						request.getDeploymentProperties().getOrDefault(
+								OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DEFAULT_DOCKERFILE,
+								properties.getDefaultDockerfile())));
 			}
 		}
 		catch (IOException e) {
-			throw new RuntimeException("Could not read default Dockerfile.artifactory", e);
+			throw new RuntimeException("Could not read default Dockerfile.artifactory",
+					e);
 		}
 
 		return dockerFile;
@@ -48,4 +54,5 @@ public class MavenDockerfileWithDockerBuildConfigStrategy extends DockerfileWith
 	private String resourceToString(Resource resource) throws IOException {
 		return new String(FileCopyUtils.copyToByteArray(resource.getInputStream()));
 	}
+
 }

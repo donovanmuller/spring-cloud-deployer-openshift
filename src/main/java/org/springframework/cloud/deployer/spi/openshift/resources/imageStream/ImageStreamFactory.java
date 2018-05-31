@@ -42,4 +42,5 @@ public class ImageStreamFactory extends AbstractObjectFactory<ImageStream> {
                 .get());
 		//@formatter:on
 	}
+
 }

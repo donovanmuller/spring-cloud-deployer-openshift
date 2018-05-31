@@ -43,12 +43,15 @@ import io.fabric8.openshift.client.OpenShiftClient;
 
 /**
  * Copied <a href="https://github.com/spring-cloud/spring-cloud-deployer-kubernetes">from
- * spring-cloud-deployer-kubernetes</a> to test the <code>docker:</code> resource handling.
+ * spring-cloud-deployer-kubernetes</a> to test the <code>docker:</code> resource
+ * handling.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ContextConfiguration(classes = { OpenShiftAppDeployerIntegrationTest.Config.class, OpenShiftAutoConfiguration.class })
-public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerIntegrationTests {
+@ContextConfiguration(classes = { OpenShiftAppDeployerIntegrationTest.Config.class,
+		OpenShiftAutoConfiguration.class })
+public class OpenShiftAppDeployerIntegrationTest
+		extends AbstractAppDeployerIntegrationTests {
 
 	@ClassRule
 	public static OpenShiftTestSupport openShiftAvailable = new OpenShiftTestSupport();
@@ -87,29 +90,33 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 		openShiftDeployerProperties.setLivenessProbePeriod(10);
 		openShiftDeployerProperties.setMaxTerminatedErrorRestarts(1);
 		openShiftDeployerProperties.setMaxCrashLoopBackOffRestarts(1);
-		ContainerFactory containerFactory = new OpenShiftContainerFactory(openShiftDeployerProperties,
+		ContainerFactory containerFactory = new OpenShiftContainerFactory(
+				openShiftDeployerProperties,
 				new VolumeMountFactory(new OpenShiftDeployerProperties()));
-		AppDeployer lbAppDeployer = new OpenShiftAppDeployer(openShiftDeployerProperties, openShiftClient,
-				containerFactory);
+		AppDeployer lbAppDeployer = new OpenShiftAppDeployer(openShiftDeployerProperties,
+				openShiftClient, containerFactory);
 
 		AppDefinition definition = new AppDefinition(randomName(), null);
 		Resource resource = testApplication();
 		Map<String, String> props = new HashMap<>();
 		// setting to small memory value will cause app to fail to be deployed
 		props.put("spring.cloud.deployer.kubernetes.memory", "8Mi");
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, props);
+		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource,
+				props);
 
 		log.info("Deploying {}...", request.getDefinition().getName());
 		String deploymentId = lbAppDeployer.deploy(request);
 		Timeout timeout = deploymentTimeout();
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(failed))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(failed))),
+						timeout.maxAttempts, timeout.pause));
 
 		log.info("Undeploying {}...", deploymentId);
 		timeout = undeploymentTimeout();
 		lbAppDeployer.undeploy(deploymentId);
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+						timeout.maxAttempts, timeout.pause));
 	}
 
 	@Test
@@ -120,7 +127,8 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 		lbProperties.setMinutesToWaitForLoadBalancer(1);
 		ContainerFactory containerFactory = new OpenShiftContainerFactory(lbProperties,
 				new VolumeMountFactory(new OpenShiftDeployerProperties()));
-		AppDeployer lbAppDeployer = new OpenShiftAppDeployer(lbProperties, openShiftClient, containerFactory);
+		AppDeployer lbAppDeployer = new OpenShiftAppDeployer(lbProperties,
+				openShiftClient, containerFactory);
 
 		AppDefinition definition = new AppDefinition(randomName(), null);
 		Resource resource = testApplication();
@@ -129,14 +137,16 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 		log.info("Deploying {}...", request.getDefinition().getName());
 		String deploymentId = lbAppDeployer.deploy(request);
 		Timeout timeout = deploymentTimeout();
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
+						timeout.maxAttempts, timeout.pause));
 
 		log.info("Undeploying {}...", deploymentId);
 		timeout = undeploymentTimeout();
 		lbAppDeployer.undeploy(deploymentId);
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+						timeout.maxAttempts, timeout.pause));
 	}
 
 	@Test
@@ -154,12 +164,13 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 				.withName(mountName)
 				.build()));
 		//@formatter:on
-		openShiftDeployerProperties
-				.setVolumeMounts(Collections.singletonList(new VolumeMount(hostPath, mountName, false, null)));
-		ContainerFactory containerFactory = new OpenShiftContainerFactory(new OpenShiftDeployerProperties(),
+		openShiftDeployerProperties.setVolumeMounts(Collections
+				.singletonList(new VolumeMount(hostPath, mountName, false, null)));
+		ContainerFactory containerFactory = new OpenShiftContainerFactory(
+				new OpenShiftDeployerProperties(),
 				new VolumeMountFactory(openShiftDeployerProperties));
-		AppDeployer lbAppDeployer = new OpenShiftAppDeployer(openShiftDeployerProperties, openShiftClient,
-				containerFactory);
+		AppDeployer lbAppDeployer = new OpenShiftAppDeployer(openShiftDeployerProperties,
+				openShiftClient, containerFactory);
 
 		AppDefinition definition = new AppDefinition(randomName(),
 				Collections.singletonMap("logging.file", containerPath + subPath));
@@ -169,11 +180,14 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 		log.info("Deploying {}...", request.getDefinition().getName());
 		String deploymentId = lbAppDeployer.deploy(request);
 		Timeout timeout = deploymentTimeout();
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
+						timeout.maxAttempts, timeout.pause));
 
-		Map<String, String> selector = Collections.singletonMap("spring-app-id", deploymentId);
-		PodSpec spec = openShiftClient.pods().withLabels(selector).list().getItems().get(0).getSpec();
+		Map<String, String> selector = Collections.singletonMap("spring-app-id",
+				deploymentId);
+		PodSpec spec = openShiftClient.pods().withLabels(selector).list().getItems()
+				.get(0).getSpec();
 		assertThat(spec.getVolumes(), is(notNullValue()));
 		//@formatter:off
 		Volume volume = spec.getVolumes().stream()
@@ -187,29 +201,35 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 		log.info("Undeploying {}...", deploymentId);
 		timeout = undeploymentTimeout();
 		lbAppDeployer.undeploy(deploymentId);
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+						timeout.maxAttempts, timeout.pause));
 	}
 
 	@Test
 	public void testDeploymentWithGroupAndIndex() throws IOException {
 		log.info("Testing {}...", "DeploymentWithWithGroupAndIndex");
 
-		AppDefinition definition = new AppDefinition(randomName().substring(0, 18), new HashMap<>());
+		AppDefinition definition = new AppDefinition(randomName().substring(0, 18),
+				new HashMap<>());
 		Resource resource = testApplication();
 		Map<String, String> props = new HashMap<>();
 		props.put(AppDeployer.GROUP_PROPERTY_KEY, "foo");
 		props.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, props);
+		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource,
+				props);
 
 		log.info("Deploying {}...", request.getDefinition().getName());
 		String deploymentId = appDeployer.deploy(request);
 		Timeout timeout = deploymentTimeout();
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(deployed))),
+						timeout.maxAttempts, timeout.pause));
 
-		Map<String, String> selector = Collections.singletonMap("spring-app-id", deploymentId);
-		PodSpec spec = openShiftClient.pods().withLabels(selector).list().getItems().get(0).getSpec();
+		Map<String, String> selector = Collections.singletonMap("spring-app-id",
+				deploymentId);
+		PodSpec spec = openShiftClient.pods().withLabels(selector).list().getItems()
+				.get(0).getSpec();
 		Map<String, String> envVars = new HashMap<>();
 		for (EnvVar e : spec.getContainers().get(0).getEnv()) {
 			envVars.put(e.getName(), e.getValue());
@@ -220,8 +240,9 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 		log.info("Undeploying {}...", deploymentId);
 		timeout = undeploymentTimeout();
 		appDeployer.undeploy(deploymentId);
-		assertThat(deploymentId, eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
-				timeout.maxAttempts, timeout.pause));
+		assertThat(deploymentId,
+				eventually(hasStatusThat(Matchers.hasProperty("state", is(unknown))),
+						timeout.maxAttempts, timeout.pause));
 	}
 
 	@Override
@@ -237,6 +258,8 @@ public class OpenShiftAppDeployerIntegrationTest extends AbstractAppDeployerInte
 
 	@Override
 	protected Resource testApplication() {
-		return new DockerResource("springcloud/spring-cloud-deployer-spi-test-app:latest");
+		return new DockerResource(
+				"springcloud/spring-cloud-deployer-spi-test-app:latest");
 	}
+
 }

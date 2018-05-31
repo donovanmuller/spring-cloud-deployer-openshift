@@ -3,6 +3,7 @@ package org.springframework.cloud.deployer.spi.openshift.resources.service;
 public class ServiceDependency {
 
 	private String name;
+
 	private final String kind = "Service";
 
 	public ServiceDependency() {
@@ -19,4 +20,5 @@ public class ServiceDependency {
 	public String getKind() {
 		return kind;
 	}
+
 }

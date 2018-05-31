@@ -19,12 +19,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Copied <a href="https://github.com/spring-cloud/spring-cloud-deployer-kubernetes">from
- * spring-cloud-deployer-kubernetes</a> to test the <code>docker:</code> resource handling.
+ * spring-cloud-deployer-kubernetes</a> to test the <code>docker:</code> resource
+ * handling.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ContextConfiguration(classes = { OpenShiftTaskLauncherIntegrationTest.Config.class, OpenShiftAutoConfiguration.class })
-public class OpenShiftTaskLauncherIntegrationTest extends AbstractTaskLauncherIntegrationTests {
+@ContextConfiguration(classes = { OpenShiftTaskLauncherIntegrationTest.Config.class,
+		OpenShiftAutoConfiguration.class })
+public class OpenShiftTaskLauncherIntegrationTest
+		extends AbstractTaskLauncherIntegrationTests {
 
 	@ClassRule
 	public static OpenShiftTestSupport openShiftTestSupport = new OpenShiftTestSupport();
@@ -57,11 +60,13 @@ public class OpenShiftTaskLauncherIntegrationTest extends AbstractTaskLauncherIn
 
 	@Override
 	protected Resource testApplication() {
-		return new DockerResource("springcloud/spring-cloud-deployer-spi-test-app:latest");
+		return new DockerResource(
+				"springcloud/spring-cloud-deployer-spi-test-app:latest");
 	}
 
 	@Override
 	protected Timeout deploymentTimeout() {
 		return new Timeout(36, 5000);
 	}
+
 }

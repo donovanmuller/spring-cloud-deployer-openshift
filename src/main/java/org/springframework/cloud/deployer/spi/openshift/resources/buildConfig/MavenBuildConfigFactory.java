@@ -22,19 +22,27 @@ import io.fabric8.openshift.api.model.BuildRequestBuilder;
 public class MavenBuildConfigFactory extends BuildConfigFactory {
 
 	public static String SPRING_BUILD_APP_GROUPID_ENV_VAR = "app_groupId";
+
 	public static String SPRING_BUILD_APP_ARTIFACTID_ENV_VAR = "app_artifactId";
+
 	public static String SPRING_BUILD_APP_VERSION_ENV_VAR = "app_version";
+
 	public static String SPRING_BUILD_RESOURCE_HOST_ENV_VAR = "app_resource_host";
+
 	public static String SPRING_BUILD_RESOURCE_URL_ENV_VAR = "app_resource_url";
+
 	public static String SPRING_BUILD_AUTH_USERNAME_ENV_VAR = "repo_auth_username";
+
 	public static String SPRING_BUILD_AUTH_PASSWORD_ENV_VAR = "repo_auth_password";
 
 	private KubernetesDeployerProperties properties;
+
 	private MavenProperties mavenProperties;
+
 	private ResourceHash resourceHash;
 
-	public MavenBuildConfigFactory(KubernetesDeployerProperties properties, ResourceHash resourceHash,
-			MavenProperties mavenProperties) {
+	public MavenBuildConfigFactory(KubernetesDeployerProperties properties,
+			ResourceHash resourceHash, MavenProperties mavenProperties) {
 		this.properties = properties;
 		this.mavenProperties = mavenProperties;
 		this.resourceHash = resourceHash;
@@ -43,8 +51,9 @@ public class MavenBuildConfigFactory extends BuildConfigFactory {
 	@Override
 	protected BuildRequest buildBuildRequest(AppDeploymentRequest request, String appId) {
 		MavenResource mavenResource = (MavenResource) request.getResource();
-		MavenProperties.Authentication authentication = Optional
-				.ofNullable(getFirstRemoteRepository(mavenProperties.getRemoteRepositories()).getAuth())
+		MavenProperties.Authentication authentication = Optional.ofNullable(
+				getFirstRemoteRepository(mavenProperties.getRemoteRepositories())
+						.getAuth())
 				.orElse(new MavenProperties.Authentication());
 
 		//@formatter:off
@@ -70,30 +79,33 @@ public class MavenBuildConfigFactory extends BuildConfigFactory {
 	}
 
 	/**
-	 * Convert a remote repository URL and Maven coordinate into a valid URL. This URL will directly
-	 * reference the Jar artifact to download. E.g. Remote repository URL
+	 * Convert a remote repository URL and Maven coordinate into a valid URL. This URL
+	 * will directly reference the Jar artifact to download. E.g. Remote repository URL
 	 * [https://repo.spring.io/libs-snapshot-local] with Maven coordinate
-	 * [org.springframework.cloud.stream.app:http-source-kafka:1.0.0.BUILD-SNAPSHOT] will be
-	 * converted into the following URL:
+	 * [org.springframework.cloud.stream.app:http-source-kafka:1.0.0.BUILD-SNAPSHOT] will
+	 * be converted into the following URL:
 	 * https://repo.spring.io/libs-snapshot-local/org/springframework/cloud/stream/app/log
 	 * -sink-kafka/1.0.0.BUILD-SNAPSHOT/log-sink-kafka-1.0.0.BUILD-SNAPSHOT.jar
-	 *
 	 * @param remoteRepositories
 	 * @param resource
 	 * @return a valid URL referencing the Jar artifact on the remote repository
 	 */
-	private String toRemoteUrl(Map<String, MavenProperties.RemoteRepository> remoteRepositories,
+	private String toRemoteUrl(
+			Map<String, MavenProperties.RemoteRepository> remoteRepositories,
 			MavenResource resource) {
 		String remoteRepository = getFirstRemoteRepository(remoteRepositories).getUrl();
-		String artifactPath = format("%s/%s/%s/%s", resource.getGroupId().replaceAll("\\.", "/"),
-				resource.getArtifactId(), resource.getVersion(), resource.getFilename());
+		String artifactPath = format("%s/%s/%s/%s",
+				resource.getGroupId().replaceAll("\\.", "/"), resource.getArtifactId(),
+				resource.getVersion(), resource.getFilename());
 
 		return format("%s/%s", remoteRepository, artifactPath);
 	}
 
-	private String toHost(Map<String, MavenProperties.RemoteRepository> remoteRepositories) {
+	private String toHost(
+			Map<String, MavenProperties.RemoteRepository> remoteRepositories) {
 		try {
-			return new URL(getFirstRemoteRepository(remoteRepositories).getUrl()).getHost();
+			return new URL(getFirstRemoteRepository(remoteRepositories).getUrl())
+					.getHost();
 		}
 		catch (MalformedURLException e) {
 			throw new IllegalArgumentException("Remote Maven URL is invalid", e);
@@ -101,10 +113,9 @@ public class MavenBuildConfigFactory extends BuildConfigFactory {
 	}
 
 	/**
-	 * Currently only support for a single remote repository. Or, more precisely, if there are
-	 * multiple remote repositories, the first repository is chosen as the source of the Maven
-	 * artifacts. I.e. what becomes the URL for the Jar file to download.
-	 *
+	 * Currently only support for a single remote repository. Or, more precisely, if there
+	 * are multiple remote repositories, the first repository is chosen as the source of
+	 * the Maven artifacts. I.e. what becomes the URL for the Jar file to download.
 	 * @param remoteRepositories
 	 * @return the first remote repository
 	 */
@@ -113,4 +124,5 @@ public class MavenBuildConfigFactory extends BuildConfigFactory {
 		Assert.notEmpty(remoteRepositories, "No remote repository specified");
 		return new TreeMap<>(remoteRepositories).firstEntry().getValue();
 	}
+
 }

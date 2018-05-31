@@ -42,21 +42,27 @@ public class MavenBuildConfigFactoryTest {
 				new MavenProperties.RemoteRepository("http://repo1/public"));
 		KubernetesDeployerProperties properties = new KubernetesDeployerProperties();
 
-		buildConfigFactory = new MavenBuildConfigFactory(properties, resourceHash, mavenProperties) {
+		buildConfigFactory = new MavenBuildConfigFactory(properties, resourceHash,
+				mavenProperties) {
 		};
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				MavenResource.parse("org.test:testapp-source:1.0-SNAPSHOT", mavenProperties));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), MavenResource
+						.parse("org.test:testapp-source:1.0-SNAPSHOT", mavenProperties));
 
-		BuildRequest buildRequest = buildConfigFactory.buildBuildRequest(request, "testapp-source");
+		BuildRequest buildRequest = buildConfigFactory.buildBuildRequest(request,
+				"testapp-source");
 
 		assertThat(buildRequest.getMetadata().getName()).isEqualTo("testapp-source");
-		assertThat(buildRequest.getEnv())
-				.contains(new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_ID_ENV_VAR, "1", null));
-		assertThat(buildRequest.getEnv())
-				.contains(new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_APP_NAME_ENV_VAR, "testapp-source", null));
-		assertThat(buildRequest.getEnv()).contains(new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_RESOURCE_URL_ENV_VAR,
-				"http://repo1/public/org/test/testapp-source/1.0-SNAPSHOT/testapp-source-1.0-SNAPSHOT.jar", null));
+		assertThat(buildRequest.getEnv()).contains(
+				new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_ID_ENV_VAR, "1", null));
+		assertThat(buildRequest.getEnv()).contains(
+				new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_APP_NAME_ENV_VAR,
+						"testapp-source", null));
+		assertThat(buildRequest.getEnv()).contains(new EnvVar(
+				MavenBuildConfigFactory.SPRING_BUILD_RESOURCE_URL_ENV_VAR,
+				"http://repo1/public/org/test/testapp-source/1.0-SNAPSHOT/testapp-source-1.0-SNAPSHOT.jar",
+				null));
 	}
 
 	@Test
@@ -68,21 +74,27 @@ public class MavenBuildConfigFactoryTest {
 		authentication.setUsername("admin");
 		authentication.setPassword("admin");
 		mavenProperties.getRemoteRepositories().put("repo1",
-				new MavenProperties.RemoteRepository("http://repo1/public", authentication));
+				new MavenProperties.RemoteRepository("http://repo1/public",
+						authentication));
 		KubernetesDeployerProperties properties = new KubernetesDeployerProperties();
 
-		buildConfigFactory = new MavenBuildConfigFactory(properties, resourceHash, mavenProperties) {
+		buildConfigFactory = new MavenBuildConfigFactory(properties, resourceHash,
+				mavenProperties) {
 		};
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				MavenResource.parse("org.test:testapp-source:1.0-SNAPSHOT", mavenProperties));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), MavenResource
+						.parse("org.test:testapp-source:1.0-SNAPSHOT", mavenProperties));
 
-		BuildRequest buildRequest = buildConfigFactory.buildBuildRequest(request, "testapp-source");
+		BuildRequest buildRequest = buildConfigFactory.buildBuildRequest(request,
+				"testapp-source");
 
-		assertThat(buildRequest.getEnv())
-				.contains(new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_AUTH_USERNAME_ENV_VAR, "admin", null));
-		assertThat(buildRequest.getEnv())
-				.contains(new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_AUTH_PASSWORD_ENV_VAR, "admin", null));
+		assertThat(buildRequest.getEnv()).contains(
+				new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_AUTH_USERNAME_ENV_VAR,
+						"admin", null));
+		assertThat(buildRequest.getEnv()).contains(
+				new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_AUTH_PASSWORD_ENV_VAR,
+						"admin", null));
 	}
 
 	@Test
@@ -94,15 +106,20 @@ public class MavenBuildConfigFactoryTest {
 				new MavenProperties.RemoteRepository("http://nexusRepo1/public"));
 		KubernetesDeployerProperties properties = new KubernetesDeployerProperties();
 
-		buildConfigFactory = new MavenBuildConfigFactory(properties, resourceHash, mavenProperties) {
+		buildConfigFactory = new MavenBuildConfigFactory(properties, resourceHash,
+				mavenProperties) {
 		};
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				MavenResource.parse("org.test:testapp-source:1.0-SNAPSHOT", mavenProperties));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), MavenResource
+						.parse("org.test:testapp-source:1.0-SNAPSHOT", mavenProperties));
 
-		BuildRequest buildRequest = buildConfigFactory.buildBuildRequest(request, "testapp-source");
+		BuildRequest buildRequest = buildConfigFactory.buildBuildRequest(request,
+				"testapp-source");
 
-		assertThat(buildRequest.getEnv())
-				.contains(new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_RESOURCE_HOST_ENV_VAR, "nexusRepo1", null));
+		assertThat(buildRequest.getEnv()).contains(
+				new EnvVar(MavenBuildConfigFactory.SPRING_BUILD_RESOURCE_HOST_ENV_VAR,
+						"nexusRepo1", null));
 	}
+
 }

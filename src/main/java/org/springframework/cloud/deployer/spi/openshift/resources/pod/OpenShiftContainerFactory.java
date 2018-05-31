@@ -23,6 +23,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
 		implements OpenShiftSupport {
 
 	private OpenShiftDeployerProperties properties;
+
 	private VolumeMountFactory volumeMountFactory;
 
 	public OpenShiftContainerFactory(OpenShiftDeployerProperties properties,
@@ -104,6 +105,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
 						"Could not create masked URI for Maven build", e);
 			}
 		}
+
 	}
 
 	/**
@@ -120,6 +122,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
 				.getLogger(OverridableDockerResource.class);
 
 		private final String dockerRegistry;
+
 		private final String imageProjectName;
 
 		public OverridableDockerResource(String imageName, String dockerRegistry,
@@ -167,5 +170,7 @@ public class OpenShiftContainerFactory extends DefaultContainerFactory
 						"Could not create masked URI for Maven build", e);
 			}
 		}
+
 	}
+
 }

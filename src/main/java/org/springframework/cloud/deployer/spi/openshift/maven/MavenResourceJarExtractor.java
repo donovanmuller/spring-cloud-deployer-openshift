@@ -1,13 +1,13 @@
 package org.springframework.cloud.deployer.spi.openshift.maven;
 
-import java.io.IOException;
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.zeroturnaround.zip.ZipUtil;
+
+import java.io.IOException;
+import java.util.Optional;
 
 public class MavenResourceJarExtractor {
 
@@ -19,7 +19,6 @@ public class MavenResourceJarExtractor {
 	 * file in the archive must be <b>the absolute path</b> to the file. I.e.
 	 * <code>/the/path/to/the/file.txt</code>, where <code>file.txt</code> is the file to
 	 * extract.
-	 *
 	 * @param resource
 	 * @param file
 	 * @return a {@link Resource} representing the extracted file
@@ -38,4 +37,5 @@ public class MavenResourceJarExtractor {
 
 		return extractedResource;
 	}
+
 }

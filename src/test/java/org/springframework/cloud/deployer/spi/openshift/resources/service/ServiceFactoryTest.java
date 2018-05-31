@@ -24,56 +24,69 @@ public class ServiceFactoryTest {
 	@Before
 	public void setup() {
 		server.init();
-		server.expect().withPath("/api/v1/namespaces/test/services?labelSelector=spring.cloud.deployer.group")
+		server.expect().withPath(
+				"/api/v1/namespaces/test/services?labelSelector=spring.cloud.deployer.group")
 				.andReturn(200, new ServiceListBuilder().build()).times(2);
 	}
 
 	@Test
 	public void buildServiceWithTargetPort() {
-		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
+		server.expect().get()
+				.withPath("/api/v1/namespaces/test/services?"
+						+ "labelSelector=spring-group-id")
 				.andReturn(200, new ServiceListBuilder().build()).times(2);
 
 		serviceFactory = new ServiceFactory(server.createOpenShiftClient(), 8080, null);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class));
 
 		Service service = serviceFactory.build(request, "testapp-source", 7777, null);
 
-		assertThat(service.getSpec().getPorts()).first()
-				.isEqualTo(new ServicePortBuilder().withNewTargetPort(8080).withPort(8080).build());
+		assertThat(service.getSpec().getPorts()).first().isEqualTo(
+				new ServicePortBuilder().withNewTargetPort(8080).withPort(8080).build());
 	}
 
 	@Test
 	public void buildServiceWithRandomNodePort() {
-		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
+		server.expect().get()
+				.withPath("/api/v1/namespaces/test/services?"
+						+ "labelSelector=spring-group-id")
 				.andReturn(200, new ServiceListBuilder().build()).times(2);
 
 		serviceFactory = new ServiceFactory(server.createOpenShiftClient(), 8080, null);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class),
-				ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT, "true"));
-
-		Service service = serviceFactory.build(request, "testapp-source", 7777, null);
-
-		assertThat(service.getSpec().getPorts()).first().isEqualTo(new ServicePortBuilder().withPort(8080).build());
-	}
-
-	@Test
-	public void buildServiceWithNodePort() {
-		server.expect().get().withPath("/api/v1/namespaces/test/services?" + "labelSelector=spring-group-id")
-				.andReturn(200, new ServiceListBuilder().build()).times(2);
-
-		serviceFactory = new ServiceFactory(server.createOpenShiftClient(), 8080, null);
-
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class),
-				ImmutableMap.of(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT, "30000"));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class),
+				ImmutableMap.of(
+						OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT,
+						"true"));
 
 		Service service = serviceFactory.build(request, "testapp-source", 7777, null);
 
 		assertThat(service.getSpec().getPorts()).first()
-				.isEqualTo(new ServicePortBuilder().withNodePort(30000).withPort(8080).build());
+				.isEqualTo(new ServicePortBuilder().withPort(8080).build());
 	}
+
+	@Test
+	public void buildServiceWithNodePort() {
+		server.expect().get()
+				.withPath("/api/v1/namespaces/test/services?"
+						+ "labelSelector=spring-group-id")
+				.andReturn(200, new ServiceListBuilder().build()).times(2);
+
+		serviceFactory = new ServiceFactory(server.createOpenShiftClient(), 8080, null);
+
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class),
+				ImmutableMap.of(
+						OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT,
+						"30000"));
+
+		Service service = serviceFactory.build(request, "testapp-source", 7777, null);
+
+		assertThat(service.getSpec().getPorts()).first().isEqualTo(
+				new ServicePortBuilder().withNodePort(30000).withPort(8080).build());
+	}
+
 }

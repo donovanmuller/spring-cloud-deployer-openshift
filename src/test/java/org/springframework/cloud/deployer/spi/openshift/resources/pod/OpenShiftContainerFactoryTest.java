@@ -20,20 +20,24 @@ public class OpenShiftContainerFactoryTest {
 	@Test
 	public void createWithMavenResource() throws JsonProcessingException {
 		OpenShiftDeployerProperties properties = new OpenShiftDeployerProperties();
-		OpenShiftContainerFactory containerFactory = new OpenShiftContainerFactory(properties,
-				new VolumeMountFactory(properties));
+		OpenShiftContainerFactory containerFactory = new OpenShiftContainerFactory(
+				properties, new VolumeMountFactory(properties));
 
 		AppDefinition definition = new AppDefinition("app-test", null);
 		Resource resource = getResource();
 
-		AppDeploymentRequest appDeploymentRequestShell = new AppDeploymentRequest(definition, resource, null);
-		Container container = containerFactory.create("app-test", appDeploymentRequestShell, null, null, false);
+		AppDeploymentRequest appDeploymentRequestShell = new AppDeploymentRequest(
+				definition, resource, null);
+		Container container = containerFactory.create("app-test",
+				appDeploymentRequestShell, null, null, false);
 
 		assertNotNull(container);
 		assertThat(container.getImage()).isEqualTo("app-test");
 	}
 
 	private Resource getResource() {
-		return new MavenResource.Builder().groupId("test.com").artifactId("test").version("1.0-SNAPSHOT").build();
+		return new MavenResource.Builder().groupId("test.com").artifactId("test")
+				.version("1.0-SNAPSHOT").build();
 	}
+
 }

@@ -22,24 +22,29 @@ public class VolumeMountFactoryTest {
 	@Test
 	public void addVolumeMounts() {
 		volumeMountFactory = new VolumeMountFactory(new OpenShiftDeployerProperties());
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class), ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts",
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class),
+				ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts",
 						"[{name: 'testVolume', mountPath: '/mnt/test'}]"));
 
 		List<VolumeMount> volumeMounts = volumeMountFactory.addObject(request, "1");
 
-		assertThat(volumeMounts).first().isEqualTo(new VolumeMount("/mnt/test", "testVolume", null, null));
+		assertThat(volumeMounts).first()
+				.isEqualTo(new VolumeMount("/mnt/test", "testVolume", null, null));
 	}
 
 	@Test
 	public void addVolumeMountsAsReadOnly() {
 		volumeMountFactory = new VolumeMountFactory(new OpenShiftDeployerProperties());
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class), ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts",
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class),
+				ImmutableMap.of("spring.cloud.deployer.openshift.deployment.volumeMounts",
 						"[{name: 'testVolume', mountPath: '/mnt/test', readOnly: 'true'}]"));
 
 		List<VolumeMount> volumeMounts = volumeMountFactory.addObject(request, "1");
 
-		assertThat(volumeMounts).first().isEqualTo(new VolumeMount("/mnt/test", "testVolume", true, null));
+		assertThat(volumeMounts).first()
+				.isEqualTo(new VolumeMount("/mnt/test", "testVolume", true, null));
 	}
+
 }

@@ -22,11 +22,13 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 
 public class VolumeMountConfigServerFactory extends VolumeMountFactory {
 
-	private static final Logger logger = LoggerFactory.getLogger(VolumeMountConfigServerFactory.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(VolumeMountConfigServerFactory.class);
 
 	private ConfigServicePropertySourceLocator configServicePropertySourceLocator;
 
-	public VolumeMountConfigServerFactory(ConfigServicePropertySourceLocator configServicePropertySourceLocator,
+	public VolumeMountConfigServerFactory(
+			ConfigServicePropertySourceLocator configServicePropertySourceLocator,
 			OpenShiftDeployerProperties openShiftDeployerProperties) {
 		super(openShiftDeployerProperties);
 		this.configServicePropertySourceLocator = configServicePropertySourceLocator;
@@ -44,10 +46,12 @@ public class VolumeMountConfigServerFactory extends VolumeMountFactory {
 		Set<VolumeMount> volumeMounts = new LinkedHashSet<>();
 
 		ConfigurableEnvironment appEnvironment = new StandardEnvironment();
-		appEnvironment.getPropertySources().addFirst(new MapPropertySource("deployer-openshift-override",
-				Collections.singletonMap("spring.application.name", appId)));
+		appEnvironment.getPropertySources()
+				.addFirst(new MapPropertySource("deployer-openshift-override",
+						Collections.singletonMap("spring.application.name", appId)));
 
-		PropertySource<?> propertySource = configServicePropertySourceLocator.locate(appEnvironment);
+		PropertySource<?> propertySource = configServicePropertySourceLocator
+				.locate(appEnvironment);
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(propertySource);
 
@@ -60,10 +64,12 @@ public class VolumeMountConfigServerFactory extends VolumeMountFactory {
 			volumeMounts.addAll(configVolumeProperties.getVolumeMounts());
 		}
 		catch (Exception e) {
-			logger.warn("Could not get volume mounts configuration for app '{}' from config server: '{}'", appId,
-					e.getMessage());
+			logger.warn(
+					"Could not get volume mounts configuration for app '{}' from config server: '{}'",
+					appId, e.getMessage());
 		}
 
 		return volumeMounts;
 	}
+
 }

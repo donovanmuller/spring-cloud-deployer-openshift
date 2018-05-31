@@ -13,7 +13,6 @@ public class ResourceHash {
 
 	/**
 	 * Generates a SHA-1 hash of the provided {@link Resource}
-	 *
 	 * @param resource
 	 * @return a hash of the {@link Resource}
 	 */
@@ -28,4 +27,5 @@ public class ResourceHash {
 			throw new RuntimeException("Could not read resource to hash", e);
 		}
 	}
+
 }

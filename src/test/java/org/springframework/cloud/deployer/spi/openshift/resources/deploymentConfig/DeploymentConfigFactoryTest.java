@@ -34,52 +34,66 @@ public class DeploymentConfigFactoryTest {
 
 	@Test
 	public void buildDeploymentConfig() {
-		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, null, null,
-				ImagePullPolicy.Always, new VolumeFactory(new OpenShiftDeployerProperties()));
+		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(),
+				null, null, null, ImagePullPolicy.Always,
+				new VolumeFactory(new OpenShiftDeployerProperties()));
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class));
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class));
 
-		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
-				null, null, ImagePullPolicy.Always);
+		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request,
+				"testapp-source", new Container(), null, null, ImagePullPolicy.Always);
 
 		assertThat(deploymentConfig.getMetadata().getName()).isEqualTo("testapp-source");
 		assertThat(deploymentConfig.getSpec().getReplicas()).isEqualTo(1);
-		assertThat(deploymentConfig.getSpec().getTemplate().getSpec().getServiceAccount()).isEmpty();
-		assertThat(deploymentConfig.getSpec().getTemplate().getSpec().getNodeSelector()).isEmpty();
+		assertThat(deploymentConfig.getSpec().getTemplate().getSpec().getServiceAccount())
+				.isEmpty();
+		assertThat(deploymentConfig.getSpec().getTemplate().getSpec().getNodeSelector())
+				.isEmpty();
 	}
 
 	@Test
 	public void buildDeploymentConfigWithServiceAccount() {
-		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, null, null,
-				ImagePullPolicy.Always, new VolumeFactory(new OpenShiftDeployerProperties()));
+		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(),
+				null, null, null, ImagePullPolicy.Always,
+				new VolumeFactory(new OpenShiftDeployerProperties()));
 
 		Map<String, String> deploymentProperties = ImmutableMap.of(
-				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_ACCOUNT, "test-sa");
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class), deploymentProperties);
+				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_ACCOUNT,
+				"test-sa");
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class),
+				deploymentProperties);
 
-		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request, "testapp-source", new Container(),
-				null, null, ImagePullPolicy.Always);
+		DeploymentConfig deploymentConfig = deploymentConfigFactory.build(request,
+				"testapp-source", new Container(), null, null, ImagePullPolicy.Always);
 
 		assertThat(deploymentConfig.getMetadata().getName()).isEqualTo("testapp-source");
-		assertThat(deploymentConfig.getSpec().getTemplate().getSpec().getServiceAccount()).isEqualTo("test-sa");
+		assertThat(deploymentConfig.getSpec().getTemplate().getSpec().getServiceAccount())
+				.isEqualTo("test-sa");
 	}
 
 	@Test
 	public void applyDeploymentConfigWhenNoActiveBuilds() {
-		server.expect().get().withPath("/oapi/v1/namespaces/test/builds").andReturn(200, new BuildListBuilder()
-				.withItems(new BuildBuilder().withNewStatus().withPhase("Completed").endStatus().build()).build())
+		server.expect().get().withPath("/oapi/v1/namespaces/test/builds")
+				.andReturn(200,
+						new BuildListBuilder()
+								.withItems(new BuildBuilder().withNewStatus()
+										.withPhase("Completed").endStatus().build())
+								.build())
 				.once();
 
-		server.expect().withPath("/oapi/v1/namespaces/test/deploymentconfigs/testapp-source")
-				.andReturn(200, new DeploymentConfigBuilder().withNewMetadata().endMetadata().build()).times(3);
+		server.expect()
+				.withPath("/oapi/v1/namespaces/test/deploymentconfigs/testapp-source")
+				.andReturn(200, new DeploymentConfigBuilder().withNewMetadata()
+						.endMetadata().build())
+				.times(3);
 
-		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, Collections.EMPTY_MAP,
-				null, ImagePullPolicy.Always, null);
+		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(),
+				null, Collections.EMPTY_MAP, null, ImagePullPolicy.Always, null);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class), null);
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class), null);
 
 		deploymentConfigFactory.applyObject(request, "testapp-source");
 	}
@@ -87,15 +101,18 @@ public class DeploymentConfigFactoryTest {
 	@Test
 	public void applyDeploymentConfigWhenActiveBuilds() {
 		server.expect().get().withPath("/oapi/v1/namespaces/test/builds")
-				.andReturn(200, new BuildListBuilder()
-						.withItems(new BuildBuilder().withNewStatus().withPhase("Running").endStatus().build()).build())
+				.andReturn(200,
+						new BuildListBuilder()
+								.withItems(new BuildBuilder().withNewStatus()
+										.withPhase("Running").endStatus().build())
+								.build())
 				.once();
 
-		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(), null, Collections.EMPTY_MAP,
-				null, ImagePullPolicy.Always, null);
+		deploymentConfigFactory = new DeploymentConfigFactory(server.getOpenshiftClient(),
+				null, Collections.EMPTY_MAP, null, ImagePullPolicy.Always, null);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("testapp-source", null),
-				mock(Resource.class), null);
+		AppDeploymentRequest request = new AppDeploymentRequest(
+				new AppDefinition("testapp-source", null), mock(Resource.class), null);
 
 		deploymentConfigFactory.applyObject(request, "testapp-source");
 	}

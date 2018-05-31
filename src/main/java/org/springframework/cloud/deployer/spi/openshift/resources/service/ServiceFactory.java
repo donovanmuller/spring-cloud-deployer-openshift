@@ -17,10 +17,13 @@ import io.fabric8.openshift.client.OpenShiftClient;
 public class ServiceFactory implements ObjectFactory<Service> {
 
 	private OpenShiftClient client;
+
 	private Integer port;
+
 	private Map<String, String> labels;
 
-	public ServiceFactory(OpenShiftClient client, Integer port, Map<String, String> labels) {
+	public ServiceFactory(OpenShiftClient client, Integer port,
+			Map<String, String> labels) {
 		this.client = client;
 		this.port = port;
 		this.labels = labels;
@@ -56,15 +59,16 @@ public class ServiceFactory implements ObjectFactory<Service> {
 		//@formatter:on
 	}
 
-	protected Service build(AppDeploymentRequest request, String appId, Integer port, Map<String, String> labels) {
-		boolean createNodePort = StringUtils.isNotBlank(
-				request.getDeploymentProperties().get(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT));
+	protected Service build(AppDeploymentRequest request, String appId, Integer port,
+			Map<String, String> labels) {
+		boolean createNodePort = StringUtils.isNotBlank(request.getDeploymentProperties()
+				.get(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT));
 
 		String serviceNameOrAppId = request.getDeploymentProperties().getOrDefault(
-			OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_NAME, appId);
+				OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_SERVICE_NAME, appId);
 
 		return new ServiceBuilder()
-			//@formatter:off
+		//@formatter:off
 			.withNewMetadata()
 				.withName(serviceNameOrAppId)
 				.withLabels(labels)
@@ -82,9 +86,13 @@ public class ServiceFactory implements ObjectFactory<Service> {
 	}
 
 	private ServicePort buildServiceNodePort(AppDeploymentRequest request) {
-		String createNodePort = request.getDeploymentProperties()
-				.getOrDefault(OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT, StringUtils.EMPTY);
+		String createNodePort = request.getDeploymentProperties().getOrDefault(
+				OpenShiftDeploymentPropertyKeys.OPENSHIFT_CREATE_NODE_PORT,
+				StringUtils.EMPTY);
 		return new ServicePortBuilder().withPort(port)
-				.withNodePort(StringUtils.isNumeric(createNodePort) ? Integer.parseInt(createNodePort) : null).build();
+				.withNodePort(StringUtils.isNumeric(createNodePort)
+						? Integer.parseInt(createNodePort) : null)
+				.build();
 	}
+
 }

@@ -14,13 +14,17 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-public class OpenShiftTaskLauncher extends KubernetesTaskLauncher implements TaskLauncher {
+public class OpenShiftTaskLauncher extends KubernetesTaskLauncher
+		implements TaskLauncher {
 
 	private KubernetesDeployerProperties properties;
+
 	private OpenShiftClient client;
 
-	public OpenShiftTaskLauncher(KubernetesDeployerProperties properties, KubernetesClient client) {
-		super(properties, new DefaultOpenShiftClient().inNamespace(client.getNamespace()));
+	public OpenShiftTaskLauncher(KubernetesDeployerProperties properties,
+			KubernetesClient client) {
+		super(properties,
+				new DefaultOpenShiftClient().inNamespace(client.getNamespace()));
 
 		this.properties = properties;
 		this.client = (OpenShiftClient) client;
@@ -47,22 +51,19 @@ public class OpenShiftTaskLauncher extends KubernetesTaskLauncher implements Tas
 	@Override
 	public void cleanup(String id) {
 		client.builds().list().getItems()
-			.forEach(build -> client.builds()
-				.withName(id)
-				.cascading(true)
-				.delete());
+				.forEach(build -> client.builds().withName(id).cascading(true).delete());
 
 		super.cleanup(id);
 	}
 
 	/**
 	 * Populate the OpenShift objects that will be created/updated and applied.
-	 *
 	 * @param request
 	 * @param taskId
 	 * @return list of {@link ObjectFactory}'s
 	 */
-	protected List<ObjectFactory> populateOpenShiftObjects(AppDeploymentRequest request, String taskId) {
+	protected List<ObjectFactory> populateOpenShiftObjects(AppDeploymentRequest request,
+			String taskId) {
 		List<ObjectFactory> factories = new ArrayList<>();
 
 		factories.add(new ObjectFactory() {
@@ -75,15 +76,18 @@ public class OpenShiftTaskLauncher extends KubernetesTaskLauncher implements Tas
 
 			@Override
 			public void applyObject(AppDeploymentRequest request, String taskId) {
-				AppDeploymentRequest taskDeploymentRequest = new AppDeploymentRequest(request.getDefinition(),
-						request.getResource(), request.getDeploymentProperties(), request.getCommandlineArguments());
+				AppDeploymentRequest taskDeploymentRequest = new AppDeploymentRequest(
+						request.getDefinition(), request.getResource(),
+						request.getDeploymentProperties(),
+						request.getCommandlineArguments());
 
 				new KubernetesTaskLauncher(properties, getClient()) {
 
 					/**
-					 * Reuse the taskId created in the {@link OpenShiftTaskLauncher}, otherwise the
-					 * {@link KubernetesTaskLauncher} will generate a new taskId for the actual task
-					 * Pod which does not match the one returned from launch.
+					 * Reuse the taskId created in the {@link OpenShiftTaskLauncher},
+					 * otherwise the {@link KubernetesTaskLauncher} will generate a new
+					 * taskId for the actual task Pod which does not match the one
+					 * returned from launch.
 					 */
 					@Override
 					protected String createDeploymentId(AppDeploymentRequest request) {
@@ -103,4 +107,5 @@ public class OpenShiftTaskLauncher extends KubernetesTaskLauncher implements Tas
 	protected KubernetesDeployerProperties getProperties() {
 		return properties;
 	}
+
 }

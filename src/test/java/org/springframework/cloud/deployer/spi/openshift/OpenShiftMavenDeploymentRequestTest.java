@@ -41,4 +41,5 @@ public class OpenShiftMavenDeploymentRequestTest {
 						"ssh://git@github.com/spring-cloud/spring-cloud-deployer.git",
 						"HEAD"));
 	}
+
 }

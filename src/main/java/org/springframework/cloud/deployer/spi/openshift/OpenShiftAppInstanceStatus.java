@@ -19,7 +19,6 @@ public class OpenShiftAppInstanceStatus extends KubernetesAppInstanceStatus {
 
 	/**
 	 * Active Builds are considered a {@link DeploymentState} of "deploying"
-	 *
 	 * @return the state of this application instance deployed in OpenShift
 	 */
 	@Override
@@ -37,4 +36,5 @@ public class OpenShiftAppInstanceStatus extends KubernetesAppInstanceStatus {
 
 		return state;
 	}
+
 }

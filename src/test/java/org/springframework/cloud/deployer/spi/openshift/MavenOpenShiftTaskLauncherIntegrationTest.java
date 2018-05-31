@@ -30,7 +30,8 @@ import io.fabric8.openshift.client.OpenShiftClient;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = { MavenOpenShiftTaskLauncherIntegrationTest.Config.class,
 		OpenShiftAutoConfiguration.class })
-public class MavenOpenShiftTaskLauncherIntegrationTest extends AbstractTaskLauncherIntegrationTests {
+public class MavenOpenShiftTaskLauncherIntegrationTest
+		extends AbstractTaskLauncherIntegrationTests {
 
 	@ClassRule
 	public static OpenShiftTestSupport openShiftTestSupport = new OpenShiftTestSupport();
@@ -68,10 +69,13 @@ public class MavenOpenShiftTaskLauncherIntegrationTest extends AbstractTaskLaunc
 	protected Resource testApplication() {
 		Properties properties = new Properties();
 		try {
-			properties.load(new ClassPathResource("integration-test-app.properties").getInputStream());
+			properties.load(new ClassPathResource("integration-test-app.properties")
+					.getInputStream());
 		}
 		catch (IOException e) {
-			throw new RuntimeException("Failed to determine which version of integration-test-app to use", e);
+			throw new RuntimeException(
+					"Failed to determine which version of integration-test-app to use",
+					e);
 		}
 		return new MavenResource.Builder().groupId("org.springframework.cloud")
 				.artifactId("spring-cloud-deployer-spi-test-app").classifier("exec")
@@ -84,9 +88,13 @@ public class MavenOpenShiftTaskLauncherIntegrationTest extends AbstractTaskLaunc
 		@Bean
 		public MavenProperties mavenProperties() {
 			MavenProperties mavenProperties = new MavenProperties();
-			mavenProperties.setRemoteRepositories(ImmutableMap.of("maven.remote-repositories.spring.url",
-					new MavenProperties.RemoteRepository("http://repo.spring.io/libs-snapshot")));
+			mavenProperties.setRemoteRepositories(
+					ImmutableMap.of("maven.remote-repositories.spring.url",
+							new MavenProperties.RemoteRepository(
+									"http://repo.spring.io/libs-snapshot")));
 			return mavenProperties;
 		}
+
 	}
+
 }

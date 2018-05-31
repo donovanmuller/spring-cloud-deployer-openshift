@@ -79,7 +79,7 @@ public class OpenShiftDeployerProperties extends KubernetesDeployerProperties {
 		this.defaultImageTag = defaultImageTag;
 	}
 
-	public String getDefaultImageNamespace(){
+	public String getDefaultImageNamespace() {
 		return getNamespace();
 	}
 
@@ -114,4 +114,5 @@ public class OpenShiftDeployerProperties extends KubernetesDeployerProperties {
 	public void setImageProjectName(String imageProjectName) {
 		this.imageProjectName = imageProjectName;
 	}
+
 }

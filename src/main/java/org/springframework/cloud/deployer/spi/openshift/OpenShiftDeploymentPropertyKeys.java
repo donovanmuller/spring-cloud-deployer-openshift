@@ -37,13 +37,6 @@ public interface OpenShiftDeploymentPropertyKeys {
 	String OPENSHIFT_DEPLOYMENT_DOCKERFILE = "spring.cloud.deployer.openshift.deployment.dockerfile";
 
 	/**
-	 * Use the specified default Dockerfile provided by the Data Flow Server to resolve
-	 * and download Maven artifacts during a build. This property overrides the deployer
-	 * property {@link OpenShiftDeployerProperties#defaultDockerfile}
-	 */
-	String OPENSHIFT_DEPLOYMENT_DEFAULT_DOCKERFILE = "spring.cloud.deployer.openshift.defaultDockerfile";
-
-	/**
 	 * An optional nodeSelector to indicate where to schedule pods. All of the following
 	 * are valid:
 	 * <code>spring.cloud.deployer.openshift.deployment.nodeSelector=region: primary,role:processor,label : something</code>
@@ -105,5 +98,11 @@ public interface OpenShiftDeploymentPropertyKeys {
 	 * Allows you to override the default service name (appId).
 	 */
 	String OPENSHIFT_DEPLOYMENT_SERVICE_NAME = "spring.cloud.deployer.openshift.service.name";
+
+	/**
+	 * The S2I build image to use for Maven resources. See
+	 * https://docs.openshift.org/latest/architecture/core_concepts/builds_and_image_streams.html#source-build
+	 */
+	String OPENSHIFT_S2I_BUILD_IMAGE = "spring.cloud.deployer.openshift.s2i.build.image";
 
 }

@@ -1,5 +1,7 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
+import io.fabric8.openshift.api.model.Build;
+import io.fabric8.openshift.api.model.DeploymentConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 
@@ -18,9 +20,8 @@ public class OpenShiftDeployerProperties extends KubernetesDeployerProperties {
 	private String defaultRoutingSubdomain = "router.default.svc.cluster.local";
 
 	/**
-	 * The default image tag to associate with
-	 * {@link io.fabric8.openshift.api.model.Build} targets and
-	 * {@link io.fabric8.openshift.api.model.DeploymentConfig}'s
+	 * The default image tag to associate with {@link Build} targets and
+	 * {@link DeploymentConfig}'s
 	 */
 	private String defaultImageTag = "latest";
 
@@ -54,6 +55,12 @@ public class OpenShiftDeployerProperties extends KubernetesDeployerProperties {
 	 * <code>metadata.namespace</code> value if using a Template.
 	 */
 	private String imageProjectName;
+
+	/**
+	 * The default S2I build image to use for Maven resource. See
+	 * https://github.com/fabric8io-images/s2i
+	 */
+	private String defaultS2iImage = "fabric8/s2i-java:2.2";
 
 	public boolean isForceBuild() {
 		return forceBuild;
@@ -113,6 +120,14 @@ public class OpenShiftDeployerProperties extends KubernetesDeployerProperties {
 
 	public void setImageProjectName(String imageProjectName) {
 		this.imageProjectName = imageProjectName;
+	}
+
+	public String getDefaultS2iImage() {
+		return defaultS2iImage;
+	}
+
+	public void setDefaultS2iImage(String defaultS2iImage) {
+		this.defaultS2iImage = defaultS2iImage;
 	}
 
 }

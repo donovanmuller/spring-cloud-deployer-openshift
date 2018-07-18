@@ -62,7 +62,7 @@ public class MavenOpenShiftTaskLauncherIntegrationTest
 
 	@Override
 	protected Timeout deploymentTimeout() {
-		return new Timeout(50, 10000);
+		return new Timeout(20, 5000);
 	}
 
 	@Override

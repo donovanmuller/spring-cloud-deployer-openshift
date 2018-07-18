@@ -28,20 +28,21 @@ public abstract class BuildConfigStrategy implements ObjectFactory<BuildConfig> 
 	public BuildConfig addObject(AppDeploymentRequest request, String appId) {
 		BuildConfig buildConfig = buildBuildConfig(request, appId, labels);
 
-		if (getExisting(appId).isPresent()) {
-			/**
-			 * Replacing a BuildConfig doesn't currently work because of "already
-			 * modified" issues. Need to investigate if there is a clean way around it.
-			 * For now, delete and recreate...
-			 */
-			// buildConfig = client.buildConfigs().createOrReplace(buildConfig);
-			client.buildConfigs().withName(appId).delete();
-			client.builds().withLabelIn("spring-app-id", appId).delete();
-			buildConfig = client.buildConfigs().create(buildConfig);
-		}
-		else {
-			buildConfig = client.buildConfigs().create(buildConfig);
-		}
+		// TODO test this!
+		// if (getExisting(appId).isPresent()) {
+		/**
+		 * Replacing a BuildConfig doesn't currently work because of "already modified"
+		 * issues. Need to investigate if there is a clean way around it. For now, delete
+		 * and recreate...
+		 */
+		buildConfig = client.buildConfigs().createOrReplace(buildConfig);
+		// client.buildConfigs().withName(appId).delete();
+		// client.builds().withLabelIn("spring-app-id", appId).delete();
+		// buildConfig = client.buildConfigs().create(buildConfig);
+		// }
+		// else {
+		// buildConfig = client.buildConfigs().create(buildConfig);
+		// }
 
 		return buildConfig;
 	}

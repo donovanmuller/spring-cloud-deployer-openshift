@@ -1,18 +1,18 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
 import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
 
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
-import io.fabric8.openshift.client.OpenShiftClient;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OpenShiftTaskLauncher extends KubernetesTaskLauncher
 		implements TaskLauncher {
@@ -21,13 +21,16 @@ public class OpenShiftTaskLauncher extends KubernetesTaskLauncher
 
 	private OpenShiftClient client;
 
+	private ContainerFactory containerFactory;
+
 	public OpenShiftTaskLauncher(KubernetesDeployerProperties properties,
-			KubernetesClient client) {
+			KubernetesClient client, ContainerFactory containerFactory) {
 		super(properties,
 				new DefaultOpenShiftClient().inNamespace(client.getNamespace()));
 
 		this.properties = properties;
 		this.client = (OpenShiftClient) client;
+		this.containerFactory = containerFactory;
 	}
 
 	@Override
@@ -81,7 +84,7 @@ public class OpenShiftTaskLauncher extends KubernetesTaskLauncher
 						request.getDeploymentProperties(),
 						request.getCommandlineArguments());
 
-				new KubernetesTaskLauncher(properties, getClient()) {
+				new KubernetesTaskLauncher(properties, getClient(), containerFactory) {
 
 					/**
 					 * Reuse the taskId created in the {@link OpenShiftTaskLauncher},

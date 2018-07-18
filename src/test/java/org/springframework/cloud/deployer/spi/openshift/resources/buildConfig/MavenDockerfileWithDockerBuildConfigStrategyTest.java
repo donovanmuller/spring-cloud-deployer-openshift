@@ -8,7 +8,6 @@ import io.fabric8.openshift.client.server.mock.OpenShiftServer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
@@ -42,18 +41,6 @@ public class MavenDockerfileWithDockerBuildConfigStrategyTest {
 	}
 
 	@Test
-	public void buildBuildConfigWithDefaultDockerfile() {
-		AppDeploymentRequest request = new AppDeploymentRequest(
-				new AppDefinition("testapp-source", null), mock(Resource.class), null);
-
-		BuildConfig buildConfig = buildConfigStrategy.buildBuildConfig(request,
-				"testapp-source", null);
-
-		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim())
-				.startsWith("FROM java:8");
-	}
-
-	@Test
 	public void buildBuildConfigWithDockerfileFromFileSystem() {
 		AppDeploymentRequest request = new AppDeploymentRequest(
 				new AppDefinition("testapp-source", null), mock(Resource.class),
@@ -81,21 +68,6 @@ public class MavenDockerfileWithDockerBuildConfigStrategyTest {
 
 		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim())
 				.isEqualTo("FROM an inline Dockerfile");
-	}
-
-	@Test
-	public void buildBuildConfigWithDeploymentDockerfile() {
-		AppDeploymentRequest request = new AppDeploymentRequest(
-				new AppDefinition("testapp-source", null), mock(Resource.class),
-				ImmutableMap.of(
-						OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DEFAULT_DOCKERFILE,
-						"Dockerfile.test"));
-
-		BuildConfig buildConfig = buildConfigStrategy.buildBuildConfig(request,
-				"testapp-source", null);
-
-		assertThat(buildConfig.getSpec().getSource().getDockerfile().trim())
-				.isEqualTo("FROM default Dockerfile");
 	}
 
 }

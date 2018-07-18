@@ -16,6 +16,7 @@ import java.util.Map;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,20 @@ public class OpenShiftAppDeployerIntegrationTest
 		openShiftClient.replicationControllers().withLabel("spring-app-id").delete();
 		openShiftClient.pods().withLabel("spring-app-id").delete();
 		openShiftClient.pods().withLabel("openshift.io/deployer-pod-for.name").delete();
+	}
+
+	@Test
+	@Override
+	@Ignore("See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/56")
+	public void testApplicationPropertiesPassing() {
+		super.testApplicationPropertiesPassing();
+	}
+
+	@Test
+	@Override
+	@Ignore("See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/56")
+	public void testCommandLineArgumentsPassing() {
+		super.testCommandLineArgumentsPassing();
 	}
 
 	/**
@@ -253,7 +268,7 @@ public class OpenShiftAppDeployerIntegrationTest
 
 	@Override
 	protected Timeout deploymentTimeout() {
-		return new Timeout(36, 5000);
+		return new Timeout(20, 5000);
 	}
 
 	@Override

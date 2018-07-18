@@ -1,16 +1,5 @@
 package org.springframework.cloud.deployer.spi.openshift;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import com.google.common.collect.Iterables;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -23,11 +12,11 @@ import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.kubernetes.ContainerConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAppDeployer;
@@ -38,6 +27,17 @@ import org.springframework.cloud.deployer.spi.openshift.resources.deploymentConf
 import org.springframework.cloud.deployer.spi.openshift.resources.route.RouteFactory;
 import org.springframework.cloud.deployer.spi.openshift.resources.service.ServiceWithIndexSupportFactory;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class OpenShiftAppDeployer extends KubernetesAppDeployer
 		implements AppDeployer, OpenShiftSupport {
@@ -180,8 +180,9 @@ public class OpenShiftAppDeployer extends KubernetesAppDeployer
 		labels.putAll(toLabels(request.getDeploymentProperties()));
 		int externalPort = configureExternalPort(request);
 
-		Container container = getContainerFactory().create(createDeploymentId(request),
-				request, externalPort, null, false);
+		Container container = getContainerFactory()
+				.create(new ContainerConfiguration(createDeploymentId(request), request)
+						.withHostNetwork(false).withExternalPort(externalPort));
 
 		factories.add(getDeploymentConfigFactory(request, labels, container));
 		factories.add(

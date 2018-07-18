@@ -1,9 +1,12 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.ImmutableList;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.openshift.api.model.DeploymentConfig;
+import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
+import io.fabric8.openshift.api.model.DeploymentTriggerPolicyBuilder;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
@@ -13,19 +16,12 @@ import org.springframework.cloud.deployer.spi.openshift.OpenShiftSupport;
 import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
 import org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeFactory;
 
-import com.google.common.collect.ImmutableList;
-
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ResourceRequirements;
-import io.fabric8.openshift.api.model.DeploymentConfig;
-import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
-import io.fabric8.openshift.api.model.DeploymentTriggerPolicyBuilder;
-import io.fabric8.openshift.client.OpenShiftClient;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DeploymentConfigFactory
 		implements ObjectFactory<DeploymentConfig>, OpenShiftSupport, DataflowSupport {
-
-	public static final String SPRING_DEPLOYMENT_TIMESTAMP = "spring-cloud-deployer/redeploy-timestamp";
 
 	private OpenShiftClient client;
 
@@ -68,27 +64,6 @@ public class DeploymentConfigFactory
 
 	@Override
 	public void applyObject(AppDeploymentRequest request, String appId) {
-		// if there are no builds in progress
-		if (client.builds().withLabels(labels).list().getItems().stream()
-				.noneMatch(build -> {
-					String phase = build.getStatus().getPhase();
-					return phase.equals("New") || phase.equals("Pending")
-							|| phase.equals("Running") || phase.equals("Failed");
-				})) {
-			// TODO when
-			// https://github.com/fabric8io/kubernetes-client/issues/507#issuecomment-246272404
-			// is implemented, rather kick off another deployment
-			//@formatter:off
-            client.deploymentConfigs()
-				.withName(appId)
-				.edit()
-					.editMetadata()
-						.addToAnnotations(SPRING_DEPLOYMENT_TIMESTAMP,
-							String.valueOf(System.currentTimeMillis()))
-					.endMetadata()
-				.done();
-            //@formatter:on
-		}
 	}
 
 	protected Optional<DeploymentConfig> getExisting(String name) {

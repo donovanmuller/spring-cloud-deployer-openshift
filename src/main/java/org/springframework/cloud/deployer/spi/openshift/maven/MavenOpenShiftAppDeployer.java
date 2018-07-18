@@ -1,34 +1,34 @@
 package org.springframework.cloud.deployer.spi.openshift.maven;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.openshift.api.model.BuildConfig;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.openshift.api.model.Build;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftAppDeployer;
-import org.springframework.cloud.deployer.spi.openshift.OpenShiftApplicationPropertyKeys;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
-import org.springframework.cloud.deployer.spi.openshift.OpenShiftMavenDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.ResourceHash;
 import org.springframework.cloud.deployer.spi.openshift.resources.ObjectFactory;
-import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.GitWithDockerBuildConfigStrategy;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.BuildConfigStrategy;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.BuildStrategies;
 import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.MavenBuildConfigFactory;
-import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.MavenDockerfileWithDockerBuildConfigStrategy;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.S2iBinaryInputBuildConfigStrategy;
+import org.springframework.cloud.deployer.spi.openshift.resources.buildConfig.WatchingBuildConfigStrategy;
 import org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig.DeploymentConfigFactory;
 import org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig.DeploymentConfigWithImageChangeTriggerWithIndexSuppportFactory;
 import org.springframework.cloud.deployer.spi.openshift.resources.imageStream.ImageStreamFactory;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 
@@ -66,8 +66,30 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 					mavenResource);
 
 			factories.add(new ImageStreamFactory(getClient()));
-			factories.add(chooseBuildStrategy(request, createIdMap(appId, request),
-					mavenResource));
+
+			BuildStrategies buildStrategies = new BuildStrategies(mavenProperties,
+					openShiftDeployerProperties, mavenResourceJarExtractor, resourceHash,
+					getClient());
+			BuildConfigStrategy buildStrategy = buildStrategies.chooseBuildStrategy(
+					request, createIdMap(appId, request), mavenResource);
+			if (buildStrategy instanceof S2iBinaryInputBuildConfigStrategy) {
+				request = new AppDeploymentRequest(request.getDefinition(),
+						request.getResource(),
+						ImmutableMap.<String, String>builder()
+								.putAll(request.getDeploymentProperties())
+								.put("s2i-build", "true").build(),
+						request.getCommandlineArguments());
+			}
+
+			AppDeploymentRequest deploymentRequest = new AppDeploymentRequest(
+					request.getDefinition(), request.getResource(),
+					request.getDeploymentProperties(), request.getCommandlineArguments());
+
+			WatchingBuildConfigStrategy watchingBuildConfigStrategy = new WatchingBuildConfigStrategy(
+					buildStrategy, getClient(), createIdMap(appId, request),
+					(build, watch) -> rolloutDeployment(build, watch, appId,
+							deploymentRequest));
+			factories.add(watchingBuildConfigStrategy);
 		}
 
 		factories.addAll(super.populateOpenShiftObjectsForDeployment(request, appId));
@@ -84,84 +106,6 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 				getResourceRequirements(request), getImagePullPolicy(request));
 	}
 
-	// TODO there is allot of duplication with
-	// org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftTaskLauncher
-	// we should probably extract the common functionality
-	protected ObjectFactory<BuildConfig> chooseBuildStrategy(AppDeploymentRequest request,
-			Map<String, String> labels, MavenResource mavenResource) {
-		ObjectFactory<BuildConfig> buildConfigFactory;
-
-		Map<String, String> applicationProperties = request.getDefinition()
-				.getProperties();
-		if (applicationProperties.containsKey(
-				OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY)) {
-			String gitUri = applicationProperties.get(
-					OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_URI_PROPERTY);
-			String gitReferenceProperty = applicationProperties.getOrDefault(
-					OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_REF_PROPERTY,
-					"master");
-			GitReference gitReference = new GitReference(gitUri, gitReferenceProperty);
-			MavenBuildConfigFactory mavenBuildConfigFactory = new MavenBuildConfigFactory(
-					getProperties(), resourceHash, mavenProperties);
-			buildConfigFactory = new GitWithDockerBuildConfigStrategy(
-					mavenBuildConfigFactory, gitReference, getProperties(), getClient(),
-					labels);
-		}
-		else {
-			OpenShiftMavenDeploymentRequest openShiftRequest = new OpenShiftMavenDeploymentRequest(
-					request, mavenProperties);
-			try {
-				/**
-				 * check the Maven artifact Jar for the presence of
-				 * `src/main/docker/Dockerfile`, if it exists, it is an
-				 * indication/assumption that the Dockerfile is present in a remote Git
-				 * repository. OpenShift will use the actual remote repository as a Git
-				 * Repository source.
-				 */
-				GitReference gitReference = openShiftRequest.getGitReference();
-				if (openShiftRequest.isMavenProjectExtractable()
-						&& mavenResourceJarExtractor
-								.extractFile(mavenResource, dockerfileLocation(request))
-								.isPresent()) {
-					/**
-					 * extract Git URI and ref from
-					 * <scm><connection>...</connection></scm> and
-					 * <scm><tag>...</tag></scm> by parsing the Maven POM and use those
-					 * values (as a {@link GitReference}) with Git Repository source
-					 * strategy:
-					 * https://docs.openshift.org/latest/dev_guide/builds.html#source-code
-					 */
-					MavenBuildConfigFactory mavenBuildConfigFactory = new MavenBuildConfigFactory(
-							getProperties(), resourceHash, mavenProperties);
-					buildConfigFactory = new GitWithDockerBuildConfigStrategy(
-							mavenBuildConfigFactory, gitReference, getProperties(),
-							getClient(), labels);
-				}
-				else {
-					/**
-					 * otherwise use the Dockerfile source strategy:
-					 * https://docs.openshift.org/latest/dev_guide/builds.html#dockerfile-
-					 * source
-					 */
-					MavenBuildConfigFactory mavenBuildConfigFactory = new MavenBuildConfigFactory(
-							getProperties(), resourceHash, mavenProperties);
-					buildConfigFactory = new MavenDockerfileWithDockerBuildConfigStrategy(
-							mavenBuildConfigFactory, openShiftDeployerProperties,
-							getClient(), labels);
-				}
-			}
-			catch (IOException e) {
-				logger.error("Could not create specified BuildConfig", e);
-				throw new RuntimeException("Could not create specified BuildConfig", e);
-			}
-		}
-
-		return buildConfigFactory;
-	}
-
-	// TODO there is allot of duplication with
-	// org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftTaskLauncher
-	// we should probably extract the common functionality
 	protected boolean buildExists(AppDeploymentRequest request, String appId,
 			MavenResource mavenResource) {
 		boolean buildExists;
@@ -175,7 +119,8 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 		else {
 			buildExists = getClient().builds().withLabelIn(SPRING_APP_KEY, appId).list()
 					.getItems().stream()
-					.filter(build -> !build.getStatus().getPhase().equals("Failed"))
+					.filter(build -> !build.getStatus().getPhase().equals("Failed")
+							&& build.getSpec().getStrategy().getDockerStrategy() != null)
 					.flatMap(build -> build.getSpec().getStrategy().getDockerStrategy()
 							.getEnv().stream()
 							.filter(envVar -> envVar.getName().equals(
@@ -188,16 +133,19 @@ public class MavenOpenShiftAppDeployer extends OpenShiftAppDeployer {
 		return buildExists;
 	}
 
-	/**
-	 * Get the source context directory, the path where the Dockerfile is expected.
-	 * Defaults to the root directory.
-	 * @param request
-	 * @return the context directory/path where the Dockerfile is expected
-	 */
-	protected String dockerfileLocation(AppDeploymentRequest request) {
-		return request.getDefinition().getProperties().getOrDefault(
-				OpenShiftApplicationPropertyKeys.OPENSHIFT_BUILD_GIT_DOCKERFILE_PATH,
-				"Dockerfile");
+	protected void rolloutDeployment(Build build, Watch watch, String appId,
+			AppDeploymentRequest request) {
+		if (build.getStatus().getPhase().equals("Complete")) {
+			logger.info(
+					String.format("Build complete: '%s'", build.getMetadata().getName()));
+
+			withIndexedDeployment(appId, request, (id, deploymentRequest) -> {
+				logger.info(String.format("Rolling out latest deployment of '%s'", id));
+				getClient().deploymentConfigs().withName(id).deployLatest();
+			});
+
+			watch.close();
+		}
 	}
 
 }

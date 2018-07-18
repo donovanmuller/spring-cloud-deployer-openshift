@@ -1,8 +1,6 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.pod;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-
+import io.fabric8.kubernetes.api.model.Container;
 import org.junit.Test;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -11,14 +9,13 @@ import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerPropert
 import org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeMountFactory;
 import org.springframework.core.io.Resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import io.fabric8.kubernetes.api.model.Container;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 
 public class OpenShiftContainerFactoryTest {
 
 	@Test
-	public void createWithMavenResource() throws JsonProcessingException {
+	public void createWithMavenResource() {
 		OpenShiftDeployerProperties properties = new OpenShiftDeployerProperties();
 		OpenShiftContainerFactory containerFactory = new OpenShiftContainerFactory(
 				properties, new VolumeMountFactory(properties));

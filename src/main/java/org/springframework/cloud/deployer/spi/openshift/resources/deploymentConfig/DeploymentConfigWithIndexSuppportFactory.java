@@ -1,8 +1,10 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.deploymentConfig;
 
-import java.util.Map;
-import java.util.Optional;
-
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.openshift.api.model.DeploymentConfig;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
@@ -13,11 +15,8 @@ import org.springframework.cloud.deployer.spi.openshift.DataflowSupport;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.resources.volumes.VolumeFactory;
 
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.ResourceRequirements;
-import io.fabric8.openshift.api.model.DeploymentConfig;
-import io.fabric8.openshift.client.OpenShiftClient;
+import java.util.Map;
+import java.util.Optional;
 
 public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFactory
 		implements DataflowSupport {
@@ -67,16 +66,12 @@ public class DeploymentConfigWithIndexSuppportFactory extends DeploymentConfigFa
 		labels.replace("spring-deployment-id", appId);
 		container.setName(appId);
 
-		if (request.getResource() instanceof MavenResource) {
-			container.setImage(getImage(request, appId));
-		}
-
 		Optional<EnvVar> instanceIndexEnvVar = container.getEnv().stream()
 				.filter(envVar -> envVar.getName()
 						.equals(AppDeployer.INSTANCE_INDEX_PROPERTY_KEY))
 				.findFirst();
 		String instanceIndex = NumberUtils
-				.isNumber(StringUtils.substringAfterLast(appId, "-"))
+				.isCreatable(StringUtils.substringAfterLast(appId, "-"))
 						? StringUtils.substringAfterLast(appId, "-")
 						: Integer.valueOf(0).toString();
 		if (instanceIndexEnvVar.isPresent()) {

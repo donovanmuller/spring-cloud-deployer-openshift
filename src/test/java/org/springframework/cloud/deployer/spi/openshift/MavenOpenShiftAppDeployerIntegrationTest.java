@@ -17,6 +17,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -32,7 +33,6 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenOpenShiftAppDeployer;
 import org.springframework.cloud.deployer.spi.openshift.maven.MavenResourceJarExtractor;
 import org.springframework.cloud.deployer.spi.openshift.resources.pod.OpenShiftContainerFactory;
@@ -115,6 +115,20 @@ public class MavenOpenShiftAppDeployerIntegrationTest
 		openShiftClient.pods().withLabel("openshift.io/deployer-pod-for.name").delete();
 		openShiftClient.buildConfigs().withLabel("spring-app-id").delete();
 		openShiftClient.builds().withLabel("spring-app-id").delete();
+	}
+
+	@Test
+	@Override
+	@Ignore("See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/56")
+	public void testApplicationPropertiesPassing() {
+		super.testApplicationPropertiesPassing();
+	}
+
+	@Test
+	@Override
+	@Ignore("See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/56")
+	public void testCommandLineArgumentsPassing() {
+		super.testCommandLineArgumentsPassing();
 	}
 
 	/**
@@ -305,7 +319,7 @@ public class MavenOpenShiftAppDeployerIntegrationTest
 	 */
 	@Override
 	protected Timeout deploymentTimeout() {
-		return new Timeout(36, 5000);
+		return new Timeout(20, 5000);
 	}
 
 	@TestConfiguration

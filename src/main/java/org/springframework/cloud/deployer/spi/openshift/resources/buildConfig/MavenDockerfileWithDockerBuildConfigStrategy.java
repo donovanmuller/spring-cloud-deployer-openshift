@@ -1,19 +1,17 @@
 package org.springframework.cloud.deployer.spi.openshift.resources.buildConfig;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeployerProperties;
 import org.springframework.cloud.deployer.spi.openshift.OpenShiftDeploymentPropertyKeys;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 
-import io.fabric8.openshift.client.OpenShiftClient;
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 public class MavenDockerfileWithDockerBuildConfigStrategy
 		extends DockerfileWithDockerBuildConfigStrategy {
@@ -36,16 +34,10 @@ public class MavenDockerfileWithDockerBuildConfigStrategy
 					dockerFile = resourceToString(new FileSystemResource(dockerFile));
 				}
 			}
-			else {
-				dockerFile = resourceToString(new ClassPathResource(
-						request.getDeploymentProperties().getOrDefault(
-								OpenShiftDeploymentPropertyKeys.OPENSHIFT_DEPLOYMENT_DEFAULT_DOCKERFILE,
-								properties.getDefaultDockerfile())));
-			}
 		}
 		catch (IOException e) {
-			throw new RuntimeException("Could not read default Dockerfile.artifactory",
-					e);
+			throw new RuntimeException(
+					String.format("Could not read Dockerfile at %s", dockerFile), e);
 		}
 
 		return dockerFile;

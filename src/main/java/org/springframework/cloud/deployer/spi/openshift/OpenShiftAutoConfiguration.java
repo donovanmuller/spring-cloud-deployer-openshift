@@ -49,13 +49,14 @@ public class OpenShiftAutoConfiguration {
 
 	@Bean
 	public TaskLauncher taskDeployer(OpenShiftDeployerProperties properties,
-			KubernetesClient kubernetesClient,
+			KubernetesClient kubernetesClient, ContainerFactory containerFactory,
 			MavenResourceJarExtractor mavenResourceJarExtractor,
 			ResourceHash resourceHash) {
 		return new ResourceAwareOpenShiftTaskLauncher(
-				new OpenShiftTaskLauncher(properties, kubernetesClient),
+				new OpenShiftTaskLauncher(properties, kubernetesClient, containerFactory),
 				new MavenOpenShiftTaskLauncher(properties, properties, mavenProperties,
-						kubernetesClient, mavenResourceJarExtractor, resourceHash));
+						kubernetesClient, mavenResourceJarExtractor, resourceHash,
+						containerFactory));
 	}
 
 	@Bean

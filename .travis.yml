@@ -45,7 +45,7 @@ before_script:
   - tar xvzOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION} > oc.bin || tar xvOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION} > oc.bin
   - sudo mv oc.bin /usr/bin/oc
   - sudo chmod 755 /usr/bin/oc
-  - oc cluster up --version=${OPENSHIFT_VERSION}
+  - oc cluster up
   - oc login -u system:admin
   - oc new-project scdf
   - oc adm policy add-scc-to-user hostaccess -z default

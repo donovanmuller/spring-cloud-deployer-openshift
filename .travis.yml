@@ -33,7 +33,7 @@ before_install:
   - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust; fi
 
 install:
-  - ./mvnw install -q -DskipTests -Dmaven.test.redirectTestOutputToFile=true
+  - ./mvnw install --batch-mode -q -DskipTests -Dmaven.test.redirectTestOutputToFile=true
 
 before_script:
   # credit to https://travis-ci.org/bucharest-gold/mean-booster/jobs/331001570/config for the basic OpenShift configuration

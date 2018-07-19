@@ -59,11 +59,13 @@ script:
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
       -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
-      -Dmaven.test.redirectTestOutputToFile=true
+      -Dmaven.test.redirectTestOutputToFile=true \
+      -Dcheckstyle.skip=true
     ./mvnw --batch-mode cobertura:cobertura \
       -Dopenshift.enabled=false \
       -Dlogging.level.=ERROR \
-      -Dmaven.test.redirectTestOutputToFile=true
+      -Dmaven.test.redirectTestOutputToFile=true \
+      -Dcheckstyle.skip=true
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

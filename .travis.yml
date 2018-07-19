@@ -32,6 +32,9 @@ before_install:
   - if [ ! -z "$gpg_secret_key" ]; then echo $gpg_secret_key | base64 --decode | gpg --import; fi
   - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust; fi
 
+install:
+  - ./mvnw install -X -DskipTests -Dlogging.level.=ERROR -Dmaven.test.redirectTestOutputToFile=true
+
 before_script:
   # credit to https://travis-ci.org/bucharest-gold/mean-booster/jobs/331001570/config for the basic OpenShift configuration
   - sudo mount --make-shared /

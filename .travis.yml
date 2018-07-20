@@ -24,7 +24,7 @@ env:
     # See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/48
 #    - OPENSHIFT_VERSION="v3.7.1" OPENSHIFT_OC_VERSION="v3.7.1" OPENSHIFT_OC_COMMIT_ID="ab0f056"
     - OPENSHIFT_VERSION="v3.9.0" OPENSHIFT_OC_VERSION="v3.9.0" OPENSHIFT_OC_COMMIT_ID="191fece" ASSET_EXTENSION="tar.gz"
-    - OPENSHIFT_VERSION="v3.10.0-rc.0" OPENSHIFT_OC_VERSION="v3.10.0-rc.0" OPENSHIFT_OC_COMMIT_ID="c20e215" ASSET_EXTENSION="tar.gz"
+#    - OPENSHIFT_VERSION="v3.10.0-rc.0" OPENSHIFT_OC_VERSION="v3.10.0-rc.0" OPENSHIFT_OC_COMMIT_ID="c20e215" ASSET_EXTENSION="tar.gz"
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_aac50e078c1d_key -iv $encrypted_aac50e078c1d_iv -in .travis/gpg_secret_key.enc -out /tmp/gpg_secret_key -d
@@ -60,8 +60,7 @@ script:
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
       -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
       -Dmaven.test.redirectTestOutputToFile=false \
-      -Dcheckstyle.skip=true \
-      -Dtest=MavenOpenShiftTaskLauncherWithJobIntegrationTest
+      -Dcheckstyle.skip=true
 
 #after_success:
 #  - bash <(curl -s https://codecov.io/bash)

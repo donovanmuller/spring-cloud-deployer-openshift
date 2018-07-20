@@ -59,7 +59,7 @@ script:
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
       -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
-      -Dmaven.test.redirectTestOutputToFile=true \
+      -Dmaven.test.redirectTestOutputToFile=false \
       -Dcheckstyle.skip=true \
       -Dtest=MavenOpenShiftTaskLauncherWithJobIntegrationTest
 

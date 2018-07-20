@@ -21,6 +21,7 @@ env:
 
   matrix:
     - OPENSHIFT_VERSION="v3.9.0" OPENSHIFT_OC_VERSION="v3.9.0" OPENSHIFT_OC_COMMIT_ID="191fece" ASSET_EXTENSION="tar.gz"
+    # Not quite ready yet
 #    - OPENSHIFT_VERSION="v3.10.0-rc.0" OPENSHIFT_OC_VERSION="v3.10.0-rc.0" OPENSHIFT_OC_COMMIT_ID="c20e215" ASSET_EXTENSION="tar.gz"
 
 before_install:
@@ -55,8 +56,7 @@ script:
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
       -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
-      -Dmaven.test.redirectTestOutputToFile=false \
-      -Dcheckstyle.skip=true
+      -Dmaven.test.redirectTestOutputToFile=false
 
 #after_success:
 #  - bash <(curl -s https://codecov.io/bash)

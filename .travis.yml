@@ -55,7 +55,7 @@ script:
   - |
     # run OpenShift deployer tests
     export KUBERNETES_NAMESPACE=scdf
-    travis_wait ./mvnw --batch-mode test \
+    ./mvnw --batch-mode test \
       -Dspring.cloud.deployer.openshift.limits.memory=0Mi \
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \

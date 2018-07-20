@@ -20,9 +20,6 @@ env:
     - secure: "lrNY4HU/aq++2tTBCvkEr3yb6dLj+iJWOEe0zboD+M0Y56ldasXvTBrFKaygn97msSplPPwk2grjfFhiVC/S6m1oUiIHjufILTgLSsf7AC0vZ3gCpHV5iRsGTg3aYCpr+RLg5WH8tgg7XetKmGGMBsPex5Oh+w2cW7i5cG+66z2ydTzcUdBIz+hjSFikCb2zYuPj/Mo8PuM2VX94h4OhkP+qXT55rgFO/H3/4xnQoOMs2H8KEsrptOUiwwU98w1QVoFM/azaUoHbJFvrr0IZlsCorAFieEoOx9kwWIB0b3GDWT7c9N8sxRYs0jTLSUvhdMHSh974UPAH70mAAZ8mKi4Z0ns5hBKezKOBkALKyMAuflB+G4mI7SJbHu4B9sJuZEpEuAXIGwTeJaj9rN73At2PUZQGPyFRajSR0IWOFKbryGQV/lfpYIvRQOVfUr9IkD9e0mYqAhzWx8wGLL0Ef3w4M/8LnlMTVaDgSS3qORapxSYz68MiMtY/qh5Lz+GlzJlET77OOEMaRBx/SCyQrQWbtIEgxiqOyrJIpL85fYCY9cm86iF26imoqn+fCH5Rn943dc2SS3xLh67y2S5ShhJWUjlYRYkb0QqBBKoCJBbEnZKqQOZgEfizR6dWcmcF462rn0ZVdFCd/FUsJW8yusH3HKvhvl05KjHT1+9Cj/Q="
 
   matrix:
-    - OPENSHIFT_VERSION="v3.6.1" OPENSHIFT_OC_VERSION="v3.6.1" OPENSHIFT_OC_COMMIT_ID="008f2d5" ASSET_EXTENSION="tar.gz"
-    # See https://github.com/donovanmuller/spring-cloud-deployer-openshift/issues/48
-#    - OPENSHIFT_VERSION="v3.7.1" OPENSHIFT_OC_VERSION="v3.7.1" OPENSHIFT_OC_COMMIT_ID="ab0f056"
     - OPENSHIFT_VERSION="v3.9.0" OPENSHIFT_OC_VERSION="v3.9.0" OPENSHIFT_OC_COMMIT_ID="191fece" ASSET_EXTENSION="tar.gz"
 #    - OPENSHIFT_VERSION="v3.10.0-rc.0" OPENSHIFT_OC_VERSION="v3.10.0-rc.0" OPENSHIFT_OC_COMMIT_ID="c20e215" ASSET_EXTENSION="tar.gz"
 
@@ -33,7 +30,6 @@ before_install:
   - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust; fi
 
 install: true
-#  - ./mvnw install --batch-mode -DskipTests -Dcheckstyle.skip=true
 
 before_script:
   # credit to https://travis-ci.org/bucharest-gold/mean-booster/jobs/331001570/config for the basic OpenShift configuration
@@ -57,8 +53,8 @@ script:
     ./mvnw --batch-mode test \
       -Dspring.cloud.deployer.openshift.limits.memory=0Mi \
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
-      -Dspring.cloud.deployer.openshift.livenessProbeDelay=40 \
-      -Dspring.cloud.deployer.openshift.readinessProbeDelay=40 \
+      -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
+      -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
       -Dmaven.test.redirectTestOutputToFile=false \
       -Dcheckstyle.skip=true
 

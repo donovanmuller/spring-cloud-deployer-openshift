@@ -57,8 +57,8 @@ script:
     ./mvnw --batch-mode test \
       -Dspring.cloud.deployer.openshift.limits.memory=0Mi \
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
-      -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
-      -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
+      -Dspring.cloud.deployer.openshift.livenessProbeDelay=40 \
+      -Dspring.cloud.deployer.openshift.readinessProbeDelay=40 \
       -Dmaven.test.redirectTestOutputToFile=false \
       -Dcheckstyle.skip=true
 

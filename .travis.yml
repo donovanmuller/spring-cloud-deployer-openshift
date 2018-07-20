@@ -33,7 +33,8 @@ before_install:
   - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust; fi
 
 install:
-  - ./mvnw install --batch-mode -DskipTests -Dcheckstyle.skip=true
+#  - ./mvnw install --batch-mode -DskipTests -Dcheckstyle.skip=true
+  install: true
 
 before_script:
   # credit to https://travis-ci.org/bucharest-gold/mean-booster/jobs/331001570/config for the basic OpenShift configuration
@@ -60,15 +61,11 @@ script:
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
       -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
       -Dmaven.test.redirectTestOutputToFile=true \
-      -Dcheckstyle.skip=true
-    ./mvnw --batch-mode cobertura:cobertura \
-      -Dopenshift.enabled=false \
-      -Dlogging.level.=ERROR \
-      -Dmaven.test.redirectTestOutputToFile=true \
-      -Dcheckstyle.skip=true
+      -Dcheckstyle.skip=true \
+      -Dtest=MavenOpenShiftTaskLauncherWithJobIntegrationTest
 
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+#after_success:
+#  - bash <(curl -s https://codecov.io/bash)
 
 deploy:
   provider: script

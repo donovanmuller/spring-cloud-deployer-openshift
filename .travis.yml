@@ -56,8 +56,7 @@ script:
       -Dspring.cloud.deployer.openshift.limits.cpu=0m \
       -Dspring.cloud.deployer.openshift.livenessProbeDelay=20 \
       -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
-      -Dmaven.test.redirectTestOutputToFile=false \
-      -Dtest=MavenOpenShiftTaskLauncherWithJobIntegrationTest
+      -Dmaven.test.redirectTestOutputToFile=false
 
 #after_success:
 #  - bash <(curl -s https://codecov.io/bash)

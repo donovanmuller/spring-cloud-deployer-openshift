@@ -58,8 +58,8 @@ script:
       -Dspring.cloud.deployer.openshift.readinessProbeDelay=20 \
       -Dmaven.test.redirectTestOutputToFile=false
 
-#after_success:
-#  - bash <(curl -s https://codecov.io/bash)
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 
 deploy:
   provider: script
@@ -69,7 +69,7 @@ deploy:
   on:
     jdk: oraclejdk8
     tags: true
-    condition: "$OPENSHIFT_VERSION = v3.6.1"
+    condition: "$OPENSHIFT_VERSION = v3.9.0"
 
 after_failure:
  - oc login -u system:admin

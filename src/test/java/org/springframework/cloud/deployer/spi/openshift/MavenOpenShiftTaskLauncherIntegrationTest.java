@@ -9,6 +9,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
@@ -86,6 +87,7 @@ public class MavenOpenShiftTaskLauncherIntegrationTest
 	public static class Config {
 
 		@Bean
+		@ConfigurationProperties("maven")
 		public MavenProperties mavenProperties() {
 			MavenProperties mavenProperties = new MavenProperties();
 			mavenProperties.setRemoteRepositories(

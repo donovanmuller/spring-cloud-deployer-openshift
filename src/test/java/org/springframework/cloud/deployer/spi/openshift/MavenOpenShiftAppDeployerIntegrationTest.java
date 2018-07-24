@@ -319,7 +319,7 @@ public class MavenOpenShiftAppDeployerIntegrationTest
 	 */
 	@Override
 	protected Timeout deploymentTimeout() {
-		return new Timeout(20, 5000);
+		return new Timeout(40, 5000);
 	}
 
 	@TestConfiguration

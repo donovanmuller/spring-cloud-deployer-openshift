@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-deployer-parent</artifactId>
-		<version>1.3.2.RELEASE</version>
+		<version>1.3.3.RELEASE</version>
 	</parent>
 
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-deployer-openshift</artifactId>
-	<version>1.5.0.BUILD-SNAPSHOT</version>
+	<version>1.3.0.BUILD-SNAPSHOT</version>
 
 	<name>spring-cloud-deployer-openshift</name>
 	<description>Spring Cloud Deployer for OpenShift 3</description>
@@ -28,8 +28,8 @@
 
 		<kubernetes-client.version>3.1.11</kubernetes-client.version>
 
-		<spring-cloud-deployer-kubernetes.version>1.3.6.RELEASE</spring-cloud-deployer-kubernetes.version>
-		<spring-cloud-deployer.version>1.3.2.RELEASE</spring-cloud-deployer.version>
+		<spring-cloud-deployer-kubernetes.version>1.3.7.RELEASE</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer.version>1.3.3.RELEASE</spring-cloud-deployer.version>
 		<spring-cloud.version>Edgware.SR4</spring-cloud.version>
 
 		<checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>

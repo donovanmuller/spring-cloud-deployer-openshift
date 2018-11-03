@@ -22,6 +22,7 @@ env:
   matrix:
     - OPENSHIFT_VERSION="v3.9.0" OPENSHIFT_OC_VERSION="v3.9.0" OPENSHIFT_OC_COMMIT_ID="191fece" ASSET_EXTENSION="tar.gz"
     - OPENSHIFT_VERSION="v3.10.0" OPENSHIFT_OC_VERSION="v3.10.0" OPENSHIFT_OC_COMMIT_ID="dd10d17" ASSET_EXTENSION="tar.gz"
+    - OPENSHIFT_VERSION="v3.11.0" OPENSHIFT_OC_VERSION="v3.11.0" OPENSHIFT_OC_COMMIT_ID="0cbc58b" ASSET_EXTENSION="tar.gz"   
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_aac50e078c1d_key -iv $encrypted_aac50e078c1d_iv -in .travis/gpg_secret_key.enc -out /tmp/gpg_secret_key -d
@@ -41,7 +42,22 @@ before_script:
   - tar xvzOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION} > oc.bin || tar xvOf openshift-origin-client-tools-${OPENSHIFT_OC_VERSION}-${OPENSHIFT_OC_COMMIT_ID}-linux-64bit.${ASSET_EXTENSION} > oc.bin
   - sudo mv oc.bin /usr/bin/oc
   - sudo chmod 755 /usr/bin/oc
-  - oc cluster up
+  # Thanks to https://github.com/redhat-cop/openshift-applier/pull/78
+  - |
+    set +e
+    built=false
+    while true; do
+      IP_ADDR=$(ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
+      oc cluster up --public-hostname=${IP_ADDR} --routing-suffix=${IP_ADDR}.nip.io --base-dir=/home/travis/ocp
+      if [ "$?" -eq 0 ]; then
+        built=true
+        break
+      fi
+      echo "Retrying oc cluster up after failure"
+      oc cluster down
+      sleep 5
+    done
+    echo "OpenShift Cluster Running"
   - oc login -u system:admin
   - oc new-project scdf
   - oc adm policy add-scc-to-user hostaccess -z default

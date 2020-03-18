@@ -1,3 +1,5 @@
+> ⚠️ **This project is no longer maintained.** Please use the [Kubernetes deployer](https://dataflow.spring.io/docs/installation/kubernetes/) as there is no longer a reason to maintain an OpenShift specific deployer.
+
 # Spring Cloud Deployer for OpenShift [![Build Status](https://travis-ci.org/donovanmuller/spring-cloud-deployer-openshift.svg?branch=master)](https://travis-ci.org/donovanmuller/spring-cloud-deployer-openshift) [![codecov](https://codecov.io/gh/donovanmuller/spring-cloud-deployer-openshift/branch/master/graph/badge.svg)](https://codecov.io/gh/donovanmuller/spring-cloud-deployer-openshift)
 
 A Spring Cloud Deployer SPI implementation which extends 
